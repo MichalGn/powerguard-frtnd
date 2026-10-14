@@ -1,0 +1,1 @@
+docker exec -it powerguard-postgresdb_container psql -U postgres -d powerguarddb

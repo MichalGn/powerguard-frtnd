@@ -1,0 +1,1 @@
+export const POWERGUARD_FRONTEND_VERSION = '261014k';

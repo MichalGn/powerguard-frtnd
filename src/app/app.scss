@@ -1,0 +1,7528 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #12233c;
+  background:
+    radial-gradient(circle at 86% 4%, rgba(0, 210, 138, 0.10), transparent 25rem),
+    linear-gradient(180deg, #f8fbfe 0%, #eef4f8 100%);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 26px 0 22px;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid rgba(11, 61, 111, 0.10);
+  box-shadow: 0 6px 28px rgba(11, 61, 111, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand__mark {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 9px rgba(0, 72, 133, 0.18));
+}
+
+.brand__name {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.brand__power {
+  color: #07336a;
+}
+
+.brand__guard {
+  color: #00b97a;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.language-picker {
+  position: relative;
+}
+
+.language-button {
+  height: 34px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 6px;
+  background: transparent;
+  color: #5f7186;
+  cursor: pointer;
+}
+
+.language-button:hover {
+  background: rgba(11, 61, 111, 0.05);
+}
+
+.language-button__chevron {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+.language-button__flag {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.flag-icon {
+  width: 24px;
+  height: 16px;
+  display: block;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.language-menu {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 20;
+  min-width: 52px;
+  overflow: hidden;
+  border: 1px solid rgba(11, 61, 111, 0.10);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(18, 56, 87, 0.14);
+}
+
+.language-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 9px 10px;
+  background: transparent;
+  color: #213b58;
+  text-align: center;
+  cursor: pointer;
+}
+
+.language-menu button:hover {
+  background: #f4f8fb;
+}
+
+.login-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  padding: 0;
+  color: #8ecde9;
+  background: transparent;
+  opacity: 0.78;
+  cursor: pointer;
+  transition:
+    opacity 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.login-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.login-button:hover,
+.login-button:focus-visible {
+  opacity: 1;
+  background: rgba(142, 205, 233, 0.12);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.dashboard {
+  width: min(1500px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 30px 0 42px;
+}
+
+.dashboard__intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+  padding: 0 4px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: #607187;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  color: #0d2746;
+}
+
+.dashboard__legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: #607187;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.dashboard__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-swatch {
+  width: 20px;
+  height: 8px;
+  display: inline-block;
+}
+
+.legend-swatch--line {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #00d28a, #0877c9);
+}
+
+.legend-swatch--bar {
+  border-radius: 3px;
+  background: rgba(18, 111, 181, 0.22);
+  border: 1px solid rgba(18, 111, 181, 0.28);
+}
+
+.meter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.meter-card {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(12, 60, 105, 0.10);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 15px 40px rgba(18, 56, 87, 0.08),
+    0 2px 7px rgba(18, 56, 87, 0.04);
+}
+
+.meter-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 22px 14px;
+}
+
+.meter-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meter-card__header h2 {
+  margin: 0;
+  color: #102b4b;
+  font-size: 22px;
+  letter-spacing: -0.025em;
+}
+
+.meter-card__header p {
+  margin: 5px 0 0;
+  color: #8290a1;
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  margin-left: 3px;
+  border-radius: 50%;
+  background: #00c887;
+  box-shadow: 0 0 0 4px rgba(0, 200, 135, 0.10);
+}
+
+.status-dot--warning {
+  background: #f0a000;
+  box-shadow: 0 0 0 4px rgba(240, 160, 0, 0.10);
+}
+
+.status-dot--offline {
+  background: #d94b4b;
+  box-shadow: 0 0 0 4px rgba(217, 75, 75, 0.10);
+}
+
+.status-text {
+  color: #718095;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.live-value {
+  min-width: 90px;
+  text-align: right;
+}
+
+.live-value strong {
+  display: block;
+  color: #073b70;
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.live-value span {
+  display: block;
+  margin-top: 5px;
+  color: #8795a5;
+  font-size: 11px;
+}
+
+.meter-card__summary {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 22px 8px;
+}
+
+.meter-card__summary--single .summary-item {
+  width: min(270px, 100%);
+}
+
+.summary-item {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid rgba(11, 61, 111, 0.07);
+  border-radius: 12px;
+  background: #f8fbfd;
+}
+
+.summary-item span,
+.summary-item small {
+  display: block;
+  color: #7f8c9d;
+  font-size: 10px;
+}
+
+.summary-item strong {
+  display: block;
+  margin: 4px 0 2px;
+  color: #153657;
+  font-size: 16px;
+}
+
+.chart-wrap {
+  padding: 0 10px;
+}
+
+.power-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 255px;
+}
+
+.grid-line {
+  stroke: rgba(72, 105, 137, 0.14);
+  stroke-width: 1;
+}
+
+.axis-label {
+  fill: #8492a3;
+  font-size: 10px;
+}
+
+.axis-label--y {
+  text-anchor: end;
+}
+
+.axis-label--x {
+  font-size: 9px;
+}
+
+.axis-unit {
+  fill: #758496;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.power-bar {
+  fill: rgba(20, 108, 180, 0.17);
+  stroke: rgba(20, 108, 180, 0.28);
+  stroke-width: 1;
+  transition:
+    y 280ms ease,
+    height 280ms ease,
+    fill 180ms ease;
+}
+
+.power-bar--current {
+  fill: rgba(0, 202, 137, 0.23);
+  stroke: rgba(0, 177, 117, 0.62);
+  stroke-width: 1.4;
+}
+
+.power-bar--alarm,
+.power-bar--current.power-bar--alarm {
+  fill: rgba(216, 55, 62, 0.30);
+  stroke: rgba(194, 39, 47, 0.92);
+  stroke-width: 1.5;
+}
+
+.limit-line {
+  stroke: #e59b22;
+  stroke-width: 1.6;
+  stroke-dasharray: 7 5;
+}
+
+.limit-label-bg {
+  fill: rgba(255, 249, 237, 0.94);
+  stroke: rgba(229, 155, 34, 0.20);
+  stroke-width: 1;
+}
+
+.limit-label {
+  fill: #a86600;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.current-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.current-line--shadow {
+  stroke: rgba(255, 255, 255, 0.96);
+  stroke-width: 4;
+}
+
+.current-line-hit {
+  fill: transparent;
+  stroke: transparent;
+  pointer-events: all;
+}
+
+.power-chart {
+  cursor: default;
+  user-select: none;
+  touch-action: none;
+}
+
+.power-chart--zoomed {
+  cursor: grab;
+}
+
+.power-chart--panning {
+  cursor: grabbing;
+}
+
+
+.meter-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 22px 16px;
+  border-top: 1px solid rgba(11, 61, 111, 0.07);
+  color: #7e8d9e;
+  font-size: 10px;
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    height: 64px;
+    padding-inline: 16px;
+  }
+
+  .brand__mark {
+    width: 42px;
+    height: 42px;
+  }
+
+  .brand__name {
+    font-size: 22px;
+  }
+
+  .dashboard {
+    width: min(100% - 20px, 1500px);
+    padding-top: 20px;
+  }
+
+  .dashboard__intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .meter-card__header {
+    padding-inline: 16px;
+  }
+
+  .meter-card__summary {
+    padding-inline: 16px;
+  }
+
+  .meter-card__footer {
+    padding-inline: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand__name {
+    display: none;
+  }
+
+  .meter-card__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard__legend {
+    flex-wrap: wrap;
+  }
+
+  .status-text {
+    display: none;
+  }
+}
+
+/* Full-day/date controls */
+.dashboard__controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.dashboard__controls .dashboard__legend {
+  justify-self: end;
+}
+
+.date-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border: 1px solid rgba(11, 61, 111, 0.11);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 5px 18px rgba(18, 56, 87, 0.06);
+  color: #607187;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.date-picker input {
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #12365b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.language-menu__flag {
+  width: 22px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Login dialog */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(10, 29, 50, 0.38);
+  backdrop-filter: blur(4px);
+}
+
+.login-dialog {
+  width: min(390px, 100%);
+  padding: 22px;
+  border: 1px solid rgba(11, 61, 111, 0.11);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 28px 70px rgba(12, 42, 72, 0.24);
+}
+
+.login-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.login-dialog__header h2 {
+  margin: 0;
+  color: #102b4b;
+  font-size: 22px;
+}
+
+.dialog-close {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #718095;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dialog-close:hover {
+  background: #f1f6f9;
+}
+
+.login-field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.login-field span {
+  display: block;
+  margin-bottom: 6px;
+  color: #607187;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.login-field input {
+  width: 100%;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid rgba(11, 61, 111, 0.16);
+  border-radius: 10px;
+  outline: none;
+  color: #173755;
+  background: #fbfdff;
+  font: inherit;
+}
+
+.login-field input:focus {
+  border-color: rgba(0, 166, 121, 0.65);
+  box-shadow: 0 0 0 3px rgba(0, 184, 127, 0.10);
+}
+
+.login-error {
+  margin: 2px 0 14px;
+  color: #c73939;
+  font-size: 12px;
+}
+
+.login-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.button {
+  min-width: 96px;
+  height: 38px;
+  border-radius: 9px;
+  padding: 0 15px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.button--secondary {
+  border: 1px solid rgba(11, 61, 111, 0.13);
+  background: #fff;
+  color: #526b84;
+}
+
+.button--primary {
+  border: 1px solid #00aa75;
+  background: #00b77d;
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .dashboard__controls {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+
+  .dashboard__controls-spacer {
+    display: none;
+  }
+
+  .date-picker {
+    justify-self: start;
+  }
+
+  .dashboard__controls .dashboard__legend {
+    justify-self: start;
+  }
+}
+
+/* Live metrics separated from the historical chart */
+.meter-card__live-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(245px, 0.8fr);
+  align-items: center;
+  gap: 12px;
+  margin: 0 22px 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(11, 61, 111, 0.08);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f7fafc 100%);
+}
+
+.live-metric {
+  min-width: 0;
+}
+
+.live-metric + .live-metric {
+  padding-left: 16px;
+  border-left: 1px solid rgba(11, 61, 111, 0.09);
+}
+
+.live-metric > span,
+.live-metric__updated {
+  display: block;
+  color: #7c8b9c;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.live-metric strong {
+  display: block;
+  margin-top: 3px;
+  color: #173657;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.live-metric--primary strong {
+  color: #073b70;
+  font-size: 24px;
+}
+
+.live-metric--alarm strong {
+  color: #c62828 !important;
+  font-size: 28px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-metric--alarm strong small {
+  color: #c62828 !important;
+}
+
+.live-metric--alarm-unack > strong {
+  display: inline-block;
+  width: fit-content;
+  padding: 3px 7px 4px;
+  border: 2px solid #c62828;
+  border-radius: 8px;
+  font-size: 34px !important;
+  line-height: 1.05;
+  transform-origin: left center;
+  animation: alarmValuePulse .70s ease-in-out infinite;
+}
+
+.live-metric--alarm-unack > strong small {
+  color: inherit !important;
+}
+
+@keyframes alarmValuePulse {
+  0%, 100% {
+    color: #ffffff;
+    background: #c62828;
+    border-color: #c62828;
+    transform: scale(1.06);
+    box-shadow: 0 0 0 3px rgba(198,40,40,.12), 0 0 12px rgba(198,40,40,.38);
+  }
+  50% {
+    color: #c62828;
+    background: #ffffff;
+    border-color: #c62828;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(198,40,40,0);
+  }
+}
+
+.live-metric strong small {
+  color: #8190a1;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.live-metric__updated {
+  align-self: end;
+  padding-bottom: 2px;
+  white-space: nowrap;
+}
+
+.date-navigation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.date-navigation__arrow {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(11, 61, 111, 0.11);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #315674;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(18, 56, 87, 0.05);
+}
+
+.date-navigation__arrow:hover:not(:disabled) {
+  background: #f5f9fc;
+}
+
+.date-navigation__arrow:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+
+.quarter-counter {
+  min-width: 245px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(11, 61, 111, 0.09);
+}
+
+.quarter-counter__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quarter-counter__top span {
+  color: #7c8b9c;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.quarter-counter__top strong {
+  color: #073b70;
+  font-size: 18px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.quarter-counter__progress {
+  height: 5px;
+  margin: 8px 0 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0, 145, 106, 0.10);
+}
+
+.quarter-counter__progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #00cb88, #0a8fbb);
+  transition: width 350ms ease;
+}
+
+.quarter-counter__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #607187;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.quarter-counter__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.quarter-counter__bottom > small {
+  color: #8996a6;
+  font-size: 9px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.limit-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid rgba(229, 155, 34, 0.25);
+  border-radius: 6px;
+  background: rgba(255, 249, 237, 0.9);
+  color: #9a650d;
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.limit-badge strong {
+  color: #7c4f08;
+  font-size: 10px;
+}
+
+@media (max-width: 720px) {
+  .meter-card__live-strip {
+    grid-template-columns: 1fr 1fr;
+    margin-inline: 16px;
+  }
+
+  .quarter-counter {
+    grid-column: 1 / -1;
+    min-width: 0;
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(11, 61, 111, 0.09);
+  }
+}
+
+/* Header date navigation + responsive meter layout (v9) */
+.topbar {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+  gap: 20px;
+}
+
+.brand {
+  justify-self: start;
+}
+
+.topbar__date-controls {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Always use the third/right grid column, including when logged in and
+   the middle date navigation is absent. */
+.topbar__actions {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.topbar__date-controls .date-picker,
+.topbar__date-controls .date-navigation__arrow,
+.today-button {
+  box-shadow: none;
+  background: rgba(248, 251, 254, 0.96);
+}
+
+.today-button {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  gap: 0;
+  padding: 0;
+  border: 1px solid rgba(11, 61, 111, 0.11);
+  border-radius: 9px;
+  color: #315674;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.today-button svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.today-button:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: rgba(0, 165, 116, 0.28);
+  color: #087a62;
+}
+
+.today-button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.dashboard {
+  width: min(1810px, calc(100% - 32px));
+  padding-top: 18px;
+}
+
+.dashboard__meta-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 26px;
+  margin-bottom: 10px;
+  padding: 0 8px;
+}
+
+.meter-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+  gap: 20px;
+}
+
+.meter-grid--one {
+  grid-template-columns: minmax(0, 1180px);
+  justify-content: center;
+}
+
+.meter-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.meter-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.meter-grid--one .power-chart,
+.meter-grid--two .power-chart {
+  min-height: 285px;
+}
+
+@media (max-width: 1500px) {
+  .meter-grid--three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1080px) {
+  .topbar {
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+  }
+
+  .topbar__date-controls .date-picker span {
+    display: none;
+  }
+
+  .meter-grid--two,
+  .meter-grid--three {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    height: auto;
+    min-height: 64px;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand actions"
+      "date date";
+    row-gap: 8px;
+    padding-block: 8px;
+  }
+
+  .brand {
+    grid-area: brand;
+  }
+
+  .topbar__actions {
+    grid-area: actions;
+    grid-column: auto;
+  }
+
+  .topbar__date-controls {
+    grid-area: date;
+    justify-self: center;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .topbar__date-controls .date-picker span {
+    display: inline;
+  }
+
+  .dashboard {
+    width: min(100% - 20px, 1810px);
+    padding-top: 12px;
+  }
+
+  .dashboard__meta-row {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-inline: 4px;
+  }
+}
+
+@media (max-width: 460px) {
+  .topbar__date-controls {
+    gap: 4px;
+  }
+
+  .date-navigation__arrow,
+  .today-button {
+    width: 31px;
+    height: 31px;
+  }
+
+  .date-picker {
+    padding-inline: 7px;
+  }
+
+  .date-picker span {
+    display: none !important;
+  }
+}
+
+.login-button--logout {
+  color: #6c7f93;
+}
+
+.configuration-dashboard {
+  width: min(1500px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 24px 0 56px;
+}
+
+.configuration-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+
+.configuration-hero__eyebrow {
+  margin: 0 0 5px;
+  color: #00a96f;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.configuration-hero h1 {
+  margin: 0;
+  color: #0d2746;
+  font-size: clamp(28px, 3vw, 38px);
+  letter-spacing: -0.035em;
+}
+
+.configuration-hero p:not(.configuration-hero__eyebrow) {
+  margin: 8px 0 0;
+  color: #6e7f92;
+  font-size: 14px;
+}
+
+.configuration-user {
+  min-width: 170px;
+  padding: 11px 14px;
+  border: 1px solid rgba(11, 61, 111, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.74);
+  text-align: right;
+}
+
+.configuration-user span,
+.configuration-user strong {
+  display: block;
+}
+
+.configuration-user span {
+  color: #8794a5;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.configuration-user strong {
+  margin-top: 3px;
+  color: #173756;
+  font-size: 14px;
+}
+
+.configuration-placeholder {
+  min-height: 470px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 28px;
+  border: 1px solid rgba(12, 60, 105, 0.10);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 15px 40px rgba(18, 56, 87, 0.08);
+  text-align: center;
+}
+
+.configuration-placeholder__icon {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  border-radius: 18px;
+  background: rgba(0, 185, 122, 0.09);
+  color: #00a96f;
+}
+
+.configuration-placeholder__icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.configuration-placeholder h2 {
+  margin: 0;
+  color: #123250;
+  font-size: 22px;
+}
+
+.configuration-placeholder p {
+  max-width: 620px;
+  margin: 9px 0 0;
+  color: #768597;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .configuration-hero {
+    flex-direction: column;
+  }
+
+  .configuration-user {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+
+/* User/profile management (102 p1) */
+.header-icon-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  padding: 0;
+  color: #6f88a1;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.header-icon-button svg {
+  width: 21px;
+  height: 21px;
+}
+
+.header-icon-button:hover,
+.header-icon-button:focus-visible {
+  background: rgba(0, 183, 125, 0.10);
+  color: #008f63;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.profile-dialog {
+  width: min(560px, 100%);
+}
+
+.dialog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.login-field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid rgba(11, 61, 111, 0.16);
+  border-radius: 10px;
+  outline: none;
+  color: #173755;
+  background: #fbfdff;
+  font: inherit;
+}
+
+.dialog-hint {
+  margin: 4px 0 10px;
+  color: #7b8999;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+
+.users-dialog {
+  width: min(1180px, calc(100vw - 40px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  padding: 22px;
+  border: 1px solid rgba(11, 61, 111, 0.11);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 28px 70px rgba(12, 42, 72, 0.24);
+}
+
+.users-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.8fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.users-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(11, 61, 111, 0.09);
+  border-radius: 12px;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #173755;
+  font-size: 12px;
+}
+
+.users-table th,
+.users-table td {
+  padding: 10px 11px;
+  border-bottom: 1px solid rgba(11, 61, 111, 0.07);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.users-table th {
+  background: #f6f9fb;
+  color: #607187;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.users-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.users-table__self {
+  background: rgba(0, 183, 125, 0.045);
+}
+
+.users-table__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.table-action {
+  border: 0;
+  border-radius: 6px;
+  padding: 5px 8px;
+  background: #eef5f9;
+  color: #315674;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.table-action--icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.table-action--icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.table-action--danger {
+  background: #fff0f0;
+  color: #b73f3f;
+}
+
+.table-action:not(:disabled):hover {
+  background: #e4eef4;
+}
+
+.table-action--danger:not(:disabled):hover {
+  background: #ffe3e3;
+}
+
+.table-action:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.user-editor {
+  padding: 16px;
+  border: 1px solid rgba(11, 61, 111, 0.09);
+  border-radius: 14px;
+  background: #f9fbfd;
+}
+
+.user-editor h3 {
+  margin: 0 0 16px;
+  color: #123250;
+  font-size: 18px;
+}
+
+.toggle-field {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 17px;
+  color: #526b84;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.toggle-field input {
+  width: 17px;
+  height: 17px;
+  accent-color: #00a96f;
+}
+
+@media (max-width: 900px) {
+  .users-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .dialog-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .users-dialog {
+    width: min(100% - 20px, 1180px);
+    padding: 16px;
+  }
+
+  .header-icon-button,
+  .login-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .topbar__actions {
+    gap: 4px;
+  }
+}
+
+
+/* Top-right application notifications, analogous to Technius snackbars. */
+.toast-message {
+  position: fixed;
+  top: 82px;
+  right: 22px;
+  z-index: 300;
+  width: min(420px, calc(100vw - 32px));
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 10px 10px 12px;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(18, 56, 87, 0.22);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.toast-message--success {
+  background: #1f9d68;
+}
+
+.toast-message--error {
+  background: #cf4343;
+}
+
+.toast-message__icon {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.toast-message__text {
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.toast-message__close {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.82;
+}
+
+.toast-message__close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+@media (max-width: 620px) {
+  .toast-message {
+    top: 74px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+}
+
+/* Meter configuration dashboard */
+.meter-configuration-panel {
+  padding: 24px;
+  border: 1px solid rgba(12, 60, 105, 0.10);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 15px 40px rgba(18, 56, 87, 0.08);
+}
+
+.meter-configuration-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.meter-configuration-panel__header h2,
+.meter-editor h3,
+.configured-meter-card h3 {
+  margin: 0;
+  color: #123250;
+}
+
+.meter-configuration-panel__header p,
+.configured-meter-card p {
+  margin: 6px 0 0;
+  color: #768597;
+  font-size: 12px;
+}
+
+.meter-configuration-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.8fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.meter-configuration-list {
+  display: grid;
+  gap: 12px;
+}
+
+.configured-meter-card,
+.meter-editor {
+  padding: 16px;
+  border: 1px solid rgba(11, 61, 111, 0.09);
+  border-radius: 14px;
+  background: #f9fbfd;
+}
+
+.configured-meter-card--disabled { opacity: 0.62; }
+
+.configured-meter-card__main,
+.configured-meter-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.configured-meter-card__status {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0, 169, 111, 0.10);
+  color: #00875a;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.configured-meter-card__alarms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.configured-meter-card__alarms span {
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #fff;
+  color: #6d7d90;
+  font-size: 11px;
+}
+
+.configured-meter-card__alarms strong {
+  display: block;
+  margin-top: 3px;
+  color: #173755;
+  font-size: 14px;
+}
+
+.configured-meter-card__actions { justify-content: flex-end; }
+.meter-editor h3 { margin-bottom: 16px; }
+.meter-enabled-field { margin: 8px 0 12px; }
+.configuration-empty { padding: 24px; text-align: center; color: #768597; }
+
+@media (max-width: 900px) {
+  .meter-configuration-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  .meter-configuration-panel { padding: 16px; }
+  .meter-configuration-panel__header { align-items: flex-start; flex-direction: column; }
+  .configured-meter-card__alarms { grid-template-columns: 1fr; }
+}
+
+.meter-editor__hint { margin-top: -6px; margin-bottom: 12px; }
+
+
+/* Meter configuration table */
+.meters-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(11, 61, 111, 0.09);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.meters-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #173755;
+  font-size: 12px;
+}
+
+.meters-table th,
+.meters-table td {
+  padding: 12px 11px;
+  border-bottom: 1px solid rgba(11, 61, 111, 0.07);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.meters-table th {
+  background: #f6f9fb;
+  color: #607187;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.meters-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.meters-table tbody tr {
+  transition: background-color 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
+}
+
+.meters-table tbody tr:hover {
+  background: #f8fbfd;
+}
+
+.meters-table__row--editing {
+  background: rgba(0, 183, 125, 0.075) !important;
+  box-shadow: inset 3px 0 0 #00a96f;
+}
+
+.meters-table__row--disabled {
+  opacity: 0.58;
+}
+
+.meters-table__name {
+  font-weight: 800;
+  color: #123250;
+  white-space: nowrap;
+}
+
+.meters-table code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #f1f5f8;
+  color: #315674;
+  font: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.meters-table__number {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.meters-table__enabled {
+  white-space: nowrap;
+  font-weight: 700;
+  color: #087a62;
+}
+
+.meter-status-dot {
+  width: 7px;
+  height: 7px;
+  display: inline-block;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #00a96f;
+  vertical-align: 1px;
+}
+
+.meter-status-dot--off {
+  background: #9aa8b6;
+}
+
+.meters-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .meters-table {
+    min-width: 760px;
+  }
+}
+
+
+/* Compact meter actions */
+.meters-table__actions .table-action--icon {
+  width: 28px;
+  height: 28px;
+}
+
+
+
+/* Header legend + compact responsive dashboard */
+.topbar__legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 8px;
+  color: #607187;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.topbar__legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dashboard { padding-top: 18px; }
+
+/* Clear 15-minute countdown and energy budget tank */
+.quarter-timer {
+  min-width: 280px;
+  display: grid;
+  grid-template-columns: auto 38px minmax(110px, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(11, 61, 111, 0.09);
+}
+.quarter-timer__clock span {
+  display: block; color: #7c8b9c; font-size: 9px; font-weight: 700;
+}
+.quarter-timer__clock strong {
+  display: block; margin-top: 2px; color: #073b70; font-size: 21px; line-height: 1; font-variant-numeric: tabular-nums;
+}
+.quarter-tank {
+  position: relative;
+  width: 32px; height: 56px; overflow: hidden;
+  border: 2px solid rgba(9, 91, 132, 0.35); border-radius: 8px 8px 10px 10px;
+  background: #f4f9fb;
+}
+.quarter-tank::before {
+  content: ''; position: absolute; top: -5px; left: 7px; width: 14px; height: 5px;
+  border: 2px solid rgba(9, 91, 132, 0.35); border-bottom: 0; border-radius: 4px 4px 0 0; background: #fff;
+}
+.quarter-tank__fill {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  min-height: 0; background: linear-gradient(180deg, #4bc9dc, #00b77d);
+  transition: height 350ms ease;
+}
+.quarter-tank > span {
+  position: absolute; inset: 0; display: grid; place-items: center; z-index: 1;
+  color: #173657; font-size: 9px; font-weight: 800; text-shadow: 0 1px 0 #fff;
+}
+.quarter-timer__details { display: grid; gap: 2px; min-width: 0; }
+.quarter-timer__details > span {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 2px;
+  color: #708194;
+  font-size: 8px;
+  white-space: nowrap;
+}
+.quarter-timer__details strong {
+  display: block;
+  color: #173657;
+  font-size: 9px;
+  line-height: 1.15;
+}
+.quarter-timer__details small { color: #8996a6; font-size: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 1260px) {
+  .topbar__legend { font-size: 10px; gap: 8px; }
+  .topbar__legend .legend-swatch { width: 15px; }
+  .meter-card__live-strip { grid-template-columns: minmax(0, .9fr) minmax(0, .9fr) minmax(250px, 1.2fr); }
+  .quarter-timer { min-width: 250px; grid-template-columns: auto 34px minmax(95px, 1fr); }
+}
+@media (max-width: 980px) {
+  .topbar__legend { display: none; }
+  .meter-grid--three, .meter-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .meter-card__live-strip { grid-template-columns: 1fr 1fr; }
+  .quarter-timer { grid-column: 1 / -1; border-left: 0; border-top: 1px solid rgba(11, 61, 111, 0.09); padding: 10px 0 0; }
+  .meter-grid--three, .meter-grid--two { grid-template-columns: 1fr; }
+}
+
+/* 261014c - keep the power SVG at its native aspect ratio.
+   This removes the artificial top/bottom letterboxing visible on narrower cards. */
+.power-chart {
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1200 / 285;
+}
+@media (max-width: 720px) {
+  .power-chart { height: auto; }
+}
+
+
+/* Quarter panel: live-only and spacious for small meter sets. */
+.meter-card__live-strip--historical {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.meter-grid--one .meter-card__live-strip,
+.meter-grid--two .meter-card__live-strip {
+  grid-template-columns: minmax(0, .85fr) minmax(0, .85fr) minmax(285px, 1.3fr);
+  align-items: center;
+}
+
+.meter-grid--one .quarter-timer,
+.meter-grid--two .quarter-timer {
+  grid-column: auto;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: minmax(72px, .55fr) 40px minmax(135px, 1.45fr);
+  gap: 10px;
+  padding: 0 0 0 14px;
+  border-left: 1px solid rgba(11, 61, 111, 0.09);
+  border-top: 0;
+}
+
+.meter-grid--three .meter-card__live-strip {
+  /* Keep all live information in one horizontal row, also when three cards are visible. */
+  grid-template-columns: minmax(0, .62fr) minmax(0, .72fr) minmax(220px, 1.66fr);
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+}
+
+.meter-grid--three .live-metric + .live-metric {
+  padding-left: 10px;
+}
+
+.meter-grid--three .quarter-timer {
+  grid-column: auto;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: minmax(58px, .55fr) 32px minmax(105px, 1.45fr);
+  gap: 7px;
+  padding: 0 0 0 10px;
+  border-left: 1px solid rgba(11, 61, 111, 0.09);
+  border-top: 0;
+}
+
+.meter-grid--one .quarter-timer__clock strong,
+.meter-grid--two .quarter-timer__clock strong {
+  font-size: 22px;
+}
+
+.meter-grid--three .quarter-timer__clock strong {
+  font-size: 20px;
+}
+
+.meter-grid--one .quarter-tank,
+.meter-grid--two .quarter-tank {
+  width: 34px;
+  height: 58px;
+  justify-self: center;
+}
+
+.meter-grid--three .quarter-tank {
+  width: 30px;
+  height: 52px;
+  justify-self: center;
+}
+
+.meter-grid--one .quarter-timer__details,
+.meter-grid--two .quarter-timer__details,
+.meter-grid--three .quarter-timer__details {
+  align-content: center;
+  gap: 4px;
+}
+
+.meter-grid--one .quarter-timer__details > span,
+.meter-grid--two .quarter-timer__details > span,
+.meter-grid--three .quarter-timer__details > span {
+  font-size: 8px;
+}
+
+.meter-grid--one .quarter-timer__details strong,
+.meter-grid--two .quarter-timer__details strong,
+.meter-grid--three .quarter-timer__details strong {
+  font-size: 9px;
+}
+
+/* Keep the shared series legend visible in the header on normal tablet/desktop
+   widths; only hide it when the header genuinely becomes too narrow. */
+@media (max-width: 820px) {
+  .topbar__legend { display: none; }
+}
+
+@media (min-width: 821px) and (max-width: 980px) {
+  .topbar__legend { display: inline-flex; }
+}
+
+@media (max-width: 720px) {
+  .meter-grid--one .meter-card__live-strip,
+  .meter-grid--two .meter-card__live-strip,
+  .meter-grid--three .meter-card__live-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .meter-grid--one .quarter-timer,
+  .meter-grid--two .quarter-timer,
+  .meter-grid--three .quarter-timer {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(84px, .65fr) 40px minmax(125px, 1.35fr);
+    gap: 10px;
+    min-height: 70px;
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(11, 61, 111, 0.09);
+  }
+}
+
+/* Alarm hysteresis configuration */
+.alarm-config-grid { display: grid; gap: 10px; margin-top: 8px; }
+.alarm-config-group { margin: 0; padding: 10px 12px 4px; border: 1px solid rgba(11,61,111,.10); border-radius: 10px; }
+.alarm-config-group legend { padding: 0 5px; color: #315674; font-size: 11px; font-weight: 800; }
+.meters-table th small { color: #8794a5; font-size: 8px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+
+/* Compact alarm history in each public meter card */
+.meter-alarm-history { margin: 0 18px 10px; padding: 8px 10px; border: 1px solid rgba(11,61,111,.08); border-radius: 10px; background: rgba(249,251,253,.9); }
+.meter-alarm-history__title { margin-bottom: 5px; color: #315674; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.meter-alarm-history__rows { display: grid; gap: 3px; width: min(100%, 860px); margin: 0 auto; }
+.meter-alarm-row { display: grid; grid-template-columns: minmax(125px,1fr) minmax(290px,2fr) minmax(90px,.62fr) minmax(110px,.72fr); column-gap: 12px; align-items: center; padding: 4px 6px; border-radius: 6px; color: #526b84; font-size: 9px; }
+.meter-alarm-row:nth-child(even) { background: rgba(11,61,111,.025); }
+.meter-alarm-row--head { background: transparent !important; padding: 0 6px 3px; color: #8996a6; font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.meter-alarm-row--active { background: rgba(207,67,67,.08) !important; color: #a73535; }
+.meter-alarm-row__type { font-weight: 800; color: #173755; display: inline-flex; align-items: center; gap: 6px; }
+.meter-alarm-row--active .meter-alarm-row__type { color: #a73535; }
+.meter-alarm-row__period { white-space: nowrap; }
+.meter-alarm-row__duration,
+.meter-alarm-row__max { display: block; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.meter-alarm-history__empty { color: #8996a6; font-size: 9px; padding: 3px 0; }
+@media (max-width: 720px) {
+  .meter-alarm-row { grid-template-columns: 1fr; }
+  .meter-alarm-row--head { display: none; }
+  .meter-alarm-row__duration,
+  .meter-alarm-row__max { text-align: left; }
+}
+
+/* 2026-10-07: shift the quarter-status group further right and give it more room. */
+@media (min-width: 721px) {
+  .meter-grid--one .meter-card__live-strip,
+  .meter-grid--two .meter-card__live-strip {
+    grid-template-columns: minmax(0, .72fr) minmax(0, .72fr) minmax(320px, 1.56fr);
+  }
+
+  .meter-grid--three .meter-card__live-strip {
+    grid-template-columns: minmax(0, .48fr) minmax(0, .58fr) minmax(250px, 1.94fr);
+    gap: 5px;
+  }
+
+  .meter-grid--one .quarter-timer,
+  .meter-grid--two .quarter-timer {
+    grid-template-columns: minmax(82px, .62fr) 44px minmax(165px, 1.58fr);
+    gap: 12px;
+    padding-left: 18px;
+  }
+
+  .meter-grid--three .quarter-timer {
+    grid-template-columns: minmax(66px, .58fr) 36px minmax(132px, 1.72fr);
+    gap: 9px;
+    padding-left: 14px;
+  }
+
+  .meter-grid--one .quarter-timer__clock strong,
+  .meter-grid--two .quarter-timer__clock strong {
+    font-size: 24px;
+  }
+
+  .meter-grid--three .quarter-timer__clock strong {
+    font-size: 22px;
+  }
+
+  .meter-grid--one .quarter-tank,
+  .meter-grid--two .quarter-tank {
+    width: 38px;
+    height: 62px;
+  }
+
+  .meter-grid--three .quarter-tank {
+    width: 34px;
+    height: 56px;
+  }
+
+  .meter-grid--one .quarter-timer__details > span,
+  .meter-grid--two .quarter-timer__details > span,
+  .meter-grid--three .quarter-timer__details > span {
+    font-size: 9px;
+  }
+
+  .meter-grid--one .quarter-timer__details strong,
+  .meter-grid--two .quarter-timer__details strong,
+  .meter-grid--three .quarter-timer__details strong {
+    font-size: 10px;
+  }
+}
+
+/* 2026-10-07 v6: keep the quarter-status block anchored to the right edge,
+   while giving the two live-power columns more horizontal room. */
+@media (min-width: 721px) {
+  .meter-grid--one .meter-card__live-strip,
+  .meter-grid--two .meter-card__live-strip {
+    grid-template-columns: minmax(150px, 1fr) minmax(185px, 1.12fr) 300px;
+    column-gap: 14px;
+  }
+
+  .meter-grid--one .quarter-timer,
+  .meter-grid--two .quarter-timer {
+    width: 300px;
+    min-width: 300px;
+    justify-self: end;
+    grid-template-columns: 76px 42px 1fr;
+    gap: 10px;
+    padding-left: 14px;
+  }
+
+  .meter-grid--three .meter-card__live-strip {
+    grid-template-columns: minmax(95px, .95fr) minmax(125px, 1.08fr) 235px;
+    column-gap: 8px;
+  }
+
+  .meter-grid--three .quarter-timer {
+    width: 235px;
+    min-width: 235px;
+    justify-self: end;
+    grid-template-columns: 60px 34px 1fr;
+    gap: 7px;
+    padding-left: 10px;
+  }
+
+  .meter-grid--one .live-metric strong,
+  .meter-grid--two .live-metric strong {
+    font-size: 21px;
+  }
+
+  .meter-grid--one .live-metric--primary strong,
+  .meter-grid--two .live-metric--primary strong {
+    font-size: 26px;
+  }
+
+  .meter-grid--three .live-metric strong {
+    font-size: 17px;
+  }
+
+  .meter-grid--three .live-metric--primary strong {
+    font-size: 21px;
+  }
+}
+
+
+/* 2026-10-07 v7: push quarter energy/limit text farther right and right-align it.
+   Keep the numeric countdown; a small icon can be added later, but should not replace mm:ss. */
+@media (min-width: 721px) {
+  .meter-grid--one .quarter-timer,
+  .meter-grid--two .quarter-timer {
+    width: 324px;
+    min-width: 324px;
+    grid-template-columns: 76px 42px minmax(176px, 1fr);
+    padding-right: 8px;
+  }
+
+  .meter-grid--three .quarter-timer {
+    width: 248px;
+    min-width: 248px;
+    grid-template-columns: 60px 34px minmax(132px, 1fr);
+    padding-right: 6px;
+  }
+
+  .quarter-timer__details {
+    justify-self: end;
+    width: 100%;
+    text-align: right;
+    justify-items: end;
+  }
+
+  .quarter-timer__details > span {
+    justify-items: end;
+  }
+}
+
+
+/* 2026-10-07 v8: move the countdown+tank group farther right by shrinking the
+   right block a little, while enlarging the two live-power sections. */
+@media (min-width: 721px) {
+  .meter-grid--one .meter-card__live-strip,
+  .meter-grid--two .meter-card__live-strip {
+    grid-template-columns: minmax(170px, 1.12fr) minmax(205px, 1.28fr) 286px;
+    column-gap: 16px;
+  }
+
+  .meter-grid--one .quarter-timer,
+  .meter-grid--two .quarter-timer {
+    width: 286px;
+    min-width: 286px;
+    grid-template-columns: 68px 38px minmax(152px, 1fr);
+    gap: 8px;
+    padding-left: 10px;
+    padding-right: 6px;
+  }
+
+  .meter-grid--three .meter-card__live-strip {
+    grid-template-columns: minmax(108px, 1.04fr) minmax(142px, 1.18fr) 220px;
+    column-gap: 10px;
+  }
+
+  .meter-grid--three .quarter-timer {
+    width: 220px;
+    min-width: 220px;
+    grid-template-columns: 56px 30px minmax(124px, 1fr);
+    gap: 6px;
+    padding-left: 8px;
+    padding-right: 4px;
+  }
+
+  .quarter-timer__clock {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .quarter-tank {
+    justify-self: end;
+  }
+
+  .meter-grid--one .live-metric strong,
+  .meter-grid--two .live-metric strong {
+    font-size: 22px;
+  }
+
+  .meter-grid--one .live-metric--primary strong,
+  .meter-grid--two .live-metric--primary strong {
+    font-size: 27px;
+  }
+
+  .meter-grid--three .live-metric strong {
+    font-size: 18px;
+  }
+
+  .meter-grid--three .live-metric--primary strong {
+    font-size: 22px;
+  }
+}
+
+
+/* 2026-10-07 v9: remove the artificial empty track between the tank and the
+   quarter details. Keep the whole quarter group packed at the right edge so
+   the two live-power metrics can use the freed space. */
+@media (min-width: 721px) {
+  .meter-grid--one .meter-card__live-strip,
+  .meter-grid--two .meter-card__live-strip {
+    grid-template-columns: minmax(185px, 1.18fr) minmax(220px, 1.32fr) max-content;
+    column-gap: 18px;
+  }
+
+  .meter-grid--three .meter-card__live-strip {
+    grid-template-columns: minmax(112px, 1.05fr) minmax(150px, 1.18fr) max-content;
+    column-gap: 10px;
+  }
+
+  .meter-grid--one .quarter-timer,
+  .meter-grid--two .quarter-timer,
+  .meter-grid--three .quarter-timer {
+    width: auto;
+    min-width: 0;
+    grid-template-columns: max-content max-content max-content;
+    justify-content: end;
+    justify-self: end;
+  }
+
+  .meter-grid--one .quarter-timer,
+  .meter-grid--two .quarter-timer {
+    gap: 9px;
+    padding-left: 10px;
+    padding-right: 0;
+  }
+
+  .meter-grid--three .quarter-timer {
+    gap: 6px;
+    padding-left: 8px;
+    padding-right: 0;
+  }
+
+  .quarter-timer__clock,
+  .quarter-tank,
+  .quarter-timer__details {
+    justify-self: end;
+  }
+
+  .quarter-timer__details {
+    width: auto;
+    min-width: 0;
+  }
+
+  .quarter-timer__details > span {
+    width: max-content;
+    max-width: none;
+  }
+
+  .meter-grid--one .live-metric,
+  .meter-grid--two .live-metric {
+    padding-right: 8px;
+  }
+}
+
+
+/* 2026-10-07 v10: responsive per-card layout.
+   The decision is based on each meter card width (not only the browser width),
+   so 1/2/3-card dashboards adapt independently without clipping. */
+.meter-card {
+  container-type: inline-size;
+}
+
+/* Normal/wide card: keep all live information on one row. */
+@container (min-width: 541px) {
+  .meter-card__live-strip {
+    grid-template-columns: minmax(135px, 1fr) minmax(175px, 1.18fr) max-content !important;
+    column-gap: clamp(10px, 1.3cqw, 18px) !important;
+  }
+
+  .quarter-timer {
+    width: auto !important;
+    min-width: 0 !important;
+    grid-template-columns: max-content max-content max-content !important;
+    justify-content: end;
+    justify-self: end;
+    gap: clamp(6px, .8cqw, 10px) !important;
+    padding-left: clamp(6px, 1cqw, 12px) !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Medium/narrow card (typical 3-column laptop layout): compact dynamically,
+   but still keep everything in ONE row and prevent the right side being cut. */
+@container (min-width: 431px) and (max-width: 540px) {
+  .meter-card__live-strip {
+    grid-template-columns: minmax(82px, .9fr) minmax(118px, 1.18fr) minmax(150px, auto) !important;
+    column-gap: 5px !important;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .live-metric + .live-metric {
+    padding-left: 8px !important;
+  }
+
+  .live-metric > span,
+  .live-metric__updated {
+    font-size: 8.5px;
+  }
+
+  .live-metric strong,
+  .meter-grid--three .live-metric strong {
+    font-size: 16px !important;
+  }
+
+  .live-metric--primary strong,
+  .meter-grid--three .live-metric--primary strong {
+    font-size: 19px !important;
+  }
+
+  .quarter-timer {
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: max-content 29px minmax(72px, 1fr) !important;
+    justify-content: stretch !important;
+    justify-self: stretch !important;
+    gap: 4px !important;
+    padding-left: 6px !important;
+    padding-right: 0 !important;
+  }
+
+  .quarter-timer__clock span {
+    font-size: 7.5px;
+  }
+
+  .quarter-timer__clock strong,
+  .meter-grid--three .quarter-timer__clock strong {
+    font-size: 18px !important;
+  }
+
+  .quarter-tank,
+  .meter-grid--three .quarter-tank {
+    width: 27px !important;
+    height: 46px !important;
+  }
+
+  .quarter-timer__details {
+    width: 100% !important;
+    min-width: 0;
+    justify-self: stretch !important;
+    justify-items: end;
+    text-align: right;
+    gap: 2px;
+  }
+
+  .quarter-timer__details > span {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+    font-size: 7px !important;
+    overflow: hidden;
+  }
+
+  .quarter-timer__details strong {
+    font-size: 8px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Very small card: do not squeeze text until it becomes unreadable.
+   Put quarter information below the two live metrics inside the same panel. */
+@container (max-width: 430px) {
+  .meter-card__live-strip {
+    grid-template-columns: 1fr 1fr !important;
+    row-gap: 9px !important;
+  }
+
+  .quarter-timer {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: max-content 32px minmax(0, 1fr) !important;
+    justify-content: stretch !important;
+    justify-self: stretch !important;
+    gap: 7px !important;
+    padding: 8px 0 0 !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(11, 61, 111, 0.09) !important;
+  }
+
+  .quarter-timer__details {
+    width: 100% !important;
+    justify-self: stretch !important;
+    justify-items: end;
+    text-align: right;
+  }
+}
+
+.site-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -10px 2px 16px;
+  overflow-x: auto;
+  padding: 2px 2px 4px;
+}
+
+.site-tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 1px solid rgba(11, 61, 111, 0.10);
+  border-radius: 10px;
+  background: rgba(255,255,255,.78);
+  color: #607187;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.site-tab__label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.site-tab strong { color: #14395f; font-size: 13px; }
+.site-tab--active { background: #fff; border-color: rgba(0,185,122,.35); box-shadow: 0 5px 14px rgba(17,71,111,.08); }
+.site-tab--active strong { color: #008f62; }
+
+.meter-view-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid rgba(11,61,111,.09);
+  border-radius: 9px;
+  background: #f5f9fc;
+  flex: 0 0 auto;
+}
+
+.meter-view-toggle button {
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 10px;
+  background: transparent;
+  color: #6e7f91;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.meter-view-toggle button.active {
+  background: #fff;
+  color: #0a6f62;
+  box-shadow: 0 2px 8px rgba(17,71,111,.10);
+}
+
+.network-charts {
+  min-height: 285px;
+  padding: 8px 18px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.network-chart-card {
+  border: 1px solid rgba(11,61,111,.07);
+  border-radius: 12px;
+  background: #fbfdff;
+  overflow: hidden;
+}
+
+.network-chart-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px 2px;
+}
+
+.network-chart-card > header > div:first-child { display: flex; align-items: baseline; gap: 8px; }
+.network-chart-card header strong { color: #163a5d; font-size: 11px; }
+.network-chart-card header span { color: #8492a3; font-size: 9px; }
+.network-live-values { display: flex; gap: 9px; color: #42607c; font-size: 9px; }
+.network-live-values b { font-weight: 700; }
+
+.network-mini-chart { width: 100%; height: 64px; display: block; }
+.network-grid-line { stroke: rgba(72,105,137,.15); stroke-width: 1; }
+.network-line { fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.network-line--l1 { stroke: #00a97a; }
+.network-line--l2 { stroke: #1681c4; }
+.network-line--l3 { stroke: #a968d8; }
+.network-line--frequency { stroke: #d58b1d; }
+
+.network-legend { display: flex; justify-content: flex-end; gap: 12px; padding: 0 4px; color: #718095; font-size: 9px; }
+.network-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.network-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.network-dot--l1 { background: #00a97a; }
+.network-dot--l2 { background: #1681c4; }
+.network-dot--l3 { background: #a968d8; }
+
+@media (max-width: 850px) {
+  .meter-card__header { align-items: center; }
+  .meter-view-toggle button { padding: 6px 7px; }
+  .network-live-values { flex-wrap: wrap; justify-content: flex-end; }
+}
+
+/* 409 - dashboard time axes, alarm acknowledgement, predictive quarter risk and admin navigation */
+.admin-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid rgba(15, 72, 119, .10);
+  border-radius: 12px;
+  background: rgba(248, 251, 253, .92);
+}
+.admin-nav button {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 18px;
+  background: transparent;
+  color: #61788f;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.admin-nav button.active { background: #fff; color: #0b6f91; box-shadow: 0 2px 8px rgba(14,62,99,.10); }
+
+.site-tab { padding: 8px 14px !important; }
+.site-tab strong { font-size: 12px; }
+.site-tab__label { display: none !important; }
+
+.x-tick { stroke: rgba(72,105,137,.35); stroke-width: 1; }
+.network-axis-label { fill: #8794a5; font-size: 8px; }
+.network-line--power { fill: none; stroke: #00aa83; stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+
+.quarter-tank__fill { transition: height .3s ease, background .3s ease; }
+.quarter-tank--green .quarter-tank__fill { background: linear-gradient(180deg,#54d7ad,#20b889); }
+.quarter-tank--yellow { border-color: rgba(229,155,34,.55); }
+.quarter-tank--yellow .quarter-tank__fill { background: linear-gradient(180deg,#ffd166,#eaa52e); }
+.quarter-tank--red { border-color: rgba(210,68,68,.65); }
+.quarter-tank--red .quarter-tank__fill { background: linear-gradient(180deg,#ff8080,#d94747); }
+
+.meter-card--alarm-unack { border-color: rgba(211,63,63,.72); box-shadow: 0 0 0 2px rgba(211,63,63,.10), 0 15px 40px rgba(18,56,87,.08); animation: alarmCardPulse 1.05s ease-in-out infinite; }
+.meter-card--alarm-ack { border-color: rgba(211,63,63,.55); box-shadow: 0 0 0 1px rgba(211,63,63,.09), 0 15px 40px rgba(18,56,87,.08); }
+@keyframes alarmCardPulse { 0%,100% { box-shadow: 0 0 0 2px rgba(211,63,63,.08),0 15px 40px rgba(18,56,87,.08); } 50% { box-shadow: 0 0 0 5px rgba(211,63,63,.22),0 15px 40px rgba(18,56,87,.10); } }
+.alarm-banner { margin: 0 22px 10px; padding: 7px 10px; border-radius: 9px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 10px; }
+.alarm-banner--unack { background: #fff0f0; color: #a82c2c; border: 1px solid rgba(211,63,63,.28); }
+.alarm-banner--ack { background: #fff7f7; color: #a82c2c; border: 1px solid rgba(211,63,63,.22); }
+.alarm-banner__message { display:flex; align-items:center; gap:8px; min-width:0; }
+.alarm-banner__bell { font-size: 15px; flex:0 0 auto; }
+.alarm-banner__label { color:#ad2323; font-size:11px; font-weight:900; letter-spacing:.03em; }
+.alarm-banner__readings { display:flex; align-items:center; gap:10px; min-width:0; flex-wrap:wrap; }
+.alarm-banner__reading { display:inline-flex; align-items:baseline; gap:5px; color:#a82c2c; }
+.alarm-banner__reading small { color:#8e4b4b; font-size:9px; font-weight:700; }
+.alarm-banner__value { color:#c62828; font-size:18px; line-height:1; font-weight:900; font-variant-numeric:tabular-nums; }
+.alarm-banner__threshold { color:#9c5353; font-size:9px; font-weight:700; font-variant-numeric:tabular-nums; }
+.alarm-banner__reading--unack .alarm-banner__value { animation: alarmValuePulse .75s ease-in-out infinite; }
+.alarm-banner--unack .alarm-banner__bell { animation: alarmBell .65s ease-in-out infinite alternate; }
+@keyframes alarmBell { from { transform: rotate(-14deg) scale(1); } to { transform: rotate(14deg) scale(1.08); } }
+.alarm-banner__actions { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+.alarm-banner button, .alarm-ack-small { border:1px solid rgba(180,48,48,.22); background:#fff; color:#a72f2f; border-radius:7px; padding:5px 8px; font-size:9px; font-weight:800; cursor:pointer; }
+.meter-alarm-row--unack { background: rgba(211,63,63,.13) !important; animation: alarmHistoryPulse 1.1s ease-in-out infinite; }
+.meter-alarm-row--ack { background: rgba(211,63,63,.07) !important; }
+@keyframes alarmHistoryPulse { 0%,100%{opacity:1} 50%{opacity:.65} }
+.alarm-ack-label { color:#ae4545; font-size:8px; font-weight:900; }
+
+/* Configuration: make the available width useful and keep the table visible without horizontal scrolling on desktop. */
+.configuration-dashboard { max-width: 1580px !important; width: calc(100% - 28px) !important; }
+.meter-configuration-panel { max-width: none !important; }
+.meter-configuration-layout { grid-template-columns: minmax(0, 1fr) 430px !important; gap: 20px !important; }
+.meters-table-wrap { overflow-x: visible !important; }
+.meters-table { width: 100% !important; min-width: 0 !important; table-layout: auto; }
+.meters-table th, .meters-table td { padding-left: 8px !important; padding-right: 8px !important; }
+.meters-table code { white-space: nowrap; font-size: 9px; }
+
+.edge-health-panel { max-width: 1320px; margin: 0 auto; padding: 24px; border: 1px solid rgba(12,60,105,.10); border-radius: 20px; background: rgba(255,255,255,.95); box-shadow: 0 15px 40px rgba(18,56,87,.08); }
+.edge-health-panel__header h2 { margin: 0 0 18px; color:#102b4b; font-size:22px; }
+.edge-health-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(340px,1fr)); gap:16px; }
+.edge-health-card { border:1px solid rgba(12,60,105,.10); border-radius:14px; background:#f9fbfd; padding:16px; }
+.edge-health-card--offline { border-color:rgba(211,63,63,.35); background:#fff8f8; }
+.edge-health-card header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; }
+.edge-health-card header div { display:grid; gap:3px; }
+.edge-health-card header strong { color:#153657; font-size:15px; }
+.edge-health-card header span { color:#8190a1; font-size:10px; }
+.edge-health-card header b { color:#19a56f; font-size:10px; letter-spacing:.06em; }
+.edge-health-card--offline header b { color:#d24444; }
+.edge-health-metrics { display:grid; grid-template-columns: repeat(3,1fr); gap:9px; }
+.edge-health-metrics span { border:1px solid rgba(12,60,105,.07); border-radius:9px; background:#fff; padding:9px; display:grid; gap:3px; }
+.edge-health-metrics small { color:#8492a3; font-size:8px; }
+.edge-health-metrics strong { color:#173755; font-size:13px; }
+
+@media (max-width: 1100px) {
+  .admin-nav { position: static; transform: none; margin-left: auto; }
+  .meter-configuration-layout { grid-template-columns: 1fr !important; }
+  .meters-table-wrap { overflow-x: auto !important; }
+  .meters-table { min-width: 900px !important; }
+}
+
+
+/* =========================================================
+   PowerGuard 510 - Technius-style Edge health table
+   ========================================================= */
+.edge-health-panel {
+  max-width: 1580px;
+  margin: 0 auto;
+}
+
+.edge-health-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(11, 61, 111, .10);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.edge-health-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #173755;
+  font-size: 11px;
+}
+
+.edge-health-table th,
+.edge-health-table td {
+  padding: 10px 9px;
+  border-bottom: 1px solid rgba(11, 61, 111, .08);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.edge-health-table th {
+  color: #617287;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .035em;
+  background: #f6f9fb;
+}
+
+.edge-health-table tbody > tr:not(.edge-health-details-row):hover {
+  background: #f8fbfd;
+}
+
+.edge-health-table__offline {
+  background: #fff8f8;
+}
+
+.health-pill {
+  display: inline-flex;
+  min-width: 72px;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .045em;
+}
+
+.health-pill--online { color: #087b55; background: #ddf8e9; }
+.health-pill--degraded { color: #9b6900; background: #fff1c9; }
+.health-pill--offline { color: #b42f37; background: #ffe1e3; }
+
+.health-host {
+  display: grid;
+  gap: 2px;
+}
+.health-host strong { color: #173755; font-size: 11px; }
+.health-host span { color: #8190a1; font-size: 9px; }
+
+.health-ok { color: #0c9c67; font-weight: 800; }
+.health-bad { color: #c53d44; font-weight: 800; }
+
+.health-expand-button {
+  width: 30px;
+  height: 28px;
+  border: 1px solid rgba(11, 61, 111, .10);
+  border-radius: 8px;
+  background: #f7fafc;
+  color: #274c6c;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.edge-health-details-row > td {
+  padding: 0 !important;
+  background: #fbfdfe;
+  white-space: normal !important;
+}
+
+.edge-health-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 14px;
+}
+
+.edge-health-details section,
+.edge-meter-health {
+  padding: 14px;
+  border: 1px solid rgba(11, 61, 111, .09);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.edge-health-details h3,
+.edge-meter-health h3 {
+  margin: 0 0 10px;
+  color: #123250;
+  font-size: 12px;
+}
+
+.edge-health-details dl {
+  margin: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.edge-health-details dl div {
+  display: grid;
+  grid-template-columns: minmax(110px, .8fr) minmax(0, 1.2fr);
+  gap: 10px;
+}
+
+.edge-health-details dt {
+  color: #7a899a;
+  font-size: 9px;
+}
+
+.edge-health-details dd {
+  margin: 0;
+  color: #183858;
+  font-size: 10px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.edge-detail-list {
+  display: grid;
+  gap: 8px;
+}
+
+.edge-detail-list__item {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(11, 61, 111, .07);
+}
+
+.edge-detail-list__item:last-child { border-bottom: 0; }
+.edge-detail-list__item strong { font-size: 10px; }
+.edge-detail-list__item span,
+.edge-detail-list__item small { color: #738396; font-size: 9px; overflow-wrap: anywhere; }
+
+.edge-meter-health {
+  margin: 0 14px 14px;
+}
+
+.edge-meter-health table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.edge-meter-health th,
+.edge-meter-health td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(11, 61, 111, .07);
+  text-align: left;
+}
+
+.edge-meter-health th {
+  color: #6d7d90;
+  font-size: 9px;
+  background: #f7fafc;
+}
+
+/* =========================================================
+   PowerGuard 510 - Edge configuration editor
+   ========================================================= */
+.edge-configuration-panel {
+  max-width: 1420px;
+  margin: 0 auto;
+  padding: 24px;
+  border: 1px solid rgba(12, 60, 105, .10);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 15px 40px rgba(18, 56, 87, .08);
+}
+
+.edge-config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.edge-config-header h2 {
+  margin: 0;
+  color: #102b4b;
+  font-size: 22px;
+}
+
+.edge-config-header p {
+  margin: 6px 0 0;
+  color: #728297;
+  font-size: 11px;
+  max-width: 780px;
+}
+
+.edge-selector {
+  min-width: 320px;
+  display: grid;
+  gap: 5px;
+  color: #617287;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.edge-selector select,
+.edge-config-form select {
+  min-height: 38px;
+  border: 1px solid rgba(11, 61, 111, .16);
+  border-radius: 9px;
+  padding: 0 10px;
+  background: #fff;
+  color: #173755;
+}
+
+.edge-config-form {
+  display: grid;
+  gap: 16px;
+}
+
+.edge-config-section {
+  padding: 16px;
+  border: 1px solid rgba(11, 61, 111, .09);
+  border-radius: 14px;
+  background: #f9fbfd;
+}
+
+.edge-config-section > h3,
+.edge-config-section__header h3 {
+  margin: 0;
+  color: #123250;
+  font-size: 15px;
+}
+
+.edge-config-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.edge-config-section__header small {
+  display: block;
+  margin-top: 4px;
+  color: #77879a;
+  font-size: 9px;
+}
+
+.edge-config-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.edge-config-grid--mqtt {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.edge-config-items {
+  display: grid;
+  gap: 10px;
+}
+
+.edge-config-item {
+  padding: 12px;
+  border: 1px solid rgba(11, 61, 111, .08);
+  border-radius: 11px;
+  background: #fff;
+}
+
+.edge-config-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.edge-config-item__header strong {
+  color: #173755;
+  font-size: 11px;
+}
+
+.edge-config-toggles {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.edge-config-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 1250px) {
+  .edge-health-table { min-width: 1180px; }
+  .edge-health-details { grid-template-columns: 1fr; }
+  .edge-config-grid,
+  .edge-config-grid--mqtt { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .edge-config-header { align-items: stretch; flex-direction: column; }
+  .edge-selector { min-width: 0; }
+  .edge-config-grid,
+  .edge-config-grid--mqtt { grid-template-columns: 1fr; }
+  .edge-configuration-panel { padding: 16px; }
+}
+
+
+/* PowerGuard 604 - compact Edge configuration tables */
+.edge-config-grid--system {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.edge-add-button {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(11, 61, 111, .16);
+  border-radius: 9px;
+  background: #fff;
+  color: #173755;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.edge-add-button:hover {
+  background: #eef5f8;
+}
+
+.edge-config-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(11, 61, 111, .09);
+  border-radius: 11px;
+  background: #fff;
+}
+
+.edge-config-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #173755;
+  font-size: 11px;
+}
+
+.edge-config-table th,
+.edge-config-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(11, 61, 111, .07);
+  text-align: left;
+  vertical-align: top;
+}
+
+.edge-config-table th {
+  background: #f6f9fb;
+  color: #607187;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.edge-config-table tbody tr:last-child td { border-bottom: 0; }
+
+.table-input {
+  width: 100%;
+  min-width: 120px;
+  min-height: 38px;
+  box-sizing: border-box;
+  border: 1px solid rgba(11, 61, 111, .16);
+  border-radius: 9px;
+  padding: 0 10px;
+  background: #fff;
+  color: #173755;
+}
+
+.table-input--small { min-width: 80px; }
+
+.table-check {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.table-check input {
+  width: 17px;
+  height: 17px;
+  accent-color: #00a96f;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 5px;
+  color: #77879a;
+  font-size: 9px;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+@media (max-width: 900px) {
+  .edge-config-grid--system { grid-template-columns: 1fr; }
+}
+
+.edge-raw-obis-toggle {
+  margin-top: 14px;
+  align-items: flex-start;
+}
+
+.edge-config-inline-hint {
+  display: block;
+  margin-top: 3px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+
+/* PowerGuard 604 p4 - Edge editor viewport layout and flag proportions */
+@media (min-width: 761px) {
+  .edge-configuration-panel {
+    height: calc(100vh - 118px);
+    min-height: 520px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .edge-config-header {
+    flex: 0 0 auto;
+  }
+
+  .edge-config-form {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
+  }
+
+  .edge-config-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 12;
+    margin: 0 -4px -1px;
+    padding: 12px 4px 2px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.96) 22%, rgba(255,255,255,.99) 100%);
+  }
+}
+
+.edge-add-button {
+  position: relative;
+  overflow: visible;
+}
+
+.edge-add-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 50;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #173755;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity .12s ease, transform .12s ease;
+  box-shadow: 0 5px 16px rgba(16,43,75,.18);
+}
+
+.edge-add-button:hover::after,
+.edge-add-button:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.language-button__flag {
+  width: 30px;
+  justify-content: center;
+}
+
+.flag-icon {
+  display: block;
+  object-fit: contain;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.flag-icon--pl {
+  width: 24px;
+  height: 15px;
+}
+
+.flag-icon--en {
+  width: 28px;
+  height: 14px;
+}
+
+/* PowerGuard 604 p5 - compact Edge editor: no artificial heights / no nested scrollbar */
+@media (min-width: 761px) {
+  .edge-configuration-panel {
+    height: auto;
+    min-height: 0;
+    display: block;
+    overflow: visible;
+  }
+
+  .edge-config-form {
+    display: grid;
+    gap: 10px;
+    min-height: 0;
+    overflow: visible;
+    padding-right: 0;
+    scrollbar-gutter: auto;
+  }
+
+  .edge-config-actions {
+    position: sticky;
+    bottom: 10px;
+    z-index: 12;
+    margin: 0;
+    padding: 8px 0 0;
+    background: rgba(255, 255, 255, .96);
+  }
+}
+
+.edge-configuration-panel {
+  padding: 18px;
+}
+
+.edge-config-header {
+  margin-bottom: 12px;
+}
+
+.edge-config-section {
+  padding: 12px;
+}
+
+.edge-config-section__header {
+  margin-bottom: 8px;
+}
+
+.edge-raw-obis-toggle {
+  margin-top: 10px;
+}
+
+.edge-config-table th,
+.edge-config-table td {
+  padding: 8px;
+}
+
+
+/* PowerGuard 606 - searchable time zone, clearer tables and a livelier energy palette */
+.timezone-search-input {
+  min-height: 38px;
+  width: 100%;
+  border: 1px solid rgba(11, 61, 111, .18);
+  border-radius: 9px;
+  padding: 0 12px;
+  background: #fff;
+  color: #173755;
+  font: inherit;
+  font-size: 12px;
+}
+
+.timezone-search-input:focus {
+  outline: none;
+  border-color: rgba(0, 169, 111, .55);
+  box-shadow: 0 0 0 3px rgba(0, 185, 122, .10);
+}
+
+.edge-config-table .table-input {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.edge-config-table th {
+  font-size: 10px;
+}
+
+.edge-delete-button {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.edge-delete-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.edge-delete-button:hover:not(:disabled) {
+  background: #fff0f0;
+  color: #c83f3f;
+}
+
+:host {
+  background:
+    radial-gradient(circle at 86% 5%, rgba(0, 210, 138, .15), transparent 27rem),
+    radial-gradient(circle at 10% 16%, rgba(35, 139, 230, .09), transparent 24rem),
+    linear-gradient(180deg, #f7fbff 0%, #edf5f9 100%);
+}
+
+.topbar {
+  border-bottom-color: rgba(0, 169, 111, .12);
+  box-shadow: 0 7px 28px rgba(11, 61, 111, .07);
+}
+
+.admin-nav {
+  background: linear-gradient(135deg, rgba(240, 249, 255, .96), rgba(240, 255, 248, .96));
+  border-color: rgba(0, 169, 111, .12);
+}
+
+.admin-nav button.active {
+  color: #087a70;
+  box-shadow: 0 2px 10px rgba(0, 169, 111, .13);
+}
+
+.edge-configuration-panel,
+.edge-health-panel,
+.meter-configuration-panel {
+  border-color: rgba(11, 95, 125, .11);
+  box-shadow: 0 16px 42px rgba(18, 78, 110, .09);
+}
+
+.edge-config-section {
+  background: linear-gradient(180deg, #f9fcff 0%, #f4fbf8 100%);
+  border-color: rgba(24, 129, 143, .11);
+}
+
+.edge-config-table-wrap {
+  border-color: rgba(24, 129, 143, .12);
+}
+
+.edge-config-table th {
+  background: linear-gradient(180deg, #eff8fc 0%, #edf8f4 100%);
+  color: #42687c;
+}
+
+.edge-add-button {
+  color: #087a70;
+  border-color: rgba(0, 169, 111, .26);
+}
+
+.edge-add-button:hover {
+  background: #eaf9f3;
+  border-color: rgba(0, 169, 111, .42);
+}
+
+.button--primary {
+  box-shadow: 0 6px 14px rgba(0, 169, 111, .17);
+}
+
+
+/* PowerGuard 606 p2 - QoS help and vertically centered row actions */
+.qos-header { white-space: nowrap; }
+
+.header-info-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 4px;
+  border: 1px solid rgba(66, 104, 124, .42);
+  border-radius: 50%;
+  color: #42687c;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: help;
+  vertical-align: middle;
+}
+
+.header-info-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 100;
+  width: max-content;
+  max-width: 310px;
+  transform: translate(-50%, 3px);
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: #173755;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease;
+  box-shadow: 0 6px 18px rgba(16, 43, 75, .2);
+}
+
+.header-info-icon:hover::after,
+.header-info-icon:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.edge-config-table td.edge-action-cell {
+  vertical-align: middle !important;
+  text-align: center;
+}
+
+.edge-action-cell .edge-delete-button {
+  display: inline-grid;
+  vertical-align: middle;
+}
+
+/* =========================================================
+   PowerGuard 606 p3 - unified typography scale
+   Keeps primary dashboard metrics intentionally larger while
+   standardising admin/configuration/table typography.
+   ========================================================= */
+:root {
+  --pg-font-page-title: 22px;
+  --pg-font-section-title: 15px;
+  --pg-font-table-body: 12px;
+  --pg-font-table-head: 10px;
+  --pg-font-input: 12px;
+  --pg-font-label: 10px;
+  --pg-font-help: 9px;
+}
+
+/* Page / panel titles */
+.edge-health-panel__header h2,
+.edge-config-header h2,
+.meter-configuration-panel__header h2,
+.users-dialog h2,
+.login-dialog h2 {
+  font-size: var(--pg-font-page-title);
+}
+
+/* Section titles */
+.edge-config-section > h3,
+.edge-config-section__header h3,
+.edge-health-details h3,
+.edge-meter-health h3,
+.meter-editor h3,
+.user-editor h3,
+.meter-alarm-history__title {
+  font-size: var(--pg-font-section-title);
+  line-height: 1.25;
+}
+
+/* Core admin/configuration tables */
+.edge-health-table,
+.edge-config-table,
+.edge-meter-health table,
+.meters-table,
+.users-table {
+  font-size: var(--pg-font-table-body);
+}
+
+.edge-health-table th,
+.edge-config-table th,
+.edge-meter-health th,
+.meters-table th,
+.users-table th {
+  font-size: var(--pg-font-table-head);
+  line-height: 1.25;
+}
+
+.edge-health-table td,
+.edge-config-table td,
+.edge-meter-health td,
+.meters-table td,
+.users-table td {
+  line-height: 1.35;
+}
+
+/* Inputs and selectors */
+.edge-config-form input,
+.edge-config-form select,
+.edge-selector select,
+.table-input,
+.meter-editor input,
+.meter-editor select,
+.user-editor input,
+.user-editor select,
+.login-field input,
+.login-field select {
+  font-size: var(--pg-font-input);
+}
+
+/* Form labels */
+.login-field > span,
+.edge-selector > span,
+.toggle-field > span,
+.edge-config-grid label > span,
+.edge-config-table label,
+.meter-editor label > span,
+.user-editor label > span {
+  font-size: var(--pg-font-label);
+}
+
+/* Secondary/help text */
+.dialog-hint,
+.edge-config-section__header small,
+.meters-table th small,
+.edge-detail-list__item small,
+.meter-alarm-row small,
+.meter-alarm-history__empty {
+  font-size: var(--pg-font-help);
+  line-height: 1.35;
+}
+
+/* Health page detail hierarchy */
+.health-pill {
+  font-size: 10px;
+}
+
+.health-host strong {
+  font-size: 12px;
+}
+
+.health-host span {
+  font-size: 10px;
+}
+
+.edge-health-details dt {
+  font-size: 10px;
+}
+
+.edge-health-details dd,
+.edge-detail-list__item strong {
+  font-size: 12px;
+}
+
+.edge-detail-list__item span,
+.edge-detail-list__item small {
+  font-size: 10px;
+}
+
+/* Meter dashboard typography: preserve prominent measurements,
+   but make supporting text consistent/readable. */
+.meter-card__header h2 {
+  font-size: 22px;
+}
+
+.meter-card__header p,
+.status-text,
+.live-metric > span,
+.quarter-timer__details,
+.meter-view-toggle button,
+.network-chart-card header,
+.network-live-values,
+.network-legend,
+.alarm-banner,
+.alarm-ack-small {
+  font-size: 10px;
+}
+
+.meter-alarm-history__title {
+  font-size: 10px;
+}
+
+.meter-alarm-row {
+  font-size: 10px;
+}
+
+/* Navigation / common controls */
+.admin-nav button,
+.button,
+.table-action,
+.header-icon-button,
+.language-button {
+  font-size: 12px;
+}
+
+
+/* PowerGuard 606 p4 - compact System row */
+.edge-config-grid--system {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(260px, .95fr);
+  align-items: end;
+}
+
+.edge-raw-obis-toggle {
+  margin-top: 0 !important;
+  min-height: 38px;
+  align-items: center !important;
+  align-self: end;
+  justify-self: end;
+  white-space: nowrap;
+  padding: 0 4px 2px 8px;
+}
+
+.edge-selector {
+  gap: 0;
+}
+
+@media (max-width: 1180px) {
+  .edge-config-grid--system {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .edge-raw-obis-toggle {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .edge-config-grid--system {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* PowerGuard 606 p5 - health table headers: compact, calm, consistent */
+.edge-health-table th {
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  line-height: 1.2 !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+
+/* =========================================================
+   PowerGuard 607 p3 - visual consistency pass
+   Harmonises typography, tables, forms and admin page widths.
+   ========================================================= */
+
+:root {
+  --pg-title-size: 20px;
+  --pg-modal-title-size: 18px;
+  --pg-section-title-size: 14px;
+  --pg-body-size: 12px;
+  --pg-table-head-size: 11px;
+  --pg-label-size: 11px;
+  --pg-input-size: 13px;
+  --pg-help-size: 10px;
+}
+
+/* One common admin canvas width */
+.configuration-dashboard {
+  width: min(1440px, calc(100% - 40px)) !important;
+  max-width: none !important;
+}
+
+.edge-health-panel,
+.edge-configuration-panel,
+.meter-configuration-panel {
+  width: 100%;
+  max-width: none !important;
+  box-sizing: border-box;
+}
+
+/* Page titles: Liczniki / Stan / Komputer brzegowy */
+.edge-health-panel__header h2,
+.edge-config-header h2,
+.meter-configuration-panel__header h2 {
+  margin-top: 0;
+  color: #102b4b;
+  font-size: var(--pg-title-size) !important;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+/* Modal titles are slightly smaller than page titles */
+.login-dialog__header h2,
+.users-dialog .login-dialog__header h2 {
+  font-size: var(--pg-modal-title-size) !important;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* Section / editor titles */
+.edge-config-section > h3,
+.edge-config-section__header h3,
+.edge-health-details h3,
+.edge-meter-health h3,
+.meter-editor h3,
+.user-editor h3 {
+  font-size: var(--pg-section-title-size) !important;
+  font-weight: 750;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+/* All admin tables use the same typography */
+.edge-health-table,
+.edge-config-table,
+.edge-meter-health table,
+.meters-table,
+.users-table {
+  font-size: var(--pg-body-size) !important;
+  line-height: 1.35;
+}
+
+.edge-health-table th,
+.edge-config-table th,
+.edge-meter-health th,
+.meters-table th,
+.users-table th {
+  font-size: var(--pg-table-head-size) !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  color: #587086;
+}
+
+.edge-health-table td,
+.edge-config-table td,
+.edge-meter-health td,
+.meters-table td,
+.users-table td {
+  font-size: var(--pg-body-size);
+  line-height: 1.35;
+}
+
+/* Avoid very small IDs/code values inside otherwise normal-size tables */
+.meters-table code,
+.edge-health-table code,
+.edge-config-table code,
+.users-table code {
+  font-size: 11px !important;
+}
+
+/* Form labels and controls */
+.login-field > span,
+.edge-config-grid label > span,
+.meter-editor label > span,
+.user-editor label > span,
+.edge-selector > span,
+.toggle-field > span,
+.alarm-config-group legend {
+  font-size: var(--pg-label-size) !important;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.edge-config-form input,
+.edge-config-form select,
+.edge-selector select,
+.table-input,
+.meter-editor input,
+.meter-editor select,
+.user-editor input,
+.user-editor select,
+.login-field input,
+.login-field select {
+  font-size: var(--pg-input-size) !important;
+  line-height: 1.3;
+}
+
+.dialog-hint,
+.field-hint,
+.edge-config-section__header small,
+.meters-table th small,
+.edge-detail-list__item small,
+.meter-alarm-row small,
+.meter-alarm-history__empty {
+  font-size: var(--pg-help-size) !important;
+  line-height: 1.35;
+}
+
+/* Health page details */
+.health-pill {
+  font-size: 10px !important;
+  font-weight: 800;
+  letter-spacing: 0 !important;
+}
+
+.health-host strong {
+  font-size: 12px !important;
+}
+
+.health-host span {
+  font-size: 10px !important;
+}
+
+.edge-health-details dt {
+  font-size: 10px !important;
+  font-weight: 650;
+}
+
+.edge-health-details dd,
+.edge-detail-list__item strong {
+  font-size: 12px !important;
+}
+
+.edge-detail-list__item span,
+.edge-detail-list__item small {
+  font-size: 10px !important;
+}
+
+/* User-management table was visually louder than other tables */
+.users-table th {
+  background: #f4f8fb;
+}
+
+.users-table td {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+/* Meter configuration */
+.meters-table th {
+  background: #f4f8fb;
+}
+
+.meter-editor h3,
+.user-editor h3 {
+  margin-bottom: 14px;
+}
+
+/* Common buttons */
+.admin-nav button,
+.button,
+.table-action,
+.header-icon-button,
+.language-button {
+  font-size: 12px !important;
+}
+
+/* Public meter dashboard:
+   keep important measurements large, normalise supporting text. */
+.meter-card__header h2 {
+  font-size: 20px !important;
+  line-height: 1.2;
+}
+
+.status-text,
+.live-metric > span,
+.live-metric__updated,
+.meter-view-toggle button,
+.network-chart-card header,
+.network-live-values,
+.network-legend,
+.alarm-banner,
+.alarm-ack-small {
+  font-size: 10px !important;
+}
+
+.meter-alarm-history__title {
+  font-size: 10px !important;
+  line-height: 1.25;
+}
+
+.meter-alarm-row {
+  font-size: 10px !important;
+}
+
+.axis-label {
+  font-size: 9px !important;
+}
+
+.axis-unit,
+.limit-label {
+  font-size: 9px !important;
+}
+
+/* Keep field/value hierarchy inside account/profile dialogs consistent */
+.profile-dialog .login-field > span,
+.users-dialog .login-field > span {
+  font-size: 11px !important;
+}
+
+.profile-dialog input,
+.users-dialog input,
+.users-dialog select {
+  font-size: 13px !important;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .configuration-dashboard {
+    width: calc(100% - 20px) !important;
+  }
+
+  .edge-health-panel,
+  .edge-configuration-panel,
+  .meter-configuration-panel {
+    padding: 16px;
+  }
+}
+
+
+/* =========================================================
+   PowerGuard 607 p4 - final typography/layout consistency
+   ========================================================= */
+
+:root {
+  --pg-page-title: 18px;
+  --pg-modal-title: 17px;
+  --pg-section-title: 14px;
+  --pg-body: 12px;
+  --pg-table-head: 10px;
+  --pg-label: 11px;
+  --pg-input: 13px;
+  --pg-help: 10px;
+}
+
+/* Same usable width on all authenticated admin views. */
+.configuration-dashboard {
+  width: min(1500px, calc(100% - 32px)) !important;
+  padding-top: 22px !important;
+}
+
+.edge-health-panel,
+.edge-configuration-panel,
+.meter-configuration-panel {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 20px !important;
+  border-radius: 18px !important;
+}
+
+/* Page titles */
+.edge-health-panel__header h2,
+.edge-config-header h2,
+.meter-configuration-panel__header h2 {
+  font-size: var(--pg-page-title) !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Modal titles */
+.login-dialog__header h2,
+.users-dialog .login-dialog__header h2 {
+  font-size: var(--pg-modal-title) !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+/* Section/editor headings */
+.edge-config-section > h3,
+.edge-config-section__header h3,
+.edge-health-details h3,
+.edge-meter-health h3,
+.meter-editor h3,
+.user-editor h3 {
+  font-size: var(--pg-section-title) !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+/* Unified admin table styling */
+.edge-health-table,
+.edge-config-table,
+.edge-meter-health table,
+.meters-table,
+.users-table {
+  font-size: var(--pg-body) !important;
+  line-height: 1.35 !important;
+}
+
+.edge-health-table th,
+.edge-config-table th,
+.edge-meter-health th,
+.meters-table th,
+.users-table th {
+  font-size: var(--pg-table-head) !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  color: #587086 !important;
+}
+
+.edge-health-table th,
+.edge-health-table td,
+.edge-config-table th,
+.edge-config-table td,
+.meters-table th,
+.meters-table td,
+.users-table th,
+.users-table td {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+}
+
+/* Health table: fit the normal desktop view without a needless scrollbar. */
+.edge-health-table-wrap {
+  overflow-x: visible !important;
+}
+
+.edge-health-table {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+.edge-health-table th,
+.edge-health-table td {
+  white-space: normal !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.edge-health-table td:nth-child(1),
+.edge-health-table td:nth-child(2),
+.edge-health-table td:nth-child(3),
+.edge-health-table td:nth-child(4),
+.edge-health-table td:nth-child(6),
+.edge-health-table td:nth-child(7),
+.edge-health-table td:nth-child(8),
+.edge-health-table td:nth-child(9),
+.edge-health-table td:nth-child(10),
+.edge-health-table td:nth-child(11),
+.edge-health-table td:nth-child(12),
+.edge-health-table td:nth-child(13) {
+  white-space: nowrap !important;
+}
+
+.health-host {
+  min-width: 160px;
+}
+
+.health-host span {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.health-pill {
+  min-width: 58px !important;
+  padding: 4px 8px !important;
+  font-size: 9px !important;
+  font-weight: 750 !important;
+}
+
+/* Meter admin page: calm table headers and balanced editor. */
+.meter-configuration-layout {
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  gap: 18px !important;
+}
+
+.meters-table th {
+  white-space: normal !important;
+}
+
+.meters-table td {
+  font-size: 12px !important;
+}
+
+.meters-table code {
+  font-size: 10px !important;
+}
+
+.meter-editor,
+.user-editor {
+  padding: 16px !important;
+}
+
+/* Edge configuration tables should not dominate the page visually. */
+.edge-config-table th {
+  font-size: 10px !important;
+  font-weight: 650 !important;
+}
+
+.edge-config-table td,
+.edge-config-table .table-input {
+  font-size: 12px !important;
+}
+
+.edge-config-table th,
+.edge-config-table td {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.edge-config-form input,
+.edge-config-form select,
+.edge-selector select,
+.meter-editor input,
+.meter-editor select,
+.user-editor input,
+.user-editor select,
+.profile-dialog input,
+.users-dialog input,
+.users-dialog select {
+  font-size: var(--pg-input) !important;
+}
+
+.login-field > span,
+.edge-config-grid label > span,
+.meter-editor label > span,
+.user-editor label > span,
+.toggle-field > span,
+.alarm-config-group legend {
+  font-size: var(--pg-label) !important;
+  font-weight: 650 !important;
+}
+
+.dialog-hint,
+.field-hint,
+.edge-config-section__header small,
+.meters-table th small {
+  font-size: var(--pg-help) !important;
+}
+
+/* Navigation is important, but must be quieter than the page content. */
+.admin-nav button {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+/* Public dashboard: preserve the large live values, normalise support text. */
+.meter-card__header h2 {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+
+.status-text,
+.live-metric > span,
+.meter-view-toggle button,
+.meter-alarm-history__title,
+.meter-alarm-row {
+  font-size: 10px !important;
+}
+
+.axis-label,
+.axis-unit,
+.limit-label,
+.network-axis-label {
+  font-size: 9px !important;
+}
+
+/* Keep modal forms visually aligned with admin forms. */
+.login-dialog,
+.profile-dialog {
+  color: #173755;
+}
+
+.login-field input,
+.login-field select {
+  font-size: 13px !important;
+}
+
+@media (max-width: 1180px) {
+  .meter-configuration-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .edge-health-table-wrap,
+  .meters-table-wrap {
+    overflow-x: auto !important;
+  }
+
+  .edge-health-table {
+    min-width: 1080px;
+  }
+}
+
+@media (max-width: 760px) {
+  .configuration-dashboard {
+    width: calc(100% - 18px) !important;
+  }
+
+  .edge-health-panel,
+  .edge-configuration-panel,
+  .meter-configuration-panel {
+    padding: 14px !important;
+  }
+}
+
+
+/* PowerGuard 607 p5 - meter table header correction */
+.meters-table th {
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  color: #5c7288 !important;
+}
+
+.meters-table th small {
+  font-size: 8px !important;
+  font-weight: 500 !important;
+  line-height: 1.15 !important;
+}
+
+
+/* PowerGuard 607 p6 - final dashboard header tuning */
+
+/* Admin table headers: keep them clearly secondary to page/section titles */
+.meters-table th,
+.edge-health-table th,
+.edge-config-table th,
+.edge-meter-health th,
+.users-table th {
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: #5f7489 !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+
+/* Secondary lines inside compound table headers */
+.meters-table th small,
+.edge-health-table th small,
+.edge-config-table th small,
+.users-table th small {
+  font-size: 8px !important;
+  font-weight: 500 !important;
+  line-height: 1.15 !important;
+}
+
+/* Page titles: slightly calmer and consistent across admin dashboards */
+.edge-health-panel__header h2,
+.edge-config-header h2,
+.meter-configuration-panel__header h2 {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+}
+
+/* Section headings inside configuration/editor cards */
+.edge-config-section > h3,
+.edge-config-section__header h3,
+.edge-health-details h3,
+.edge-meter-health h3,
+.meter-editor h3,
+.user-editor h3 {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+/* Main public dashboard supporting headers should not compete with live values */
+.live-metric > span,
+.meter-alarm-history__title,
+.network-chart-card header,
+.status-text {
+  font-size: 9px !important;
+}
+
+/* Keep actual meter names readable */
+.meter-card__header h2 {
+  font-size: 18px !important;
+}
+
+
+/* PowerGuard 607 p7 - reduce oversized page/section/form headers */
+
+/* Main admin page titles */
+.edge-health-panel__header h2,
+.edge-config-header h2,
+.meter-configuration-panel__header h2 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+/* Editor / card / section titles */
+.edge-config-section > h3,
+.edge-config-section__header h3,
+.edge-health-details h3,
+.edge-meter-health h3,
+.meter-editor h3,
+.user-editor h3,
+.meter-configuration-panel h3 {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+/* Form labels: Site ID, Edge ID, ID licznika, etc. */
+.login-field > span,
+.edge-config-grid label > span,
+.meter-editor label > span,
+.user-editor label > span,
+.toggle-field > span,
+.edge-selector > span,
+.alarm-config-group legend {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+}
+
+/* Alarm group titles in meter editor */
+.alarm-config-group legend {
+  font-size: 11px !important;
+}
+
+/* Keep table headers clearly smallest */
+.meters-table th,
+.edge-health-table th,
+.edge-config-table th,
+.edge-meter-health th,
+.users-table th {
+  font-size: 8.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+}
+
+/* Secondary line inside compound table headers */
+.meters-table th small,
+.edge-health-table th small,
+.edge-config-table th small,
+.users-table th small {
+  font-size: 7.5px !important;
+  font-weight: 500 !important;
+}
+
+/* Modal headings */
+.login-dialog__header h2,
+.users-dialog .login-dialog__header h2 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+/* Public meter cards: names can stay stronger, support labels smaller */
+.meter-card__header h2 {
+  font-size: 17px !important;
+}
+
+.live-metric > span,
+.meter-alarm-history__title,
+.network-chart-card header,
+.status-text {
+  font-size: 8.5px !important;
+}
+
+
+/* PowerGuard 607 p8 - compact admin top navigation */
+.admin-nav {
+  padding: 2px !important;
+  border-radius: 10px !important;
+  gap: 2px !important;
+}
+
+.admin-nav button {
+  min-width: 0 !important;
+  height: 28px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+.admin-nav button.active {
+  font-weight: 650 !important;
+}
+
+
+/* PowerGuard 607 p9 - health row text scale correction */
+.edge-health-table td {
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+}
+
+.edge-health-table td strong,
+.health-host strong,
+.edge-health-table .health-host strong,
+.edge-health-table td:nth-child(3),
+.edge-health-table td:nth-child(6) {
+  font-size: 10px !important;
+  font-weight: 650 !important;
+}
+
+.edge-health-table td:nth-child(6) {
+  color: #2ca96b !important;
+}
+
+.edge-health-table .health-host span {
+  font-size: 8px !important;
+  line-height: 1.15 !important;
+}
+
+.health-pill {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  min-width: 50px !important;
+  padding: 3px 7px !important;
+}
+
+.edge-health-panel__header h2 {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+
+/* =========================================================
+   PowerGuard 607 p10 - fit admin editor on standard laptop screens
+   ========================================================= */
+
+/* The hysteresis hint is secondary information. */
+.meter-editor .dialog-hint {
+  font-size: 9px !important;
+  line-height: 1.2 !important;
+  margin: 4px 0 6px !important;
+  color: #7a8998 !important;
+}
+
+/* Keep the editor compact even on normal desktop screens. */
+.meter-editor {
+  padding: 14px !important;
+}
+
+.meter-editor h3 {
+  margin: 0 0 10px !important;
+}
+
+.meter-editor .login-field {
+  gap: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+.meter-editor .login-field input,
+.meter-editor .login-field select {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+
+.meter-editor .alarm-config-grid {
+  gap: 8px !important;
+  margin-top: 5px !important;
+}
+
+.meter-editor .alarm-config-group {
+  padding: 7px 9px 5px !important;
+}
+
+.meter-editor .alarm-config-group .dialog-grid {
+  gap: 8px !important;
+}
+
+.meter-editor .meter-enabled-field {
+  margin: 5px 0 7px !important;
+}
+
+.meter-editor .login-dialog__actions {
+  margin-top: 8px !important;
+  gap: 8px !important;
+}
+
+/* On typical laptop-height screens, tighten vertical rhythm further
+   so the whole editor fits without forcing page scrolling. */
+@media (max-height: 900px) and (min-width: 901px) {
+  .configuration-dashboard {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .meter-configuration-panel {
+    padding: 16px !important;
+  }
+
+  .meter-configuration-panel__header {
+    margin-bottom: 10px !important;
+  }
+
+  .meter-configuration-layout {
+    gap: 14px !important;
+    grid-template-columns: minmax(0, 1fr) 340px !important;
+  }
+
+  .meter-editor {
+    padding: 12px !important;
+  }
+
+  .meter-editor h3 {
+    margin-bottom: 8px !important;
+  }
+
+  .meter-editor .login-field {
+    gap: 3px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .meter-editor .login-field > span {
+    font-size: 9px !important;
+  }
+
+  .meter-editor .login-field input,
+  .meter-editor .login-field select {
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 5px 9px !important;
+    font-size: 11px !important;
+  }
+
+  .meter-editor .alarm-config-group {
+    padding: 6px 8px 3px !important;
+  }
+
+  .meter-editor .alarm-config-group legend {
+    font-size: 9px !important;
+  }
+
+  .meter-editor .alarm-config-group .dialog-grid {
+    gap: 6px !important;
+  }
+
+  .meter-editor .dialog-hint {
+    font-size: 8px !important;
+    margin: 2px 0 4px !important;
+  }
+
+  .meter-editor .meter-enabled-field {
+    margin: 3px 0 5px !important;
+  }
+
+  .meter-editor .login-dialog__actions {
+    margin-top: 6px !important;
+  }
+
+  .meter-editor .button {
+    min-height: 32px !important;
+    padding: 6px 14px !important;
+  }
+}
+
+/* Very short laptop/browser viewport: stay single-page where practical. */
+@media (max-height: 760px) and (min-width: 901px) {
+  .meter-configuration-layout {
+    grid-template-columns: minmax(0, 1fr) 320px !important;
+  }
+
+  .meter-editor {
+    padding: 10px !important;
+  }
+
+  .meter-editor .login-field {
+    margin-bottom: 4px !important;
+  }
+
+  .meter-editor .login-field input,
+  .meter-editor .login-field select {
+    min-height: 29px !important;
+    height: 29px !important;
+  }
+
+  .meter-editor .alarm-config-grid {
+    gap: 5px !important;
+    margin-top: 3px !important;
+  }
+
+  .meter-editor .alarm-config-group {
+    padding: 4px 7px 2px !important;
+  }
+
+  .meter-editor .dialog-hint {
+    font-size: 7.5px !important;
+  }
+}
+
+
+/* PowerGuard 607 p11 - QoS tooltip
+   Use the browser-native title tooltip because the table is inside
+   an overflow container which clips pseudo-element tooltips. */
+.header-info-icon::after {
+  display: none !important;
+}
+
+.header-info-icon {
+  box-shadow: none !important;
+}
+
+.header-info-icon:hover,
+.header-info-icon:focus-visible {
+  background: #eef6f8;
+  border-color: rgba(8, 122, 112, .45);
+  color: #087a70;
+}
+
+
+/* PowerGuard 607 p12 - consistent delete icon buttons + styled tooltips */
+.edge-delete-button {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 7px !important;
+  box-sizing: border-box !important;
+}
+
+.edge-delete-button svg {
+  width: 14px !important;
+  height: 14px !important;
+  flex: 0 0 auto;
+}
+
+.edge-icon-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.edge-icon-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 7px);
+  z-index: 80;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #173755;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(2px);
+  transition: opacity .12s ease, transform .12s ease;
+  box-shadow: 0 5px 16px rgba(16, 43, 75, .18);
+}
+
+.edge-icon-tooltip:hover::after,
+.edge-icon-tooltip:focus-within::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Let desktop tooltips escape the table box; restore scrolling only on narrow layouts. */
+.edge-config-table-wrap {
+  overflow: visible !important;
+}
+
+@media (max-width: 900px) {
+  .edge-config-table-wrap {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+}
+
+/* =========================================================
+   PowerGuard 612 - sites + header context + compact actions
+   ========================================================= */
+
+/* Public dashboard site title / selector lives next to the logo. */
+.site-context {
+  margin-left: 18px;
+  color: #103657;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.site-context--single {
+  padding: 8px 12px;
+  border: 1px solid rgba(43, 176, 118, .24);
+  border-radius: 10px;
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 2px 8px rgba(15, 61, 94, .05);
+}
+
+.site-context--selector select {
+  min-width: 190px;
+  height: 34px;
+  padding: 0 34px 0 12px;
+  border: 1px solid rgba(43, 176, 118, .25);
+  border-radius: 10px;
+  background: rgba(255,255,255,.88);
+  color: #103657;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Sites / Obiekty administration. */
+.sites-configuration-panel {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(31, 72, 104, .08);
+}
+
+.site-configuration-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 16px;
+  align-items: start;
+}
+
+.site-configuration-list {
+  min-width: 0;
+}
+
+.sites-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #dfe9ef;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 11px;
+}
+
+.sites-table th {
+  padding: 7px 9px;
+  background: #f2f7fa;
+  color: #60778a;
+  font-size: 9px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.sites-table td {
+  padding: 9px;
+  border-top: 1px solid #e8eff3;
+  font-size: 11px;
+}
+
+.site-editor {
+  padding: 14px;
+  border: 1px solid #dfe9ef;
+  border-radius: 12px;
+  background: #f9fbfc;
+}
+
+.site-editor h3 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.site-editor .login-field {
+  margin-bottom: 8px;
+}
+
+/* Edge config bottom actions should match the compact typography used elsewhere. */
+.edge-config-actions .button {
+  min-height: 30px !important;
+  height: 30px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  font-size: 9px !important;
+  font-weight: 650 !important;
+}
+
+/* Meter editor help text is secondary. */
+.meter-editor .dialog-hint {
+  font-size: 8px !important;
+  line-height: 1.2 !important;
+  margin: 3px 0 5px !important;
+}
+
+@media (max-width: 1050px) {
+  .site-context { margin-left: 10px; }
+  .site-context--selector select { min-width: 150px; }
+  .site-configuration-layout { grid-template-columns: 1fr; }
+}
+
+
+/* =========================================================
+   PowerGuard 613 - deterministic header layout
+   left: logo + site, center: date/admin nav, right: legend/actions
+   ========================================================= */
+.topbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  column-gap: 18px !important;
+  justify-content: initial !important;
+}
+
+.topbar__left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-self: start;
+}
+
+.topbar__left .site-context {
+  margin-left: 0 !important;
+  flex: 0 1 auto;
+}
+
+.topbar__date-controls,
+.admin-nav {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  justify-self: center !important;
+}
+
+.topbar__actions {
+  justify-self: end !important;
+  min-width: 0;
+}
+
+.site-context--single {
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.site-context--selector select {
+  min-width: 150px !important;
+  height: 30px !important;
+  font-size: 11px !important;
+  border-radius: 8px !important;
+}
+
+@media (max-width: 980px) {
+  .topbar {
+    grid-template-columns: auto 1fr auto !important;
+    column-gap: 10px !important;
+  }
+
+  .topbar__left {
+    gap: 8px;
+  }
+
+  .site-context--single,
+  .site-context--selector {
+    max-width: 180px;
+  }
+
+  .site-context--selector select {
+    min-width: 120px !important;
+    max-width: 180px;
+  }
+}
+
+
+/* PowerGuard 613 p2 - Sites enabled column as read-only checkbox */
+.site-enabled-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.site-enabled-cell input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #2fb378;
+  opacity: 1;
+  cursor: default;
+}
+
+
+/* =========================================================
+   PowerGuard 613 p3 - readability pass
+   Slightly larger body/data text while keeping headers restrained.
+   ========================================================= */
+
+.admin-nav button {
+  font-size: 10px !important;
+}
+
+.edge-health-panel__header h2,
+.edge-config-header h2,
+.meter-configuration-panel__header h2,
+.site-configuration-panel__header h2 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+.edge-config-section > h3,
+.edge-config-section__header h3,
+.edge-health-details h3,
+.edge-meter-health h3,
+.meter-editor h3,
+.user-editor h3,
+.site-editor h3 {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.edge-health-table th,
+.edge-config-table th,
+.edge-meter-health th,
+.meters-table th,
+.users-table th,
+.sites-table th {
+  font-size: 9.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.edge-health-table td,
+.edge-config-table td,
+.edge-meter-health td,
+.meters-table td,
+.users-table td,
+.sites-table td {
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
+.edge-health-table td > strong,
+.edge-health-table .health-host strong,
+.edge-health-table .health-ok,
+.edge-health-table .health-bad {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.edge-health-table .health-host span {
+  font-size: 8.5px !important;
+  line-height: 1.15 !important;
+}
+
+.health-pill {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+}
+
+.login-field > span,
+.edge-config-grid label > span,
+.meter-editor label > span,
+.user-editor label > span,
+.site-editor label > span,
+.toggle-field > span,
+.edge-selector > span,
+.alarm-config-group legend {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+}
+
+.edge-config-form input,
+.edge-config-form select,
+.edge-selector select,
+.table-input,
+.meter-editor input,
+.meter-editor select,
+.user-editor input,
+.user-editor select,
+.site-editor input,
+.site-editor select,
+.login-field input,
+.login-field select {
+  font-size: 12px !important;
+}
+
+.dialog-hint,
+.field-hint,
+.edge-config-section__header small,
+.meters-table th small,
+.users-table th small,
+.sites-table th small {
+  font-size: 9px !important;
+  line-height: 1.25 !important;
+}
+
+.button,
+.table-action,
+.header-icon-button,
+.language-button {
+  font-size: 10.5px !important;
+}
+
+.live-metric > span,
+.meter-alarm-history__title,
+.network-chart-card header,
+.status-text,
+.meter-view-toggle button {
+  font-size: 9.5px !important;
+}
+
+.meter-alarm-row {
+  font-size: 10px !important;
+}
+
+.axis-label,
+.axis-unit,
+.limit-label,
+.network-axis-label {
+  font-size: 9px !important;
+}
+
+.meter-card__header h2 {
+  font-size: 18px !important;
+}
+
+
+/* =========================================================
+   PowerGuard 614 - 2-column meter layout + Technius-style zoom
+   ========================================================= */
+
+/* For 3 or 4 meters always use two columns on normal desktop widths. */
+.meter-grid--three,
+.meter-grid--four {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 1080px) {
+  .meter-grid--three,
+  .meter-grid--four {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.meter-card__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.meter-zoom-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meter-zoom-button {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  border: 1px solid rgba(24, 77, 113, .16);
+  border-radius: 8px;
+  background: rgba(247, 251, 253, .96);
+  color: #43718d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease, color .12s ease, transform .12s ease;
+}
+
+.meter-zoom-button:hover {
+  background: #eef8f5;
+  border-color: rgba(40, 177, 117, .35);
+  color: #07846d;
+}
+
+.meter-zoom-button:active {
+  transform: translateY(1px);
+}
+
+.meter-zoom-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.meter-zoom-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 7px);
+  z-index: 1200;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #173755;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(2px);
+  transition: opacity .12s ease, transform .12s ease;
+  box-shadow: 0 5px 16px rgba(16, 43, 75, .18);
+}
+
+.meter-zoom-tooltip:hover::after,
+.meter-zoom-tooltip:focus-within::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Full-screen-like expanded meter card. */
+.meter-card--expanded {
+  position: fixed !important;
+  top: 74px !important;
+  right: 12px !important;
+  bottom: auto !important;
+  left: 12px !important;
+  z-index: 1100 !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: calc(100vh - 86px) !important;
+  overflow: auto !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 0 0 100vmax rgba(15, 37, 58, .38),
+    0 22px 70px rgba(9, 40, 70, .22) !important;
+  background: #fff !important;
+}
+
+.meter-card--expanded .meter-card__header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: rgba(255, 255, 255, .97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(12, 60, 105, .08);
+}
+
+.meter-card--expanded .power-chart {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+.meter-card--expanded .network-charts {
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 6px 14px 8px;
+}
+
+.meter-card--expanded .network-chart-card {
+  min-width: 0;
+}
+
+.meter-card--expanded .network-chart-card svg {
+  width: 100%;
+  height: clamp(105px, 15vh, 150px);
+  min-height: 0;
+}
+
+.meter-card--expanded .network-legend {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .meter-card--expanded .network-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .meter-card--expanded .network-chart-card svg {
+    height: 82px;
+  }
+}
+
+/* Do not let container-query compact rules make the expanded view tiny. */
+.meter-card--expanded .meter-card__live-strip {
+  font-size: initial;
+}
+
+@media (max-width: 720px) {
+  .meter-card--expanded {
+    top: 70px !important;
+    right: 6px !important;
+    bottom: 6px !important;
+    left: 6px !important;
+    max-height: calc(100vh - 76px) !important;
+  }
+
+  .meter-card__header-actions {
+    gap: 5px;
+  }
+
+  .meter-zoom-button {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+}
+
+
+/* =========================================================
+   PowerGuard 615 - meter table filtering + sorting
+   ========================================================= */
+.meter-table-filters {
+  display: grid;
+  grid-template-columns: minmax(120px, .8fr) minmax(140px, 1fr) minmax(120px, .75fr) minmax(190px, 1.25fr) auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.meter-table-filters label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.meter-table-filters label > span {
+  font-size: 9px;
+  font-weight: 600;
+  color: #61788c;
+}
+
+.meter-table-filters select,
+.meter-table-filters input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  border: 1px solid rgba(38, 79, 110, .16);
+  border-radius: 8px;
+  background: #fff;
+  color: #173755;
+  padding: 0 9px;
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.meter-table-filters select:focus,
+.meter-table-filters input:focus {
+  border-color: rgba(42, 177, 117, .5);
+  box-shadow: 0 0 0 2px rgba(42, 177, 117, .09);
+}
+
+.meter-filter-clear {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  white-space: nowrap;
+}
+
+.meter-sort-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-align: left;
+}
+
+.meter-sort-button > span {
+  color: #7f93a4;
+  font-size: 9px;
+  min-width: 8px;
+}
+
+.meter-sort-button:hover {
+  color: #0c7568;
+}
+
+.meter-sort-button--multiline {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 4px;
+  align-items: center;
+}
+
+.meter-sort-button--multiline small {
+  grid-column: 1 / -1;
+  display: block;
+  margin-top: 1px;
+}
+
+.configuration-empty--filtered {
+  padding: 22px 12px;
+  border: 1px dashed rgba(48, 91, 122, .15);
+  border-radius: 10px;
+  background: rgba(248, 251, 253, .6);
+}
+
+@media (max-width: 1200px) {
+  .meter-table-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .meter-filter-clear {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 680px) {
+  .meter-table-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* PowerGuard 615 p2 - Edge version in Health table */
+.edge-health-table td code {
+  font-size: 10px !important;
+  font-weight: 600;
+  color: #3e5870;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   PowerGuard 615 p3 - compact 3/4 meter overview on laptop screens
+   Goal: 2 rows visible without page scrollbar; zoom remains available
+   for detailed inspection.
+   ========================================================= */
+@media (min-width: 1081px) and (max-height: 950px) {
+  .dashboard {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .dashboard__meta-row {
+    min-height: 20px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .meter-grid--three,
+  .meter-grid--four {
+    gap: 12px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded),
+  .meter-grid--four .meter-card:not(.meter-card--expanded) {
+    border-radius: 16px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-card__header,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-card__header {
+    padding: 10px 14px 8px !important;
+    gap: 10px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-card__header h2,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-card__header h2 {
+    font-size: 16px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .status-text,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .status-text {
+    font-size: 8px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-card__header-actions,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-card__header-actions {
+    gap: 5px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-view-toggle button,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-view-toggle button {
+    min-height: 26px !important;
+    padding: 4px 8px !important;
+    font-size: 8.5px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-zoom-button,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-zoom-button {
+    width: 27px !important;
+    height: 27px !important;
+    min-width: 27px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-card__live-strip,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-card__live-strip {
+    margin: 0 14px 6px !important;
+    padding: 7px 10px !important;
+    gap: 8px !important;
+    border-radius: 11px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .live-metric > span,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .live-metric > span,
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .quarter-timer__details > span,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .quarter-timer__details > span {
+    font-size: 7.5px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .live-metric strong,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .live-metric strong {
+    font-size: 15px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .quarter-timer__clock strong,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .quarter-timer__clock strong {
+    font-size: 20px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .quarter-timer,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .quarter-timer {
+    min-width: 0 !important;
+    padding-left: 8px !important;
+    gap: 6px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .quarter-tank,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .quarter-tank {
+    width: 32px !important;
+    height: 52px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .power-chart,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .power-chart {
+    height: clamp(125px, 15vh, 155px) !important;
+    min-height: 125px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .chart-wrap,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .chart-wrap {
+    padding-inline: 6px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-card__footer,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-card__footer {
+    padding: 7px 14px 9px !important;
+    font-size: 9px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-alarm-history__title,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-alarm-history__title {
+    font-size: 8px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-alarm-row,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-alarm-row {
+    font-size: 9px !important;
+  }
+}
+
+/* A little more compression for common 768px-high laptop viewports. */
+@media (min-width: 1081px) and (max-height: 820px) {
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .power-chart,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .power-chart {
+    height: 118px !important;
+    min-height: 118px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-card__header,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-card__header {
+    padding-top: 8px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .meter-grid--three .meter-card:not(.meter-card--expanded) .meter-card__live-strip,
+  .meter-grid--four .meter-card:not(.meter-card--expanded) .meter-card__live-strip {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+}
+
+
+/* PowerGuard 731 p4 - delete stale/offline Edge health entry */
+.edge-health-actions {
+  width: 42px;
+  text-align: center;
+}
+
+.edge-health-delete-button {
+  margin: 0 auto;
+}
+
+.edge-health-delete-button:disabled {
+  opacity: .28;
+  cursor: not-allowed;
+}
+
+/* PowerGuard 741 p4 - alarm sound controls in the top bar */
+.sound-picker {
+  position: relative;
+}
+
+.sound-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+  color: #68829b;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.sound-button:hover,
+.sound-button:focus-visible {
+  background: rgba(11, 61, 111, 0.06);
+  color: #0b4b82;
+  outline: none;
+}
+
+.sound-button svg {
+  width: 21px;
+  height: 21px;
+}
+
+.sound-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  width: 250px;
+  padding: 13px;
+  border: 1px solid rgba(11, 61, 111, 0.12);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(18, 56, 87, 0.16);
+}
+
+.sound-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+  color: #29445f;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.sound-menu__header strong {
+  color: #0b4b82;
+  font-size: 11px;
+}
+
+.sound-menu__slider {
+  width: 100%;
+  margin: 2px 0 7px;
+  accent-color: #0b7fc1;
+  cursor: pointer;
+}
+
+.sound-menu__volume-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7a8998;
+  font-size: 9px;
+}
+
+.sound-menu__volume-actions button {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dce7ee;
+  border-radius: 7px;
+  background: #f8fbfd;
+  color: #254761;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sound-menu__volume-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sound-menu__spacer {
+  flex: 1;
+}
+
+.sound-menu__test {
+  width: 100%;
+  height: 31px;
+  margin-top: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid rgba(11, 127, 193, 0.22);
+  border-radius: 8px;
+  background: rgba(11, 127, 193, 0.07);
+  color: #0b5d91;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sound-menu__test:hover {
+  background: rgba(11, 127, 193, 0.12);
+}
+
+.sound-menu__test svg {
+  width: 14px;
+  height: 14px;
+}
+
+
+/* Application information */
+.info-button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #123a73;
+  cursor: pointer;
+  padding: 6px;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.info-button:hover {
+  background: rgba(18, 58, 115, .07);
+  color: #0b62b7;
+}
+
+.info-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.info-dialog {
+  position: relative;
+  width: min(430px, calc(100vw - 32px));
+}
+
+.info-dialog__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.info-dialog__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 2px 44px 16px 0;
+  border-bottom: 1px solid rgba(21, 60, 105, .12);
+}
+
+.info-dialog__brand strong {
+  font-size: 20px;
+  color: #123a73;
+}
+
+.info-dialog__brand span,
+.info-dialog__section span {
+  color: #61758d;
+  font-size: 13px;
+}
+
+.info-dialog__section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 16px;
+}
+
+.info-dialog__section strong {
+  color: #183b66;
+  font-size: 14px;
+}
+
+.info-dialog__label {
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: 11px !important;
+  font-weight: 700;
+  color: #71839a !important;
+}
+
+.info-dialog__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(21, 60, 105, .08);
+}
+
+
+/* 261011b - application settings */
+.settings-panel {
+  width: min(1080px, calc(100vw - 48px));
+  margin: 0 auto;
+  padding: 24px;
+  border: 1px solid rgba(107, 145, 168, .20);
+  border-radius: 18px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 18px 45px rgba(20, 68, 101, .08);
+}
+.settings-form { display: grid; gap: 18px; }
+.settings-card {
+  border: 1px solid #dfe9ef;
+  border-radius: 14px;
+  background: #fff;
+  padding: 20px;
+}
+.settings-card h3 { margin: 0 0 16px; color: #163d5a; }
+.settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.settings-field--wide { grid-column: 1 / -1; }
+.settings-field--wide textarea { resize: vertical; min-height: 84px; }
+.settings-version-list { display: grid; gap: 8px; margin: 0; }
+.settings-version-list > div { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #edf2f5; padding: 9px 0; }
+.settings-version-list dt { color: #607787; }
+.settings-version-list dd { margin: 0; font-weight: 700; color: #183b56; }
+.settings-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.info-dialog__multiline { white-space: pre-line; }
+@media (max-width: 760px) {
+  .settings-panel { width: calc(100vw - 24px); padding: 16px; }
+  .settings-grid { grid-template-columns: 1fr; }
+  .settings-field--wide { grid-column: auto; }
+}
+
+/* =========================================================
+   PowerGuard 261011c - responsive layout pass
+   Breakpoints: tablet <= 900px, mobile <= 640px, small mobile <= 420px
+   ========================================================= */
+
+/* Prevent long labels/values from forcing the whole viewport wider. */
+:host,
+.shell,
+.dashboard,
+.configuration-dashboard,
+.meter-card,
+.settings-panel,
+.sites-configuration-panel,
+.edge-health-panel,
+.edge-configuration-panel,
+.meter-configuration-panel {
+  min-width: 0;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  /* Header becomes two rows: identity/actions + navigation. */
+  .topbar {
+    height: auto !important;
+    min-height: 0 !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 10px !important;
+    row-gap: 8px !important;
+    padding: 8px 12px !important;
+  }
+
+  .topbar__left {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .topbar__actions {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 3px !important;
+    white-space: nowrap;
+  }
+
+  .admin-nav,
+  .topbar__date-controls {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    max-width: 100%;
+    justify-self: stretch !important;
+  }
+
+  .admin-nav {
+    display: flex !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px !important;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-nav button {
+    flex: 0 0 auto;
+    padding: 7px 11px !important;
+    white-space: nowrap;
+  }
+
+  .topbar__date-controls {
+    display: flex !important;
+    justify-content: center !important;
+    overflow-x: auto;
+    padding-bottom: 1px;
+  }
+
+  .dashboard,
+  .configuration-dashboard {
+    width: calc(100% - 24px) !important;
+    max-width: none !important;
+    padding-top: 14px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .meter-grid,
+  .meter-grid--one,
+  .meter-grid--two,
+  .meter-grid--three,
+  .meter-grid--four {
+    grid-template-columns: 1fr !important;
+  }
+
+  .meter-card__live-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .quarter-timer {
+    grid-column: 1 / -1;
+  }
+
+  .settings-panel,
+  .sites-configuration-panel,
+  .edge-health-panel,
+  .edge-configuration-panel,
+  .meter-configuration-panel {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 18px !important;
+  }
+
+  .site-configuration-layout,
+  .meter-configuration-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Data tables stay readable and scroll inside their own container. */
+  .meters-table-wrap,
+  .edge-health-table-wrap,
+  .edge-config-table-wrap,
+  .users-table-wrap,
+  .sites-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .meters-table { min-width: 860px !important; }
+  .edge-health-table { min-width: 1050px !important; }
+  .edge-config-table { min-width: 760px !important; }
+  .users-table { min-width: 720px !important; }
+  .sites-table { min-width: 620px !important; }
+
+  .edge-config-header {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .edge-selector {
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+  .edge-config-grid,
+  .edge-config-grid--mqtt,
+  .edge-config-grid--system {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .users-dialog {
+    width: min(96vw, 900px) !important;
+    max-height: 92vh;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  :host {
+    background:
+      radial-gradient(circle at 86% 4%, rgba(0, 210, 138, 0.08), transparent 18rem),
+      linear-gradient(180deg, #f8fbfe 0%, #eef4f8 100%);
+  }
+
+  .topbar {
+    padding: 7px 8px !important;
+    row-gap: 6px !important;
+  }
+
+  .brand {
+    gap: 6px !important;
+  }
+
+  .brand__mark {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* The full wordmark is the first thing that causes portrait overflow. */
+  .brand__name {
+    display: none !important;
+  }
+
+  .site-context--single,
+  .site-context--selector {
+    max-width: 125px !important;
+  }
+
+  .site-context--single {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-context--selector select {
+    min-width: 0 !important;
+    width: 120px !important;
+    max-width: 120px !important;
+  }
+
+  .topbar__actions {
+    gap: 0 !important;
+  }
+
+  .header-icon-button,
+  .sound-button,
+  .info-button,
+  .language-button,
+  .login-button {
+    width: 31px !important;
+    min-width: 31px !important;
+    height: 31px !important;
+    padding: 0 !important;
+  }
+
+  .header-icon-button svg,
+  .sound-button svg,
+  .info-button svg,
+  .login-button svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .language-button__flag .flag-icon,
+  .flag-icon {
+    width: 21px !important;
+    height: 14px !important;
+  }
+
+  .admin-nav button {
+    min-height: 30px !important;
+    padding: 6px 9px !important;
+    font-size: 10px !important;
+  }
+
+  .dashboard,
+  .configuration-dashboard {
+    width: calc(100% - 12px) !important;
+    padding-top: 8px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .dashboard__meta-row,
+  .dashboard__intro {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .meter-card {
+    border-radius: 14px !important;
+  }
+
+  .meter-card__header {
+    padding: 12px 12px 9px !important;
+    gap: 8px !important;
+  }
+
+  .meter-card__header h2 {
+    font-size: 15px !important;
+  }
+
+  .meter-card__header-actions {
+    gap: 4px !important;
+  }
+
+  .meter-card__live-strip {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin: 0 10px 10px !important;
+    padding: 10px !important;
+  }
+
+  .live-metric + .live-metric {
+    padding-left: 0 !important;
+    padding-top: 8px;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(11, 61, 111, 0.09);
+  }
+
+  .quarter-timer {
+    grid-column: auto !important;
+    width: 100%;
+  }
+
+  .alarm-banner {
+    margin: 0 10px 9px !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .alarm-banner__actions {
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+
+  .power-chart {
+    height: 220px !important;
+  }
+
+  .meter-card--expanded {
+    inset: 3px !important;
+    border-radius: 10px !important;
+  }
+
+  .meter-card--expanded .power-chart {
+    min-height: 260px !important;
+    height: 48vh !important;
+  }
+
+  .settings-panel,
+  .sites-configuration-panel,
+  .edge-health-panel,
+  .edge-configuration-panel,
+  .meter-configuration-panel {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .settings-card,
+  .edge-config-section,
+  .site-editor,
+  .meter-editor {
+    padding: 12px !important;
+  }
+
+  .settings-grid,
+  .edge-config-grid,
+  .edge-config-grid--mqtt,
+  .edge-config-grid--system,
+  .configured-meter-card__alarms,
+  .edge-health-metrics {
+    grid-template-columns: 1fr !important;
+  }
+
+  .settings-actions,
+  .edge-config-actions,
+  .login-dialog__actions {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+  }
+
+  .settings-actions .button,
+  .edge-config-actions .button,
+  .login-dialog__actions .button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .meter-table-filters {
+    grid-template-columns: 1fr !important;
+  }
+
+  .meters-table { min-width: 820px !important; }
+  .edge-health-table { min-width: 980px !important; }
+  .edge-config-table { min-width: 700px !important; }
+  .users-table { min-width: 680px !important; }
+  .sites-table { min-width: 560px !important; }
+
+  .modal-backdrop {
+    padding: 8px !important;
+    align-items: center !important;
+  }
+
+  .login-dialog,
+  .info-dialog,
+  .users-dialog {
+    width: min(100%, calc(100vw - 16px)) !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 16px) !important;
+    overflow-y: auto !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+  }
+
+  .info-dialog__brand {
+    padding-right: 34px !important;
+  }
+
+  .sound-menu,
+  .language-menu {
+    position: fixed !important;
+    top: 54px !important;
+    right: 8px !important;
+    max-width: calc(100vw - 16px);
+  }
+
+  .toast-message {
+    top: 92px !important;
+    right: 8px !important;
+    width: calc(100vw - 16px) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+
+  .topbar__actions {
+    justify-self: end !important;
+  }
+
+  .header-icon-button,
+  .sound-button,
+  .info-button,
+  .language-button,
+  .login-button {
+    width: 29px !important;
+    min-width: 29px !important;
+    height: 29px !important;
+  }
+
+  .site-context--single,
+  .site-context--selector {
+    display: none !important;
+  }
+
+  .date-picker span {
+    display: none;
+  }
+
+  .date-picker input {
+    max-width: 150px;
+  }
+
+  .settings-card h3,
+  .meter-configuration-panel__header h2,
+  .edge-config-header h2,
+  .edge-health-panel__header h2 {
+    font-size: 16px !important;
+  }
+
+  .button {
+    min-width: 0 !important;
+  }
+}
+
+/* Landscape phones / short tablets: keep header compact but navigable. */
+@media (max-height: 520px) and (max-width: 900px) and (orientation: landscape) {
+  .topbar {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    row-gap: 3px !important;
+  }
+
+  .brand__mark {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .admin-nav button {
+    min-height: 27px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .dashboard,
+  .configuration-dashboard {
+    padding-top: 6px !important;
+  }
+}
+
+/* 261011d - per-user site access */
+.users-table__sites {
+  max-width: 260px;
+  white-space: normal !important;
+  line-height: 1.35;
+}
+
+.user-site-access {
+  margin: 4px 0 2px;
+  padding: 12px;
+  border: 1px solid #dce7ef;
+  border-radius: 12px;
+  background: #f9fbfd;
+}
+
+.user-site-access legend,
+.user-site-access__title {
+  padding: 0 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #49657a;
+}
+
+.user-site-access--all {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-site-access--all .user-site-access__title {
+  padding: 0;
+}
+
+.user-site-access__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 10px;
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.user-site-access__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid #e6edf2;
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.user-site-access__item input {
+  margin: 0;
+}
+
+.user-site-access__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-site-access__item code {
+  color: #718397;
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .user-site-access__list {
+    grid-template-columns: 1fr;
+    max-height: 220px;
+  }
+  .user-site-access__item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .user-site-access__item code {
+    grid-column: 2;
+  }
+}
+
+/* =========================================================
+   PowerGuard 261011e - compact filters, site selector,
+   and responsive administration tables
+   ========================================================= */
+
+.user-site-selector {
+  position: relative;
+  width: 100%;
+}
+
+.user-site-selector > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #d7e3eb;
+  border-radius: 9px;
+  background: #fff;
+  color: #173755;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.user-site-selector > summary::-webkit-details-marker { display: none; }
+.user-site-selector > summary span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-site-selector > summary svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  transition: transform .15s ease;
+}
+.user-site-selector[open] > summary svg { transform: rotate(180deg); }
+
+.user-site-selector__options {
+  display: grid;
+  gap: 3px;
+  max-height: 190px;
+  overflow-y: auto;
+  margin-top: 6px;
+  padding: 5px;
+  border: 1px solid #dce7ef;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(20, 68, 101, .08);
+}
+
+.user-site-selector__option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.user-site-selector__option:hover { background: #f3f8fb; }
+.user-site-selector__option input { margin: 0; }
+.user-site-selector__option span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+
+.meter-filter-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 10px;
+  padding: 8px 9px;
+  border: 1px solid #e2ebf0;
+  border-radius: 10px;
+  background: #f8fbfc;
+}
+
+.meter-filter-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  align-self: center;
+  color: #49657a;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.meter-filter-panel__title svg { width: 15px; height: 15px; }
+
+.meter-filter-panel .meter-table-filters {
+  grid-template-columns: minmax(100px, .72fr) minmax(120px, .9fr) minmax(100px, .7fr) minmax(170px, 1.25fr) 30px;
+  gap: 7px;
+  margin-bottom: 0;
+}
+.meter-filter-panel .meter-table-filters label { gap: 2px; }
+.meter-filter-panel .meter-table-filters label > span { font-size: 8px; }
+.meter-filter-panel .meter-table-filters select,
+.meter-filter-panel .meter-table-filters input {
+  height: 29px;
+  padding: 0 8px;
+  border-radius: 7px;
+  font-size: 10px;
+}
+.meter-filter-clear {
+  width: 29px !important;
+  height: 29px !important;
+  min-width: 29px !important;
+  min-height: 29px !important;
+  padding: 0 !important;
+  align-self: end;
+}
+.meter-filter-clear svg { width: 15px; height: 15px; }
+
+@media (max-width: 980px) {
+  .meter-filter-panel {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .meter-filter-panel__title { align-self: auto; }
+  .meter-filter-panel .meter-table-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) 30px;
+  }
+  .meter-table-filter-search { grid-column: 1 / 3; }
+  .meter-filter-clear { grid-column: 3; grid-row: 2; }
+}
+
+@media (max-width: 700px) {
+  .meter-filter-panel {
+    padding: 8px;
+  }
+  .meter-filter-panel .meter-table-filters {
+    grid-template-columns: 1fr 1fr 30px !important;
+    gap: 6px !important;
+  }
+  .meter-table-filter-search { grid-column: 1 / 3; }
+  .meter-filter-clear { grid-column: 3; grid-row: 2; }
+
+  /* Sites become compact cards instead of a squeezed horizontal table. */
+  .sites-table {
+    min-width: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+  .sites-table thead { display: none; }
+  .sites-table,
+  .sites-table tbody,
+  .sites-table tr,
+  .sites-table td { display: block; width: 100%; }
+  .sites-table tbody { display: grid; gap: 8px; }
+  .sites-table tr {
+    padding: 8px 10px;
+    border: 1px solid #dfe9ef;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .sites-table td {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0 !important;
+    border: 0 !important;
+    text-align: left !important;
+  }
+  .sites-table td::before {
+    content: attr(data-label);
+    color: #6b8192;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .sites-table .meters-table__actions {
+    justify-content: flex-start;
+  }
+
+  /* Meter configuration rows become readable cards on phones. */
+  .meters-table {
+    min-width: 0 !important;
+    border: 0 !important;
+  }
+  .meters-table thead { display: none; }
+  .meters-table,
+  .meters-table tbody,
+  .meters-table tr,
+  .meters-table td { display: block; width: 100%; }
+  .meters-table tbody { display: grid; gap: 9px; }
+  .meters-table tr {
+    padding: 9px 10px;
+    border: 1px solid #dfe9ef;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .meters-table td {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0 !important;
+    border: 0 !important;
+    text-align: left !important;
+    white-space: normal !important;
+  }
+  .meters-table td::before {
+    content: attr(data-label);
+    color: #6b8192;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .meters-table td .meters-table__actions { justify-content: flex-start; }
+
+  /* User management also switches to cards; no 680px forced table width. */
+  .users-table {
+    min-width: 0 !important;
+    border: 0 !important;
+  }
+  .users-table thead { display: none; }
+  .users-table,
+  .users-table tbody,
+  .users-table tr,
+  .users-table td { display: block; width: 100%; }
+  .users-table tbody { display: grid; gap: 8px; }
+  .users-table tr {
+    padding: 9px 10px;
+    border: 1px solid #dfe9ef;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .users-table td {
+    display: grid;
+    grid-template-columns: 95px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+    padding: 5px 0 !important;
+    border: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+  .users-table td::before {
+    content: attr(data-label);
+    color: #6b8192;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .users-table__actions { justify-content: flex-start !important; }
+
+  .user-site-selector__options { max-height: 160px; }
+}
+
+@media (max-width: 430px) {
+  .meter-filter-panel .meter-table-filters {
+    grid-template-columns: 1fr 30px !important;
+  }
+  .meter-filter-panel .meter-table-filters label { grid-column: 1 / 3; }
+  .meter-filter-clear { grid-column: 2 !important; grid-row: auto !important; }
+  .meter-table-filter-search { grid-column: 1 !important; }
+
+  .sites-table td,
+  .meters-table td,
+  .users-table td {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+}
+
+/* 261011g - live last-reading age */
+.meter-last-reading {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 4px;
+  color: #6f8198;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.meter-last-reading > span { color: #9aabba; }
+@media (max-width: 640px) {
+  .meter-card__title-row { flex-wrap: wrap; }
+  .meter-last-reading {
+    width: 100%;
+    margin: 3px 0 0 0;
+    padding-left: 0;
+    font-size: 10px;
+  }
+  .meter-last-reading > span { display: none; }
+}
+
+
+/* PowerGuard 261012e - simplified global meter search */
+.meter-global-search {
+  margin: 0 0 12px;
+}
+.meter-global-search__field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.meter-global-search__field > svg {
+  position: absolute;
+  left: 10px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  opacity: .65;
+}
+.meter-global-search__field > input {
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 34px 5px 34px;
+  border: 1px solid #cbd9e4;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  outline: none;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.meter-global-search__field > input:focus {
+  border-color: #75cdb6;
+  box-shadow: 0 0 0 3px rgba(47, 183, 147, .10);
+}
+.meter-global-search__clear {
+  position: absolute;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  opacity: .65;
+}
+.meter-global-search__clear:hover { opacity: 1; background: rgba(0,0,0,.04); }
+
+/* Date-range history controls */
+.date-picker--range {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 5px;
+}
+.date-picker--range input {
+  width: 104px;
+  min-width: 0;
+  padding: 0;
+}
+.date-range-separator { color: #7c8ea1; font-weight: 700; margin: 0 -1px; }
+.date-range-presets { display: inline-flex; align-items: center; gap: 2px; margin-left: 0; }
+.date-range-presets button {
+  height: 30px;
+  min-width: 32px;
+  border: 1px solid rgba(11,61,111,.11);
+  border-radius: 8px;
+  background: rgba(248,251,254,.96);
+  color: #315674;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+  padding: 0 7px;
+}
+.date-range-presets button:hover,
+.date-range-presets button.active { background: #eef6fb; border-color: rgba(11,61,111,.25); }
+
+@media (max-width: 900px) {
+  .topbar__date-controls { justify-content: flex-start !important; }
+  .date-range-presets { flex: 0 0 auto; }
+}
+
+/* Communication diagnostics timeline */
+.communication-diagnostics {
+  margin-top: 8px;
+  border: 1px solid rgba(23,73,112,.10);
+  border-radius: 10px;
+  padding: 6px 10px 8px;
+  background: rgba(255,255,255,.72);
+}
+.communication-diagnostics__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+  color: #173a5d;
+  font-size: 9px;
+}
+.communication-diagnostics__legend { display:flex; flex-wrap:wrap; gap:7px; color:#718095; font-size:7px; font-weight:600; }
+.communication-diagnostics__legend span { display:inline-flex; align-items:center; gap:4px; }
+.comm-swatch { width:6px; height:6px; border-radius:2px; display:inline-block; }
+.comm-swatch--online,.communication-segment--online { background:#52bb8a; }
+.comm-swatch--degraded,.communication-segment--degraded { background:#e8b000; }
+.comm-swatch--offline,.communication-segment--offline { background:#d96666; }
+.comm-swatch--unknown,.communication-segment--unknown { background:repeating-linear-gradient(135deg,#dce5ee,#dce5ee 3px,#eef3f7 3px,#eef3f7 6px); }
+.communication-row { display:grid; grid-template-columns:140px minmax(0,1fr); align-items:center; gap:8px; margin-top:4px; }
+.communication-row__label { display:flex; flex-direction:column; min-width:0; color:#183d60; font-size:8px; line-height:1.15; }
+.communication-row__label strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.communication-row__label small { color:#8492a3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.communication-track { position:relative; height:8px; border-radius:999px; overflow:hidden; background:#edf2f6; }
+.communication-segment { position:absolute; top:0; bottom:0; min-width:1px; }
+@media (max-width:720px){ .communication-row{grid-template-columns:100px minmax(0,1fr);} .communication-diagnostics__header{align-items:flex-start;flex-direction:column;} }
+
+/* 2026-10-12 p8: fill the available chart width and align communication to it */
+.communication-row {
+  display: block;
+  margin-top: 5px;
+}
+.communication-row__label {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 1.67% 2px 2.83%;
+}
+.communication-track {
+  margin-left: 2.83%;
+  margin-right: 1.67%;
+  width: auto;
+}
+@media (max-width:720px) {
+  .communication-row { display: block; }
+}
+
+
+/* p10: chart-local toggles and single alarm acknowledgement */
+.chart-wrap { position: relative; }
+.chart-local-legend {
+  position: absolute;
+  top: 4px;
+  right: 16px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.88);
+}
+.chart-local-legend button {
+  border: 0;
+  background: transparent;
+  color: #607187;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.chart-local-legend button:hover { color: #073b70; }
+.chart-local-legend__off { opacity: .35; text-decoration: line-through; }
+.legend-swatch--limit {
+  width: 18px;
+  height: 0;
+  border-top: 2px dashed #f59e0b;
+  background: transparent;
+}
+.limit-label--above {
+  paint-order: stroke fill;
+  stroke: #fff;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+/* 2026-10-13 p12: future is a separate, neutral state */
+.comm-swatch--future,
+.communication-segment--future {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #d9e3ec;
+}
+
+
+/* p24: meter ID is selected from meters actually reported by the selected Edge */
+.meter-editor__field-hint {
+  display: block;
+  margin-top: 4px;
+  color: #8996a6;
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+
+/* p6: current alarm information lives inside the affected KPI, not in a full-width banner */
+.live-metric__alarm-info {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  min-height: 20px;
+}
+
+.live-metric__alarm-text {
+  color: #b42323;
+  font-size: 9px;
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: .025em;
+  white-space: nowrap;
+}
+
+.live-metric__alarm-text b {
+  margin-left: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-metric__ack {
+  border: 1px solid rgba(180,48,48,.34);
+  background: #fff;
+  color: #a72f2f;
+  border-radius: 7px;
+  min-height: 28px;
+  padding: 5px 10px;
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.live-metric__ack:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+.live-metric__ack-state {
+  color: #b42323;
+  font-size: 8px;
+  line-height: 1.1;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+/* Acknowledged active alarm stays solid red; only unacknowledged value blinks. */
+.live-metric--alarm:not(.live-metric--alarm-unack) > strong {
+  animation: none !important;
+}
+
+
+/* p8: acknowledged active alarm stays conspicuous but does not blink. */
+.live-metric--alarm:not(.live-metric--alarm-unack) > strong {
+  display: inline-block;
+  width: fit-content;
+  font-size: 31px !important;
+  line-height: 1.05;
+  color: #c62828 !important;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+
+/* p9: sound controls above all meter widgets and simplified volume controls */
+.topbar {
+  position: relative;
+  z-index: 2000;
+  overflow: visible;
+}
+
+.sound-picker {
+  z-index: 2100;
+}
+
+.sound-menu {
+  z-index: 2200 !important;
+  width: 270px;
+}
+
+.sound-menu__header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sound-menu__mute {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d8e4ec;
+  border-radius: 7px;
+  background: #f8fbfd;
+  color: #345a76;
+  cursor: pointer;
+}
+
+.sound-menu__mute:hover {
+  background: #eef6fa;
+  color: #0b5d91;
+}
+
+.sound-menu__mute svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sound-menu__slider-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0,1fr) 28px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.sound-menu__slider-row .sound-menu__slider {
+  margin: 0;
+  min-width: 0;
+}
+
+.sound-menu__step {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dce7ee;
+  border-radius: 7px;
+  background: #f8fbfd;
+  color: #254761;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sound-menu__step:disabled {
+  opacity: .38;
+  cursor: default;
+}
+
+.sound-menu__volume-actions {
+  display: none !important;
+}
+
+
+/* 301 p4: distinguish a real alarm from a predictive warning. */
+.status-dot--alarm {
+  background: #d32f2f;
+  box-shadow: 0 0 0 4px rgba(211, 47, 47, .12);
+}
+.status-text--alarm { color: #b42323; }
+
+/* Alarm history shows all incidents in a compact scrollable area. */
+.meter-alarm-history__rows {
+  max-height: 170px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  padding-right: 3px;
+}
+.meter-alarm-row--head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(249,251,253,.98) !important;
+}
+
+.meter-export-button:hover {
+  background: #eef6fb;
+  border-color: rgba(36, 116, 170, .30);
+  color: #236e9e;
+}
+
+
+/* 261014a - alarm table units on a second, smaller header line. */
+.meter-alarm-row--head .meter-alarm-row__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  line-height: 1.05;
+}
+.meter-alarm-row--head .meter-alarm-row__header > span {
+  white-space: nowrap;
+}
+.meter-alarm-row--head .meter-alarm-row__header > small {
+  color: #9ba7b4;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+
+/* 261014a - compact export format selector below the export icon. */
+.meter-export-menu {
+  position: relative;
+  display: inline-flex;
+  z-index: 20;
+}
+.meter-export-menu > summary {
+  list-style: none;
+}
+.meter-export-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.meter-export-menu__popup {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 1400;
+  min-width: 76px;
+  padding: 4px;
+  border: 1px solid rgba(24,77,113,.15);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(17,52,79,.18);
+}
+.meter-export-menu__popup button {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #315674;
+  padding: 6px 9px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.meter-export-menu__popup button:hover {
+  background: #eef7f5;
+  color: #087c68;
+}
+
+
+/* 261014a - separate create/update actions in the meter editor. */
+.meter-editor__actions {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 8px;
+}
+.meter-editor__actions .button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+
+/* 261014b - expanded view: use the available viewport more efficiently. */
+@media (min-width: 1000px) and (min-height: 760px) {
+  .meter-card--expanded {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .meter-card--expanded .chart-wrap {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .meter-card--expanded .communication-diagnostics {
+    margin-top: 2px;
+    padding-top: 4px;
+    padding-bottom: 5px;
+  }
+
+  .meter-card--expanded .meter-alarm-history {
+    margin-bottom: 4px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .meter-card--expanded .meter-alarm-history__rows {
+    max-height: 190px;
+  }
+}
+
+/* 261014b - make the alarm-history row under the mouse clearly visible. */
+.meter-alarm-row:not(.meter-alarm-row--head) {
+  transition: background-color .12s ease, box-shadow .12s ease, color .12s ease;
+}
+
+.meter-alarm-row:not(.meter-alarm-row--head):hover {
+  background: rgba(27, 113, 177, .10) !important;
+  box-shadow: inset 3px 0 0 rgba(27, 113, 177, .48);
+}
+
+.meter-alarm-row--active:not(.meter-alarm-row--head):hover,
+.meter-alarm-row--ack:not(.meter-alarm-row--head):hover,
+.meter-alarm-row--unack:not(.meter-alarm-row--head):hover {
+  background: rgba(207, 67, 67, .13) !important;
+  box-shadow: inset 3px 0 0 rgba(190, 45, 45, .58);
+}
+
+
+/* 261014c - export format icons are self-authored inline SVGs (no external icon package/license). */
+.meter-export-menu__popup button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.meter-export-menu__format-icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
+/* 261014c - compact expanded body; no artificial footer-sized blank area. */
+.meter-card--expanded {
+  height: auto !important;
+}
+
+.meter-card--expanded .network-charts + .communication-diagnostics,
+.meter-card--expanded .chart-wrap + .communication-diagnostics {
+  margin-top: 2px;
+}
+
+
+/* 261014d - expanded mode uses the full available viewport.
+   Keep the header/live strip compact, then give remaining space to charts and alarms. */
+@media (min-width: 1000px) and (min-height: 700px) {
+  .meter-card--expanded {
+    top: 74px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    height: auto !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .meter-card--expanded .meter-card__header,
+  .meter-card--expanded .meter-card__live-strip,
+  .meter-card--expanded .communication-diagnostics {
+    flex: 0 0 auto;
+  }
+
+  /* Power view: keep the chart large and let alarm history use remaining height. */
+  .meter-card--expanded .chart-wrap {
+    flex: 0 0 auto;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .meter-card--expanded .power-chart {
+    width: 100%;
+    height: auto !important;
+    max-height: 45vh !important;
+    aspect-ratio: 1200 / 285;
+  }
+
+  /* Network view: 4 large charts in a 2x2 matrix using the available center area. */
+  .meter-card--expanded .network-charts {
+    flex: 1 1 auto;
+    min-height: 310px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(135px, 1fr)) auto;
+    align-content: stretch;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .meter-card--expanded .network-chart-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .meter-card--expanded .network-chart-card svg {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100% !important;
+    min-height: 115px;
+    max-height: none !important;
+  }
+
+  .meter-card--expanded .network-legend {
+    grid-column: 1 / -1;
+    align-self: center;
+  }
+
+  /* Alarm history expands into otherwise unused bottom area.
+     Rows remain scrollable only when there are more alarms than fit. */
+  .meter-card--expanded .meter-alarm-history {
+    flex: 1 1 170px;
+    min-height: 135px;
+    margin-bottom: 4px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .meter-card--expanded .meter-alarm-history__rows {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none !important;
+    overflow-y: auto;
+  }
+
+  .meter-card--expanded .meter-alarm-history__empty {
+    flex: 1 1 auto;
+  }
+}
+
+/* On very tall displays, give the charts a little more room without wasting the footer. */
+@media (min-width: 1000px) and (min-height: 950px) {
+  .meter-card--expanded .power-chart {
+    max-height: 50vh !important;
+  }
+
+  .meter-card--expanded .network-charts {
+    min-height: 390px;
+  }
+
+  .meter-card--expanded .meter-alarm-history {
+    flex-basis: 190px;
+  }
+}
+
+
+/* 261014e - dialogs must always be above an expanded meter card. */
+.modal-backdrop {
+  z-index: 5000 !important;
+}
+
+/* 261014e - network diagnostics touch the chart area just like in the power view. */
+.meter-card--expanded .network-charts {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.meter-card--expanded .network-charts + .communication-diagnostics {
+  margin-top: 0 !important;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Admin-only live raw OBIS diagnostics. */
+.measurement-data-panel {
+  width: min(1380px, calc(100% - 36px));
+  margin: 26px auto;
+  padding: 18px;
+  border: 1px solid rgba(12, 60, 105, .12);
+  border-radius: 18px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 16px 44px rgba(13, 51, 83, .08);
+}
+
+.measurement-data-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+.measurement-data-header h2 { margin: 0 0 3px; font-size: 19px; color: #0d2d50; }
+.measurement-data-header p { margin: 0; font-size: 11px; color: #6a7d92; }
+.measurement-data-selectors { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.measurement-data-selectors .edge-selector select { min-width: 220px; }
+
+.measurement-data-layout {
+  display: grid;
+  grid-template-columns: minmax(270px, .72fr) minmax(520px, 1.8fr);
+  gap: 12px;
+  align-items: start;
+}
+.measurement-summary-card,
+.measurement-obis-card {
+  border: 1px solid rgba(12, 60, 105, .11);
+  border-radius: 13px;
+  background: #fbfdff;
+}
+.measurement-summary-card { padding: 14px; }
+.measurement-summary-card h3,
+.measurement-obis-card h3 { margin: 0; color: #103458; font-size: 14px; }
+
+.measurement-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: 10px;
+}
+.measurement-summary-grid > div {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(100px, 1.1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 2px;
+  border-bottom: 1px solid rgba(12,60,105,.06);
+}
+.measurement-summary-grid span { font-size: 11px; font-weight: 700; color: #34536f; }
+.measurement-summary-grid strong { font-size: 11px; color: #102f50; text-align: left; word-break: break-word; }
+.measurement-summary-grid .measurement-ok { color: #15875b; }
+.measurement-summary-grid .measurement-error { color: #c53838; }
+
+.measurement-obis-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(12, 60, 105, .08);
+}
+.measurement-obis-card__header span { color: #71839a; font-size: 10px; }
+.measurement-obis-table-wrap {
+  max-height: calc(100vh - 270px);
+  min-height: 330px;
+  overflow: auto;
+}
+.measurement-obis-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px;
+}
+.measurement-obis-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #eef6f7;
+  color: #39566f;
+  text-align: left;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .025em;
+}
+.measurement-obis-table th,
+.measurement-obis-table td {
+  padding: 7px 9px;
+  border-bottom: 1px solid rgba(12,60,105,.06);
+}
+.measurement-obis-table th:nth-child(1) { width: 18%; }
+.measurement-obis-table th:nth-child(2) { width: 24%; }
+.measurement-obis-table th:nth-child(3) { width: 13%; }
+.measurement-obis-table th:nth-child(4) { width: 45%; }
+.measurement-obis-table tbody tr:hover { background: rgba(29, 155, 117, .07); }
+.measurement-obis-table code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: #3d5268;
+  font-size: 10px;
+}
+
+@media (max-width: 900px) {
+  .measurement-data-layout { grid-template-columns: 1fr; }
+  .measurement-data-header { flex-direction: column; }
+  .measurement-data-selectors { width: 100%; }
+  .measurement-data-selectors .edge-selector { flex: 1 1 220px; }
+  .measurement-data-selectors .edge-selector select { width: 100%; min-width: 0; }
+}
+
+
+/* 261014f - measurement-data page uses one internal OBIS scroll area, not the browser scrollbar. */
+body:has(.measurement-data-panel) {
+  overflow-y: hidden;
+}
+
+.measurement-data-panel {
+  height: calc(100vh - 112px);
+  max-height: calc(100vh - 112px);
+  margin-top: 18px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.measurement-data-header {
+  flex: 0 0 auto;
+  margin-bottom: 10px;
+}
+
+.measurement-data-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.measurement-summary-card {
+  align-self: start;
+}
+
+.measurement-obis-card {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.measurement-obis-card__header {
+  flex: 0 0 auto;
+}
+
+.measurement-obis-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.measurement-data-layout--empty .measurement-obis-card {
+  min-height: 330px;
+}
+
+.measurement-obis-card--empty {
+  justify-content: flex-start;
+}
+
+.measurement-no-data {
+  flex: 1 1 auto;
+  min-height: 250px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: #71839a;
+}
+
+.measurement-no-data strong {
+  color: #143a5d;
+  font-size: 18px;
+}
+
+.measurement-no-data span {
+  max-width: 520px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  .measurement-data-panel {
+    height: calc(100vh - 92px);
+    max-height: calc(100vh - 92px);
+    margin-top: 8px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .measurement-data-header {
+    margin-bottom: 7px;
+  }
+
+  .measurement-summary-grid > div {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+
+/* On narrow/mobile layouts the normal page scroll is preferable. */
+@media (max-width: 900px) {
+  body:has(.measurement-data-panel) {
+    overflow-y: auto;
+  }
+
+  .measurement-data-panel {
+    height: auto;
+    max-height: none;
+    margin-bottom: 18px;
+    overflow: visible;
+  }
+
+  .measurement-obis-table-wrap {
+    max-height: 55vh;
+  }
+}
+
+
+/* 261014i - Dane pomiarowe stays inside the viewport on desktop.
+   Only the OBIS list scrolls vertically. */
+.measurement-data-panel {
+  height: calc(100dvh - 150px) !important;
+  max-height: calc(100dvh - 150px) !important;
+  margin-top: 10px !important;
+  margin-bottom: 0 !important;
+  padding: 13px !important;
+}
+
+.measurement-data-header {
+  margin-bottom: 7px !important;
+}
+
+.measurement-refresh-button {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #cad9e6;
+  border-radius: 9px;
+  background: #fff;
+  color: #184b77;
+  cursor: pointer;
+}
+
+.measurement-refresh-button:hover:not(:disabled) {
+  background: #f1f7fb;
+  border-color: #a9c2d7;
+}
+
+.measurement-refresh-button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.measurement-refresh-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.measurement-obis-table-wrap {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+
+@media (max-height: 800px) and (min-width: 901px) {
+  .measurement-data-panel {
+    height: calc(100dvh - 132px) !important;
+    max-height: calc(100dvh - 132px) !important;
+    margin-top: 6px !important;
+    padding: 10px 12px !important;
+  }
+
+  .measurement-summary-grid > div {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .measurement-obis-table th,
+  .measurement-obis-table td {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+
+
+/* 261014k - Measurement data: eliminate the page/global scrollbar.
+   The configuration dashboard itself is constrained to the viewport;
+   only the OBIS table keeps its internal scrollbar. */
+.configuration-dashboard--measurement-data {
+  height: calc(100dvh - 72px);
+  max-height: calc(100dvh - 72px);
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.configuration-dashboard--measurement-data .measurement-data-panel {
+  width: 100%;
+  height: 100% !important;
+  max-height: 100% !important;
+  margin: 0 auto !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.configuration-dashboard--measurement-data .measurement-data-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.configuration-dashboard--measurement-data .measurement-obis-card {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.configuration-dashboard--measurement-data .measurement-obis-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: auto;
+}
+
+@media (max-width: 900px) {
+  .configuration-dashboard--measurement-data {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 24px !important;
+  }
+
+  .configuration-dashboard--measurement-data .measurement-data-panel {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible;
+  }
+
+  .configuration-dashboard--measurement-data .measurement-obis-table-wrap {
+    max-height: 55vh !important;
+  }
+}

@@ -1,342 +1,1857 @@
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
-<!-- * * * * * * * to get started with your project! * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<div class="shell" (pointerdown)="unlockAlarmAudio()">
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="brand" href="/" aria-label="PowerGuard home" [attr.title]="'PowerGuard Frontend ' + frontendVersion">
+        <img src="powerguard-mark.png" alt="" class="brand__mark" />
+        <span class="brand__name">
+          <span class="brand__power">Power</span><span class="brand__guard">Guard</span>
+        </span>
+      </a>
 
-<style>
-  :host {
-    --bright-blue: oklch(51.01% 0.274 263.83);
-    --electric-violet: oklch(53.18% 0.28 296.97);
-    --french-violet: oklch(47.66% 0.246 305.88);
-    --vivid-pink: oklch(69.02% 0.277 332.77);
-    --hot-red: oklch(61.42% 0.238 15.34);
-    --orange-red: oklch(63.32% 0.24 31.68);
+      @if (!authenticated && publicDashboardClients.length === 1) {
+        <div class="site-context site-context--single" [attr.title]="publicDashboardClients[0].clientId">
+          {{ publicDashboardClients[0].name }}
+        </div>
+      } @else if (!authenticated && publicDashboardClients.length > 1) {
+        <label class="site-context site-context--selector">
+          <span class="sr-only">{{ t('client') }}</span>
+          <select [ngModel]="selectedClientId" (ngModelChange)="selectClient($event)" [attr.aria-label]="t('selectClient')">
+            @for (client of publicDashboardClients; track client.clientId) {
+              <option [value]="client.clientId">{{ client.name }}</option>
+            }
+          </select>
+        </label>
+      }
 
-    --gray-900: oklch(19.37% 0.006 300.98);
-    --gray-700: oklch(36.98% 0.014 302.71);
-    --gray-400: oklch(70.9% 0.015 304.04);
+      @if (!authenticated && !hideDuplicateSingleSiteContext && publicDashboardSitesForSelectedClient.length === 1) {
+        <div class="site-context site-context--single" [attr.title]="publicDashboardSitesForSelectedClient[0].siteId">
+          {{ publicDashboardSitesForSelectedClient[0].name }}
+        </div>
+      } @else if (!authenticated && publicDashboardSitesForSelectedClient.length > 1) {
+        <label class="site-context site-context--selector">
+          <span class="sr-only">{{ t('site') }}</span>
+          <select [ngModel]="selectedSiteId" (ngModelChange)="selectSite($event)" [attr.aria-label]="t('selectSite')">
+            @for (site of publicDashboardSitesForSelectedClient; track site.id) {
+              <option [value]="site.siteId">{{ site.name }}</option>
+            }
+          </select>
+        </label>
+      }
 
-    --red-to-pink-to-purple-vertical-gradient: linear-gradient(
-      180deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
-
-    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(
-      90deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
-
-    --pill-accent: var(--bright-blue);
-
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  h1 {
-    font-size: 3.125rem;
-    color: var(--gray-900);
-    font-weight: 500;
-    line-height: 100%;
-    letter-spacing: -0.125rem;
-    margin: 0;
-    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
-  }
-
-  p {
-    margin: 0;
-    color: var(--gray-700);
-  }
-
-  main {
-    width: 100%;
-    min-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-    box-sizing: inherit;
-    position: relative;
-  }
-
-  .angular-logo {
-    max-width: 9.2rem;
-  }
-
-  .content {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    max-width: 700px;
-    margin-bottom: 3rem;
-  }
-
-  .content h1 {
-    margin-top: 1.75rem;
-  }
-
-  .content p {
-    margin-top: 1.5rem;
-  }
-
-  .divider {
-    width: 1px;
-    background: var(--red-to-pink-to-purple-vertical-gradient);
-    margin-inline: 0.5rem;
-  }
-
-  .pill-group {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-  }
-
-  .pill {
-    display: flex;
-    align-items: center;
-    --pill-accent: var(--bright-blue);
-    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);
-    color: var(--pill-accent);
-    padding-inline: 0.75rem;
-    padding-block: 0.375rem;
-    border-radius: 2.75rem;
-    border: 0;
-    transition: background 0.3s ease;
-    font-family: var(--inter-font);
-    font-size: 0.875rem;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 1.4rem;
-    letter-spacing: -0.00875rem;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .pill:hover {
-    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
-  }
-
-  .pill-group .pill:nth-child(6n + 1) {
-    --pill-accent: var(--bright-blue);
-  }
-  .pill-group .pill:nth-child(6n + 2) {
-    --pill-accent: var(--electric-violet);
-  }
-  .pill-group .pill:nth-child(6n + 3) {
-    --pill-accent: var(--french-violet);
-  }
-
-  .pill-group .pill:nth-child(6n + 4),
-  .pill-group .pill:nth-child(6n + 5),
-  .pill-group .pill:nth-child(6n + 6) {
-    --pill-accent: var(--hot-red);
-  }
-
-  .pill-group svg {
-    margin-inline-start: 0.25rem;
-  }
-
-  .social-links {
-    display: flex;
-    align-items: center;
-    gap: 0.73rem;
-    margin-top: 1.5rem;
-  }
-
-  .social-links path {
-    transition: fill 0.3s ease;
-    fill: var(--gray-400);
-  }
-
-  .social-links a:hover svg path {
-    fill: var(--gray-900);
-  }
-
-  @media screen and (max-width: 650px) {
-    .content {
-      flex-direction: column;
-      width: max-content;
-    }
-
-    .divider {
-      height: 1px;
-      width: 100%;
-      background: var(--red-to-pink-to-purple-horizontal-gradient);
-      margin-block: 1.5rem;
-    }
-  }
-</style>
-
-<main class="main">
-  <div class="content">
-    <div class="left-side">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 982 239"
-        fill="none"
-        class="angular-logo"
-      >
-        <g clip-path="url(#a)">
-          <path
-            fill="url(#b)"
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"
-          />
-          <path
-            fill="url(#c)"
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"
-          />
-        </g>
-        <defs>
-          <radialGradient
-            id="c"
-            cx="0"
-            cy="0"
-            r="1"
-            gradientTransform="rotate(118.122 171.182 60.81) scale(205.794)"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stop-color="#FF41F8" />
-            <stop offset=".707" stop-color="#FF41F8" stop-opacity=".5" />
-            <stop offset="1" stop-color="#FF41F8" stop-opacity="0" />
-          </radialGradient>
-          <linearGradient
-            id="b"
-            x1="0"
-            x2="982"
-            y1="192"
-            y2="192"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stop-color="#F0060B" />
-            <stop offset="0" stop-color="#F0070C" />
-            <stop offset=".526" stop-color="#CC26D5" />
-            <stop offset="1" stop-color="#7702FF" />
-          </linearGradient>
-          <clipPath id="a"><path fill="#fff" d="M0 0h982v239H0z" /></clipPath>
-        </defs>
-      </svg>
-      <h1>Hello, {{ title() }}</h1>
-      <p>Congratulations! Your app is running. 🎉</p>
     </div>
-    <div class="divider" role="separator" aria-label="Divider"></div>
-    <div class="right-side">
-      <div class="pill-group">
-        @for (item of [
-          { title: 'Explore the Docs', link: 'https://angular.dev' },
-          { title: 'Learn with Tutorials', link: 'https://angular.dev/tutorials' },
-          { title: 'Prompt and best practices for AI', link: 'https://angular.dev/ai/develop-with-ai'},
-          { title: 'CLI Docs', link: 'https://angular.dev/tools/cli' },
-          { title: 'Angular Language Service', link: 'https://angular.dev/tools/language-service' },
-          { title: 'Angular DevTools', link: 'https://angular.dev/tools/devtools' },
-        ]; track item.title) {
-          <a
-            class="pill"
-            [href]="item.link"
-            target="_blank"
-            rel="noopener"
-          >
-            <span>{{ item.title }}</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="14"
-              viewBox="0 -960 960 960"
-              width="14"
-              fill="currentColor"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
+
+    @if (authenticated) {
+      <nav class="admin-nav" aria-label="Application navigation">
+        <button type="button" [class.active]="adminView === 'health'" (click)="setAdminView('health')">{{ t('health') }}</button>
+        @if (authenticatedRole === 'ADMIN') {
+          <button type="button" [class.active]="adminView === 'sites'" (click)="setAdminView('sites')">{{ t('sites') }}</button>
+        }
+        <button type="button" [class.active]="adminView === 'configuration'" (click)="setAdminView('configuration')">{{ t('meterConfiguration') }}</button>
+        @if (authenticatedRole === 'ADMIN' || authenticatedRole === 'INSTALATOR') {
+          <button type="button" [class.active]="adminView === 'settings'" (click)="setAdminView('settings')">{{ t('settings') }}</button>
+        }
+        @if (authenticatedRole === 'ADMIN') {
+          <button type="button" [class.active]="adminView === 'edgeConfiguration'" (click)="setAdminView('edgeConfiguration')">{{ t('edgeConfiguration') }}</button>
+          @if (rawMeasurementTabVisible()) {
+            <button type="button" [class.active]="adminView === 'measurementData'" (click)="setAdminView('measurementData')">{{ t('measurementData') }}</button>
+          }
+        }
+      </nav>
+    }
+
+    @if (!authenticated) {
+    <div class="topbar__date-controls" aria-label="Date range navigation">
+      <button type="button" class="date-navigation__arrow" (click)="changeSelectedDay(-1)" [attr.title]="t('previousDay')">‹</button>
+
+      <label class="date-picker date-picker--range">
+        <span>{{ language === 'pl' ? 'Od' : 'From' }}</span>
+        <input type="date" [(ngModel)]="selectedDateFrom" (change)="onDateChanged()" [max]="todayInputMax()" />
+      </label>
+      <span class="date-range-separator">–</span>
+      <label class="date-picker date-picker--range">
+        <span>{{ language === 'pl' ? 'Do' : 'To' }}</span>
+        <input type="date" [(ngModel)]="selectedDateTo" (change)="onDateChanged()" [max]="todayInputMax()" />
+      </label>
+
+      <button type="button" class="date-navigation__arrow" (click)="changeSelectedDay(1)" [disabled]="isNextDayDisabled()" [attr.title]="t('nextDay')">›</button>
+      <div class="date-range-presets">
+        <button type="button" [class.active]="selectedQuickRangeMinutes === 60" (click)="setRangeMinutes(60)">1h</button>
+        <button type="button" [class.active]="selectedQuickRangeMinutes === 120" (click)="setRangeMinutes(120)">2h</button>
+        <button type="button" [class.active]="selectedQuickRangeMinutes === 240" (click)="setRangeMinutes(240)">4h</button>
+        <button type="button" [class.active]="selectedQuickRangeMinutes === 1440" (click)="setRangeMinutes(1440)">1d</button>
+        <button type="button" (click)="setRangeDays(3)">3d</button>
+        <button type="button" (click)="setRangeDays(7)">7d</button>
+        <button type="button" (click)="setRangeDays(30)">30d</button>
+      </div>
+      <button type="button" class="today-button" (click)="selectToday()" [disabled]="isSelectedToday()" [attr.title]="t('today')">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 2h2v2h6V2h2v2h1.5A2.5 2.5 0 0 1 21 6.5v12A2.5 2.5 0 0 1 18.5 21h-13A2.5 2.5 0 0 1 3 18.5v-12A2.5 2.5 0 0 1 5.5 4H7V2Zm11.5 7h-13v9.5c0 .28.22.5.5.5h12c.28 0 .5-.22.5-.5V9ZM12 11a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"></path>
+        </svg>
+      </button>
+    </div>
+    }
+
+    <div class="topbar__actions">
+      @if (authenticated && (authenticatedRole === 'ADMIN' || authenticatedRole === 'INSTALATOR')) {
+        <button
+          class="header-icon-button"
+          type="button"
+          (click)="openUsers()"
+          [attr.title]="t('users')"
+          [attr.aria-label]="t('users')"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </button>
+      }
+
+      @if (authenticated) {
+        <button
+          class="header-icon-button"
+          type="button"
+          (click)="openProfile()"
+          [attr.title]="authenticatedUsername || t('profile')"
+          [attr.aria-label]="t('profile')"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+      }
+
+      <div class="sound-picker">
+        <button
+          class="sound-button"
+          type="button"
+          (click)="toggleSoundMenu()"
+          [attr.aria-label]="soundLabel()"
+          [attr.title]="soundLabel() + ': ' + alarmVolume + '%'"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5 6 9H3v6h3l5 4V5Z"></path>
+            @if (alarmVolume > 0) {
+              <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+            }
+            @if (alarmVolume >= 50) {
+              <path d="M18 6a8 8 0 0 1 0 12"></path>
+            }
+          </svg>
+        </button>
+
+        @if (soundMenuOpen) {
+          <div class="sound-menu">
+            <div class="sound-menu__header">
+              <span>{{ soundLabel() }}</span>
+              <div class="sound-menu__header-actions">
+                <button type="button" class="sound-menu__mute" (click)="toggleAlarmMute()" [attr.title]="alarmMuteLabel()" [attr.aria-label]="alarmMuteLabel()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H3v6h3l5 4V5Z"></path>
+                    @if (alarmVolume === 0) {
+                      <path d="m16 9 5 6"></path><path d="m21 9-5 6"></path>
+                    } @else {
+                      <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+                    }
+                  </svg>
+                </button>
+                <strong>{{ alarmVolume }}%</strong>
+              </div>
+            </div>
+            <div class="sound-menu__slider-row">
+              <button type="button" class="sound-menu__step" (click)="changeAlarmVolume(-10)" [disabled]="alarmVolume === 0">−</button>
+              <input
+                class="sound-menu__slider"
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                [ngModel]="alarmVolume"
+                (ngModelChange)="setAlarmVolume($event)"
+                [attr.aria-label]="soundLabel()"
               />
-            </svg>
-          </a>
+              <button type="button" class="sound-menu__step" (click)="changeAlarmVolume(10)" [disabled]="alarmVolume === 100">+</button>
+            </div>
+            <button type="button" class="sound-menu__test" (click)="testAlarmSound()">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m8 5 11 7-11 7V5Z"></path>
+              </svg>
+              {{ testSoundLabel() }}
+            </button>
+          </div>
         }
       </div>
-      <div class="social-links">
-        <a
-          href="https://github.com/angular/angular"
-          aria-label="Github"
-          target="_blank"
-          rel="noopener"
+
+      <button
+        class="info-button"
+        type="button"
+        (click)="openInfo()"
+        [attr.aria-label]="infoTitle()"
+        [attr.title]="infoTitle()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 10v6"></path>
+          <path d="M12 7h.01"></path>
+        </svg>
+      </button>
+
+      <div class="language-picker">
+        <button
+          class="language-button"
+          type="button"
+          (click)="toggleLanguageMenu()"
+          [attr.aria-label]="t('language')"
+          [attr.title]="t('language')"
         >
-          <svg
-            width="25"
-            height="24"
-            viewBox="0 0 25 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Github"
-          >
-            <path
-              d="M12.3047 0C5.50634 0 0 5.50942 0 12.3047C0 17.7423 3.52529 22.3535 8.41332 23.9787C9.02856 24.0946 9.25414 23.7142 9.25414 23.3871C9.25414 23.0949 9.24389 22.3207 9.23876 21.2953C5.81601 22.0377 5.09414 19.6444 5.09414 19.6444C4.53427 18.2243 3.72524 17.8449 3.72524 17.8449C2.61064 17.082 3.81137 17.0973 3.81137 17.0973C5.04697 17.1835 5.69604 18.3647 5.69604 18.3647C6.79321 20.2463 8.57636 19.7029 9.27978 19.3881C9.39052 18.5924 9.70736 18.0499 10.0591 17.7423C7.32641 17.4347 4.45429 16.3765 4.45429 11.6618C4.45429 10.3185 4.9311 9.22133 5.72065 8.36C5.58222 8.04931 5.16694 6.79833 5.82831 5.10337C5.82831 5.10337 6.85883 4.77319 9.2121 6.36459C10.1965 6.09082 11.2424 5.95546 12.2883 5.94931C13.3342 5.95546 14.3801 6.09082 15.3644 6.36459C17.7023 4.77319 18.7328 5.10337 18.7328 5.10337C19.3942 6.79833 18.9789 8.04931 18.8559 8.36C19.6403 9.22133 20.1171 10.3185 20.1171 11.6618C20.1171 16.3888 17.2409 17.4296 14.5031 17.7321C14.9338 18.1012 15.3337 18.8559 15.3337 20.0084C15.3337 21.6552 15.3183 22.978 15.3183 23.3779C15.3183 23.7009 15.5336 24.0854 16.1642 23.9623C21.0871 22.3484 24.6094 17.7341 24.6094 12.3047C24.6094 5.50942 19.0999 0 12.3047 0Z"
-            />
+          <span class="language-button__flag" aria-hidden="true">
+            @if (language === 'pl') {
+              <svg class="flag-icon flag-icon--pl" viewBox="0 0 16 10" aria-hidden="true">
+                <path fill="#fff" d="M0 0h16v10H0z"></path>
+                <path fill="#dc143c" d="M0 5h16v5H0z"></path>
+              </svg>
+            } @else {
+              <svg class="flag-icon flag-icon--en" viewBox="0 0 60 30" aria-hidden="true">
+                <defs>
+                  <clipPath id="flag-en-a"><path d="M0 0v30h60V0z"></path></clipPath>
+                  <clipPath id="flag-en-b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"></path></clipPath>
+                </defs>
+                <g clip-path="url(#flag-en-a)">
+                  <path d="M0 0v30h60V0z" fill="#012169"></path>
+                  <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"></path>
+                  <path d="M0 0l60 30m0-30L0 30" clip-path="url(#flag-en-b)" stroke="#C8102E" stroke-width="4"></path>
+                  <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"></path>
+                  <path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"></path>
+                </g>
+              </svg>
+            }
+          </span>
+          <svg class="language-button__chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m7 10 5 5 5-5z"></path>
           </svg>
-        </a>
-        <a
-          href="https://twitter.com/angular"
-          aria-label="Twitter"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Twitter"
-          >
-            <path
-              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-            />
-          </svg>
-        </a>
-        <a
-          href="https://www.youtube.com/channel/UCbn1OgGei-DV7aSRo_HaAiw"
-          aria-label="Youtube"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="29"
-            height="20"
-            viewBox="0 0 29 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Youtube"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M27.4896 1.52422C27.9301 1.96749 28.2463 2.51866 28.4068 3.12258C29.0004 5.35161 29.0004 10 29.0004 10C29.0004 10 29.0004 14.6484 28.4068 16.8774C28.2463 17.4813 27.9301 18.0325 27.4896 18.4758C27.0492 18.9191 26.5 19.2389 25.8972 19.4032C23.6778 20 14.8068 20 14.8068 20C14.8068 20 5.93586 20 3.71651 19.4032C3.11363 19.2389 2.56449 18.9191 2.12405 18.4758C1.68361 18.0325 1.36732 17.4813 1.20683 16.8774C0.613281 14.6484 0.613281 10 0.613281 10C0.613281 10 0.613281 5.35161 1.20683 3.12258C1.36732 2.51866 1.68361 1.96749 2.12405 1.52422C2.56449 1.08095 3.11363 0.76113 3.71651 0.596774C5.93586 0 14.8068 0 14.8068 0C14.8068 0 23.6778 0 25.8972 0.596774C26.5 0.76113 27.0492 1.08095 27.4896 1.52422ZM19.3229 10L11.9036 5.77905V14.221L19.3229 10Z"
-            />
-          </svg>
-        </a>
+        </button>
+
+        @if (languageMenuOpen) {
+          <div class="language-menu">
+            <button type="button" (click)="setLanguage('en')" title="English" aria-label="English">
+              <svg class="flag-icon flag-icon--en" viewBox="0 0 60 30" aria-hidden="true">
+                <defs>
+                  <clipPath id="flag-menu-en-a"><path d="M0 0v30h60V0z"></path></clipPath>
+                  <clipPath id="flag-menu-en-b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"></path></clipPath>
+                </defs>
+                <g clip-path="url(#flag-menu-en-a)">
+                  <path d="M0 0v30h60V0z" fill="#012169"></path>
+                  <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"></path>
+                  <path d="M0 0l60 30m0-30L0 30" clip-path="url(#flag-menu-en-b)" stroke="#C8102E" stroke-width="4"></path>
+                  <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"></path>
+                  <path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"></path>
+                </g>
+              </svg>
+            </button>
+            <button type="button" (click)="setLanguage('pl')" title="Polski" aria-label="Polski">
+              <svg class="flag-icon flag-icon--pl" viewBox="0 0 16 10" aria-hidden="true">
+                <path fill="#fff" d="M0 0h16v10H0z"></path>
+                <path fill="#dc143c" d="M0 5h16v5H0z"></path>
+              </svg>
+            </button>
+          </div>
+        }
       </div>
+
+      @if (!authenticated) {
+        <button
+          class="login-button"
+          type="button"
+          (click)="openLogin()"
+          [attr.title]="t('login')"
+          [attr.aria-label]="t('login')"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <path d="m10 17 5-5-5-5"></path>
+            <path d="M15 12H3"></path>
+          </svg>
+        </button>
+      } @else {
+        <button
+          class="login-button login-button--logout"
+          type="button"
+          (click)="logout()"
+          [attr.title]="t('logout')"
+          [attr.aria-label]="t('logout')"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"></path>
+            <path d="m14 17 5-5-5-5"></path>
+            <path d="M19 12H9"></path>
+          </svg>
+        </button>
+      }
     </div>
-  </div>
-</main>
+  </header>
 
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+  @if (!authenticated) {
+  <main class="dashboard">
+
+    <section
+      class="meter-grid"
+      [class.meter-grid--one]="visibleMeters.length === 1"
+      [class.meter-grid--two]="visibleMeters.length === 2"
+      [class.meter-grid--three]="visibleMeters.length === 3"
+      [class.meter-grid--four]="visibleMeters.length === 4"
+    >
+      @for (meter of visibleMeters; track meter.id) {
+        <article class="meter-card"
+          [class.meter-card--alarm-unack]="hasUnacknowledgedAlarm(meter)"
+          [class.meter-card--alarm-ack]="hasAcknowledgedActiveAlarm(meter)"
+          [class.meter-card--expanded]="isMeterExpanded(meter)">
+          <header class="meter-card__header">
+            <div>
+              <div class="meter-card__title-row">
+                <h2>{{ meter.name }}</h2>
+                <span
+                  class="status-dot"
+                  [class.status-dot--warning]="meterHeaderStatus(meter) === 'WARNING'"
+                  [class.status-dot--alarm]="meterHeaderStatus(meter) === 'ALARM'"
+                  [class.status-dot--offline]="meterHeaderStatus(meter) === 'OFFLINE'"
+                ></span>
+                <span class="status-text" [class.status-text--alarm]="meterHeaderStatus(meter) === 'ALARM'">{{ statusLabel(meterHeaderStatus(meter)) }}</span>
+                <span class="meter-last-reading"
+                  [attr.title]="lastReadingTitle(meter.lastReadingAt)">
+                  <span aria-hidden="true">•</span>
+                  {{ lastReadingLabel() }}: {{ lastReadingDisplay(meter.lastReadingAt) }}
+                </span>
+              </div>
+            </div>
+            <div class="meter-card__header-actions">
+              <div class="meter-view-toggle" role="group" [attr.aria-label]="t('networkParameters')">
+                <button type="button" [class.active]="meter.chartView === 'power'" (click)="setMeterChartView(meter, 'power')">{{ t('powerChart') }}</button>
+                <button type="button" [class.active]="meter.chartView === 'network'" (click)="setMeterChartView(meter, 'network')">{{ t('networkParameters') }}</button>
+              </div>
+
+              <details class="meter-export-menu">
+                <summary
+                  class="meter-zoom-button meter-export-button"
+                  [attr.aria-label]="language === 'pl' ? 'Eksportuj dane' : 'Export data'"
+                  [attr.title]="language === 'pl' ? 'Eksportuj dane' : 'Export data'">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path>
+                    <path d="M5 20h14"></path>
+                  </svg>
+                </summary>
+                <div class="meter-export-menu__popup">
+                  <button type="button" (click)="exportMeterCsv(meter)">
+                    <svg class="meter-export-menu__format-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor"
+                      stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 2.5h6l4 4V17.5H5z"></path>
+                      <path d="M11 2.5v4h4"></path>
+                      <path d="M7.2 10.2h5.6M7.2 12.6h5.6M7.2 15h3.4"></path>
+                    </svg>
+                    <span>CSV</span>
+                  </button>
+                  <button type="button" (click)="exportMeterXls(meter)">
+                    <svg class="meter-export-menu__format-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor"
+                      stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="14" height="14" rx="1.5"></rect>
+                      <path d="M3 8h14M3 12.5h14M8 8v9M12.5 8v9"></path>
+                    </svg>
+                    <span>XLS</span>
+                  </button>
+                </div>
+              </details>
+
+              <span class="meter-zoom-tooltip"
+                [attr.data-tooltip]="isMeterExpanded(meter) ? t('collapseMeter') : t('expandMeter')">
+                <button type="button"
+                  class="meter-zoom-button"
+                  [class.meter-zoom-button--expanded]="isMeterExpanded(meter)"
+                  (click)="toggleMeterExpanded(meter)"
+                  [attr.aria-label]="isMeterExpanded(meter) ? t('collapseMeter') : t('expandMeter')"
+                  [attr.aria-pressed]="isMeterExpanded(meter)">
+                  @if (isMeterExpanded(meter)) {
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M8 3v5H3"></path><path d="M16 3v5h5"></path>
+                      <path d="M8 21v-5H3"></path><path d="M16 21v-5h5"></path>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="6"></circle>
+                      <path d="m16 16 4 4"></path>
+                      <path d="M11 8v6M8 11h6"></path>
+                    </svg>
+                  }
+                </button>
+              </span>
+            </div>
+
+          </header>
 
 
-<router-outlet />
+          <div class="meter-card__live-strip" [class.meter-card__live-strip--historical]="!isSelectedToday()">
+            <div class="live-metric live-metric--primary"
+                 [class.live-metric--alarm]="hasActiveAlarmType(meter, 'INSTANTANEOUS_POWER')"
+                 [class.live-metric--alarm-unack]="hasUnacknowledgedAlarmType(meter, 'INSTANTANEOUS_POWER')">
+              <span>{{ t('livePower') }}</span>
+              <strong>{{ formatPower(meter.currentPowerKw) }} <small>kW</small></strong>
+              @if (activeAlarmOfType(meter, 'INSTANTANEOUS_POWER'); as alarm) {
+                <div class="live-metric__alarm-info">
+                  <span class="live-metric__alarm-text">
+                    ALARM
+                    @if (activeAlarmThreshold(meter, alarm) !== null) {
+                      <b>&gt; {{ formatPower(activeAlarmThreshold(meter, alarm)) }} kW</b>
+                    }
+                  </span>
+                  @if (!alarm.acknowledged) {
+                    <button type="button" class="live-metric__ack" (click)="acknowledgeAlarmType(meter, 'INSTANTANEOUS_POWER')" [disabled]="meter.alarmAckBusy">
+                      {{ meter.alarmAckBusy ? (language === 'pl' ? 'Potwierdzanie…' : 'Acknowledging…') : t('acknowledge') }}
+                    </button>
+                  } @else {
+                    <span class="live-metric__ack-state">{{ t('acknowledged') }}</span>
+                  }
+                </div>
+              }
+            </div>
+            <div class="live-metric"
+                 [class.live-metric--alarm]="hasActiveAlarmType(meter, 'QUARTER_HOUR_POWER')"
+                 [class.live-metric--alarm-unack]="hasUnacknowledgedAlarmType(meter, 'QUARTER_HOUR_POWER')">
+              <span>{{ t('current15Min') }}</span>
+              <strong>{{ formatPower(meter.currentQuarterPowerKw) }} <small>kW</small></strong>
+              @if (activeAlarmOfType(meter, 'QUARTER_HOUR_POWER'); as alarm) {
+                <div class="live-metric__alarm-info">
+                  <span class="live-metric__alarm-text">
+                    ALARM
+                    @if (activeAlarmThreshold(meter, alarm) !== null) {
+                      <b>&gt; {{ formatPower(activeAlarmThreshold(meter, alarm)) }} kW</b>
+                    }
+                  </span>
+                  @if (!alarm.acknowledged) {
+                    <button type="button" class="live-metric__ack" (click)="acknowledgeAlarmType(meter, 'QUARTER_HOUR_POWER')" [disabled]="meter.alarmAckBusy">
+                      {{ meter.alarmAckBusy ? (language === 'pl' ? 'Potwierdzanie…' : 'Acknowledging…') : t('acknowledge') }}
+                    </button>
+                  } @else {
+                    <span class="live-metric__ack-state">{{ t('acknowledged') }}</span>
+                  }
+                </div>
+              }
+            </div>
+            @if (isSelectedToday()) {
+              <div class="quarter-timer" [attr.title]="t('quarterInterval')">
+                <div class="quarter-timer__clock">
+                  <span>{{ t('quarterRemaining') }}</span>
+                  <strong>{{ quarterCountdown(now) }}</strong>
+                </div>
+                <div class="quarter-tank" [class.quarter-tank--green]="quarterRiskClass(meter) === 'quarter-tank--green'" [class.quarter-tank--yellow]="quarterRiskClass(meter) === 'quarter-tank--yellow'" [class.quarter-tank--red]="quarterRiskClass(meter) === 'quarter-tank--red'" aria-hidden="true">
+                  <div class="quarter-tank__fill" [style.height.%]="quarterEnergyUsagePercent(meter)"></div>
+                  <span>{{ quarterEnergyUsagePercent(meter).toFixed(0) }}%</span>
+                </div>
+                <div class="quarter-timer__details">
+                  <span>{{ t('quarterEnergy') }} <strong>{{ formatEnergySoFar(meter) }} / {{ quarterEnergyBudgetKwh(meter).toFixed(2) }} kWh</strong></span>
+                  <span>{{ t('quarterBudget') }} <strong>{{ meter.limitKw.toFixed(1) }} kW</strong></span>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (meter.chartView === 'power') {
+          <div class="chart-wrap">
+            <div class="chart-local-legend" [attr.aria-label]="t('power') + ' / ' + t('average15Min')">
+              <button type="button" [class.chart-local-legend__off]="!meter.showInstantPower"
+                (click)="meter.showInstantPower = !meter.showInstantPower">
+                <i class="legend-swatch legend-swatch--line"></i>{{ t('power') }}
+              </button>
+              <button type="button" [class.chart-local-legend__off]="!meter.showQuarterBars"
+                (click)="meter.showQuarterBars = !meter.showQuarterBars">
+                <i class="legend-swatch legend-swatch--bar"></i>{{ t('average15Min') }}
+              </button>
+              <button type="button" [class.chart-local-legend__off]="!meter.showLimit"
+                (click)="meter.showLimit = !meter.showLimit">
+                <i class="legend-swatch legend-swatch--limit"></i>{{ t('limit') }}
+              </button>
+            </div>
+            <svg
+              class="power-chart"
+              [class.power-chart--zoomed]="isPowerChartZoomed(meter)"
+              [class.power-chart--panning]="meter.chartPanActive"
+              viewBox="0 0 1200 285"
+              role="img"
+              [attr.aria-label]="meter.name + ' power chart'"
+              (wheel)="onPowerChartWheel($event, meter)"
+              (pointerdown)="onPowerChartPointerDown($event, meter)"
+              (pointermove)="onPowerChartPointerMove($event, meter)"
+              (pointerup)="onPowerChartPointerUp($event, meter)"
+              (pointercancel)="onPowerChartPointerUp($event, meter)"
+              (dblclick)="resetPowerChartZoom(meter)"
+            >
+              <defs>
+                <linearGradient [attr.id]="'lineGradient-' + meter.id" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#00d28a"></stop>
+                  <stop offset="100%" stop-color="#0877c9"></stop>
+                </linearGradient>
+              </defs>
+
+              @for (tick of meter.yTicks; track tick.value) {
+                <line class="grid-line" x1="34" x2="1180" [attr.y1]="tick.y" [attr.y2]="tick.y"></line>
+                <text class="axis-label axis-label--y" x="24" [attr.y]="tick.y + 4">{{ tick.value }}</text>
+              }
+
+              <text class="axis-unit" x="4" y="18">kW</text>
+
+              @if (meter.showQuarterBars) {
+              @for (bar of meter.bars; track $index) {
+                <rect
+                  class="power-bar"
+                  [class.power-bar--current]="bar.current"
+                  [class.power-bar--alarm]="meter.quarterHourAlarmOnKw !== null && bar.value >= meter.quarterHourAlarmOnKw"
+                  [attr.x]="bar.x"
+                  [attr.y]="bar.y"
+                  [attr.width]="bar.width"
+                  [attr.height]="bar.height"
+                  rx="1"
+                >
+                  <title>{{ t('average15Min') }} · {{ bar.intervalLabel }} · {{ bar.value.toFixed(1) }} kW</title>
+                </rect>
+              }
+              }
+
+              @if (meter.showLimit) {
+              <line
+                class="limit-line"
+                x1="34"
+                x2="1180"
+                [attr.y1]="meter.limitY"
+                [attr.y2]="meter.limitY"
+              ></line>
+              <text
+                class="limit-label limit-label--above"
+                x="1174"
+                [attr.y]="meter.limitY - 8"
+                text-anchor="end"
+              >{{ t('limit') }} {{ meter.limitKw.toFixed(1) }} kW</text>
+              }
+
+              @if (meter.showInstantPower) {
+              @for (segment of meter.lineSegments; track $index) {
+                <polyline class="current-line current-line--shadow" [attr.points]="segment"></polyline>
+                <polyline class="current-line" [attr.stroke]="'url(#lineGradient-' + meter.id + ')'" [attr.points]="segment"></polyline>
+              }
+              @for (point of meter.lineHoverPoints; track $index) {
+                <circle class="current-line-hit" [attr.cx]="point.x" [attr.cy]="point.y" r="6">
+                  <title>{{ t('power') }} · {{ point.label }} · {{ point.value.toFixed(2) }} kW</title>
+                </circle>
+              }
+              }
+
+              @for (tick of xAxisTicks(meter); track tick.label) {
+                <line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="244" y2="249"></line>
+                <text class="axis-label axis-label--x" [attr.x]="tick.x" y="270" text-anchor="middle">{{ tick.label }}</text>
+              }
+            </svg>
+          </div>
+
+          } @else {
+            <div class="network-charts">
+              <section class="network-chart-card">
+                <header><div><strong>{{ t('powerChart') }}</strong><span>{{ meter.powerRange }} kW</span></div><div class="network-live-values"><b>{{ formatNetworkValue(meter.currentPowerKw, 2) }} kW</b></div></header>
+                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@for (segment of meter.powerSegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--power"></polyline>}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+              </section>
+              <section class="network-chart-card">
+                <header><div><strong>{{ t('voltage') }}</strong><span>{{ meter.voltageRange }} V</span></div><div class="network-live-values">@if (hasPhaseData(meter,'voltage',1)) {<b>L1 {{ formatNetworkValue(meter.voltageL1V) }} V</b>} @if (hasPhaseData(meter,'voltage',2)) {<b>L2 {{ formatNetworkValue(meter.voltageL2V) }} V</b>} @if (hasPhaseData(meter,'voltage',3)) {<b>L3 {{ formatNetworkValue(meter.voltageL3V) }} V</b>} @if (noVoltageData(meter)) {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
+                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@if (hasPhaseData(meter,'voltage',1)) {@for (segment of meter.voltageL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'voltage',2)) {@for (segment of meter.voltageL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'voltage',3)) {@for (segment of meter.voltageL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+              </section>
+              <section class="network-chart-card">
+                <header><div><strong>{{ t('current') }}</strong><span>{{ meter.currentRange }} A</span></div><div class="network-live-values">@if (hasPhaseData(meter,'current',1)) {<b>L1 {{ formatNetworkValue(meter.currentL1A, 2) }} A</b>} @if (hasPhaseData(meter,'current',2)) {<b>L2 {{ formatNetworkValue(meter.currentL2A, 2) }} A</b>} @if (hasPhaseData(meter,'current',3)) {<b>L3 {{ formatNetworkValue(meter.currentL3A, 2) }} A</b>} @if (noCurrentData(meter)) {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
+                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@if (hasPhaseData(meter,'current',1)) {@for (segment of meter.currentL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'current',2)) {@for (segment of meter.currentL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'current',3)) {@for (segment of meter.currentL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+              </section>
+              <section class="network-chart-card">
+                <header><div><strong>{{ t('frequency') }}</strong><span>{{ meter.frequencyRange }} Hz</span></div><div class="network-live-values">@if (!noFrequencyData(meter)) {<b>{{ formatNetworkValue(meter.frequencyHz, 2) }} Hz</b>} @else {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
+                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@for (segment of meter.frequencySegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--frequency"></polyline>}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+              </section>
+              <div class="network-legend">@if (hasPhaseData(meter,'voltage',1) || hasPhaseData(meter,'current',1)) {<span><i class="network-dot network-dot--l1"></i>L1</span>} @if (hasPhaseData(meter,'voltage',2) || hasPhaseData(meter,'current',2)) {<span><i class="network-dot network-dot--l2"></i>L2</span>} @if (hasPhaseData(meter,'voltage',3) || hasPhaseData(meter,'current',3)) {<span><i class="network-dot network-dot--l3"></i>L3</span>}</div>
+            </div>
+          }
+
+          <section class="communication-diagnostics">
+            <div class="communication-diagnostics__header">
+              <strong>{{ language === 'pl' ? 'Diagnostyka komunikacji' : 'Communication diagnostics' }}</strong>
+              <div class="communication-diagnostics__legend">
+                <span><i class="comm-swatch comm-swatch--online"></i>{{ language === 'pl' ? 'Działa' : 'Online' }}</span>
+                <span><i class="comm-swatch comm-swatch--degraded"></i>{{ language === 'pl' ? 'Zakłócenia' : 'Degraded' }}</span>
+                <span><i class="comm-swatch comm-swatch--offline"></i>{{ language === 'pl' ? 'Brak komunikacji' : 'Offline' }}</span>
+                <span><i class="comm-swatch comm-swatch--unknown"></i>{{ language === 'pl' ? 'Brak danych' : 'No data' }}</span>
+                <span><i class="comm-swatch comm-swatch--future"></i>{{ language === 'pl' ? 'Przyszłość' : 'Future' }}</span>
+              </div>
+            </div>
+            <div class="communication-row">
+              <div class="communication-row__label"><strong>{{ language === 'pl' ? 'Serwer PowerGuard' : 'PowerGuard Server' }}</strong></div>
+              <div class="communication-track">
+                @for (segment of meter.serverCommunicationSegments; track $index) {
+                  <span class="communication-segment"
+                        [class.communication-segment--online]="segment.status === 'ONLINE'"
+                        [class.communication-segment--degraded]="segment.status === 'DEGRADED' || segment.status === 'STARTING'"
+                        [class.communication-segment--offline]="segment.status === 'OFFLINE'"
+                        [class.communication-segment--unknown]="segment.status === 'UNKNOWN'"
+                        [class.communication-segment--future]="segment.status === 'FUTURE'"
+                        [style.left.%]="segment.left" [style.width.%]="segment.width"
+                        [attr.title]="(language === 'pl' ? 'Serwer PowerGuard' : 'PowerGuard Server') + ' · ' + communicationStatusLabel(segment.status)"></span>
+                }
+              </div>
+            </div>
+            <div class="communication-row">
+              <div class="communication-row__label"><strong>PowerGuard-Edge</strong></div>
+              <div class="communication-track">
+                @for (segment of meter.edgeCommunicationSegments; track $index) {
+                  <span class="communication-segment"
+                        [class.communication-segment--online]="segment.status === 'ONLINE'"
+                        [class.communication-segment--degraded]="segment.status === 'DEGRADED' || segment.status === 'STARTING'"
+                        [class.communication-segment--offline]="segment.status === 'OFFLINE'"
+                        [class.communication-segment--unknown]="segment.status === 'UNKNOWN'"
+                        [class.communication-segment--future]="segment.status === 'FUTURE'"
+                        [style.left.%]="segment.left" [style.width.%]="segment.width"
+                        [attr.title]="'PowerGuard-Edge · ' + communicationStatusLabel(segment.status)"></span>
+                }
+              </div>
+            </div>
+            <div class="communication-row">
+              <div class="communication-row__label"><strong>{{ meter.name }}</strong></div>
+              <div class="communication-track">
+                @for (segment of meter.meterCommunicationSegments; track $index) {
+                  <span class="communication-segment"
+                        [class.communication-segment--online]="segment.status === 'ONLINE'"
+                        [class.communication-segment--degraded]="segment.status === 'DEGRADED' || segment.status === 'STARTING'"
+                        [class.communication-segment--offline]="segment.status === 'OFFLINE'"
+                        [class.communication-segment--unknown]="segment.status === 'UNKNOWN'"
+                        [class.communication-segment--future]="segment.status === 'FUTURE'"
+                        [style.left.%]="segment.left" [style.width.%]="segment.width"
+                        [attr.title]="meter.name + ' · ' + communicationStatusLabel(segment.status)"></span>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section class="meter-alarm-history">
+            <div class="meter-alarm-history__title">{{ t('alarmHistory') }}</div>
+            @if (meter.alarmHistory.length === 0) {
+              <div class="meter-alarm-history__empty">{{ t('noAlarms') }}</div>
+            } @else {
+              <div class="meter-alarm-history__rows">
+                <div class="meter-alarm-row meter-alarm-row--head">
+                  <span>{{ t('alarmLabel') }}</span>
+                  <span>{{ t('alarmPeriod') }}</span>
+                  <span class="meter-alarm-row__duration meter-alarm-row__header">
+                    <span>{{ t('alarmDuration') }}</span>
+                    <small>[hh:mm:ss]</small>
+                  </span>
+                  <span class="meter-alarm-row__max meter-alarm-row__header">
+                    <span>{{ t('alarmMaximumPower') }}</span>
+                    <small>[kW]</small>
+                  </span>
+                </div>
+                @for (alarm of meter.alarmHistory; track alarm.id) {
+                  <div class="meter-alarm-row" [class.meter-alarm-row--active]="alarm.active" [class.meter-alarm-row--unack]="alarm.active && !alarm.acknowledged" [class.meter-alarm-row--ack]="alarm.active && alarm.acknowledged">
+                    <span class="meter-alarm-row__type">
+                      {{ alarmTypeLabel(alarm.type) }}
+                      @if (alarm.active && alarm.acknowledged) { <span class="alarm-ack-label">{{ t('acknowledged') }}</span> }
+                    </span>
+                    <span class="meter-alarm-row__period">{{ formatAlarmPeriod(alarm.startedAt, alarm.endedAt) }}</span>
+                    <span class="meter-alarm-row__duration">{{ formatAlarmDuration(alarm.startedAt, alarm.endedAt) }}</span>
+                    <span class="meter-alarm-row__max">{{ formatPower(alarmMaximumPower(alarm)) }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+
+        </article>
+      }
+    </section>
+  </main>
+  } @else {
+    <main class="configuration-dashboard" [class.configuration-dashboard--measurement-data]="adminView === 'measurementData'">
+      @if (adminView === 'health') {
+        <section class="edge-health-panel">
+          <div class="edge-health-panel__header">
+            <h2>{{ t('edgeHealth') }}</h2>
+          </div>
+
+          @if (edgeHealth.length === 0) {
+            <p class="configuration-empty">{{ t('noEdgeHealth') }}</p>
+          } @else {
+            <div class="edge-health-table-wrap">
+              <table class="edge-health-table">
+                <thead>
+                  <tr>
+                    <th>{{ t('ordinal') }}</th>
+                    <th>{{ t('client') }}</th>
+                    <th><button type="button" class="meter-sort-button" (click)="setMeterSort('siteId')">{{ t('siteId') }} <span>{{ meterSortIndicator('siteId') }}</span></button></th>
+                    <th><button type="button" class="meter-sort-button" (click)="setMeterSort('edgeId')">{{ t('edgeId') }} <span>{{ meterSortIndicator('edgeId') }}</span></button></th>
+                    <th>{{ t('serialPort') }}</th>
+                    <th>{{ t('edgeStatus') }}</th>
+                    <th>{{ t('hostname') }} / {{ t('ipAddress') }}</th>
+                    <th>{{ t('mqtt') }}</th>
+                    <th>{{ t('cpuTemperature') }}</th>
+                    <th>{{ t('memoryUsage') }}</th>
+                    <th>{{ t('diskUsage') }}</th>
+                    <th>{{ t('edgeUptime') }}</th>
+                    <th>{{ t('lastSeen') }}</th>
+                    <th>{{ t('version') }}</th>
+                    <th>{{ t('metersHealth') }}</th>
+                    <th>{{ t('details') }}</th>
+                    <th>{{ t('actions') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (edge of edgeHealth; track edge.clientId + ':' + edge.siteId + ':' + edge.edgeId) {
+                    <tr [class.edge-health-table__offline]="edge.status === 'OFFLINE'">
+                      <td>{{ $index + 1 }}</td>
+                      <td><strong>{{ clientDisplayName(edge.clientId) }}</strong><br><code>{{ edge.clientId }}</code></td>
+                      <td><strong>{{ siteDisplayName(edge.clientId, edge.siteId) }}</strong><br><code>{{ edge.siteId }}</code></td>
+                      <td><strong>{{ edge.edgeId }}</strong></td>
+                      <td><code>{{ selectedEdgeSerialPorts(edge) }}</code></td>
+                      <td>
+                        <span class="health-pill"
+                          [class.health-pill--online]="edge.status === 'ONLINE'"
+                          [class.health-pill--degraded]="edge.status === 'DEGRADED'"
+                          [class.health-pill--offline]="edge.status === 'OFFLINE'">
+                          {{ edge.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="health-host">
+                          <strong>{{ edge.hostname || '—' }}</strong>
+                          <span>{{ edgeIp(edge) }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span [class.health-ok]="edgeMqttConnected(edge)" [class.health-bad]="!edgeMqttConnected(edge)">
+                          {{ edgeMqttConnected(edge) ? t('connected') : t('disconnected') }}
+                        </span>
+                      </td>
+                      <td>{{ formatHealthNumber(edge.cpuTemperatureC, '°C') }}</td>
+                      <td>{{ formatHealthNumber(edge.memoryUsedPercent) }}</td>
+                      <td>{{ formatHealthNumber(edge.diskUsedPercent) }}</td>
+                      <td>{{ formatUptime(edge.uptimeSeconds) }}</td>
+                      <td>{{ formatAlarmDate(edge.timestamp) }}</td>
+                      <td><code>{{ edge.version || '—' }}</code></td>
+                      <td>{{ edgeMeterSummary(edge) }}</td>
+                      <td>
+                        <button type="button" class="health-expand-button" (click)="toggleEdgeDetails(edge)"
+                          [attr.title]="t('details')" [attr.aria-label]="t('details')">
+                          {{ edgeIsExpanded(edge) ? '⌃' : '⌄' }}
+                        </button>
+                      </td>
+                      <td class="edge-health-actions">
+                        @if (authenticatedRole === 'ADMIN') {
+                          <button type="button"
+                            class="table-action table-action--icon table-action--danger edge-health-delete-button"
+                            (click)="deleteEdgeHealth(edge)"
+                            [disabled]="edge.status !== 'OFFLINE'"
+                            [attr.title]="edge.status === 'OFFLINE' ? t('deleteEdgeHealth') : t('deleteEdgeHealthOfflineOnly')"
+                            [attr.aria-label]="t('deleteEdgeHealth')">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path d="M8 4h8l1 2h4v2H3V6h4l1-2Zm1 6h2v8H9v-8Zm4 0h2v8h-2v-8Zm-6 0h2v8H7v-8Zm-1 10h12l1-11H5l1 11Z" fill="currentColor"/>
+                            </svg>
+                          </button>
+                        }
+                      </td>
+                    </tr>
+
+                    @if (edgeIsExpanded(edge)) {
+                      <tr class="edge-health-details-row">
+                        <td colspan="17">
+                          <div class="edge-health-details">
+                            <section>
+                              <h3>{{ t('system') }}</h3>
+                              <dl>
+                                <div><dt>{{ t('hostname') }}</dt><dd>{{ edge.hostname || '—' }}</dd></div>
+                                <div><dt>{{ t('ipAddress') }}</dt><dd>{{ edgeIp(edge) }}</dd></div>
+                                <div><dt>{{ t('systemUptime') }}</dt><dd>{{ formatUptime(edge.systemUptimeSeconds) }}</dd></div>
+                                <div><dt>{{ t('edgeStarted') }}</dt><dd>{{ edge.edgeStartedAt ? formatAlarmDate(edge.edgeStartedAt) : '—' }}</dd></div>
+                                <div><dt>{{ t('edgeUptime') }}</dt><dd>{{ formatUptime(edge.uptimeSeconds) }}</dd></div>
+                                <div><dt>{{ t('version') }}</dt><dd>{{ edge.version || '—' }}</dd></div>
+                                <div><dt>{{ t('serialPorts') }}</dt><dd>{{ edge.serialPorts.length ? edge.serialPorts.join(', ') : '—' }}</dd></div>
+                              </dl>
+                            </section>
+
+                            <section>
+                              <h3>{{ t('resources') }}</h3>
+                              <dl>
+                                <div><dt>{{ t('cpuLoad') }}</dt><dd>{{ formatHealthNumber(edge.cpuLoadPercent) }}</dd></div>
+                                <div><dt>{{ t('cpuTemperature') }}</dt><dd>{{ formatHealthNumber(edge.cpuTemperatureC, '°C') }}</dd></div>
+                                <div><dt>{{ t('memoryUsage') }}</dt><dd>{{ formatHealthNumber(edge.memoryUsedPercent) }} · {{ formatBytes(edge.memoryFreeBytes) }} free</dd></div>
+                                <div><dt>{{ t('diskUsage') }}</dt><dd>{{ formatHealthNumber(edge.diskUsedPercent) }} · {{ formatBytes(edge.diskFreeBytes) }} free</dd></div>
+                              </dl>
+                            </section>
+
+                            <section>
+                              <h3>{{ t('networkAndMqtt') }}</h3>
+                              @if (!edge.mqttTargets.length) {
+                                <p>—</p>
+                              } @else {
+                                <div class="edge-detail-list">
+                                  @for (target of edge.mqttTargets; track target.brokerUri) {
+                                    <div class="edge-detail-list__item">
+                                      <strong>{{ target.brokerUri }}</strong>
+                                      <span [class.health-ok]="target.connected" [class.health-bad]="!target.connected">
+                                        {{ target.connected ? t('connected') : t('disconnected') }}
+                                      </span>
+                                      <small>{{ t('publishSuccess') }}: {{ target.publishSuccess ?? 0 }} · {{ t('publishErrors') }}: {{ target.publishErrors ?? 0 }}</small>
+                                    </div>
+                                  }
+                                </div>
+                              }
+                            </section>
+                          </div>
+
+                          <div class="edge-meter-health">
+                            <h3>{{ t('configuredMeters') }}</h3>
+                            @if (!edge.meters.length) {
+                              <p>{{ t('noMetersOnEdge') }}</p>
+                            } @else {
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th><button type="button" class="meter-sort-button" (click)="setMeterSort('uniqueKey')">{{ t('uniqueName') }} <span>{{ meterSortIndicator('uniqueKey') }}</span></button></th>
+                                    <th>{{ t('serialPort') }}</th>
+                                    <th>{{ t('meterStatus') }}</th>
+                                    <th>{{ t('lastSeen') }}</th>
+                                    <th>{{ t('readTime') }}</th>
+                                    <th>{{ t('failures') }}</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (meter of edge.meters; track meter.meterId) {
+                                    <tr>
+                                      <td><code>{{ meter.meterId }}</code></td>
+                                      <td>{{ meter.serialPortName }}</td>
+                                      <td>{{ meter.status }}</td>
+                                      <td>{{ meter.lastStatusAt ? formatAlarmDate(meter.lastStatusAt) : '—' }}</td>
+                                      <td>{{ meter.lastReadDurationMs == null ? '—' : meter.lastReadDurationMs + ' ms' }}</td>
+                                      <td>{{ meter.consecutiveFailures ?? 0 }}</td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      } @else if (adminView === 'sites') {
+        <section class="sites-configuration-panel">
+          <div class="meter-configuration-panel__header">
+            <div><h2>{{ t('clientsAndSites') }}</h2></div>
+          </div>
+
+          <div class="site-configuration-layout">
+            <div class="site-configuration-list">
+              <h3>{{ t('clients') }}</h3>
+              @if (adminClients.length === 0) {
+                <p class="configuration-empty">{{ t('noClients') }}</p>
+              } @else {
+                <table class="sites-table">
+                  <thead><tr><th>{{ t('clientId') }}</th><th>{{ t('clientName') }}</th><th>{{ t('enabled') }}</th><th>{{ t('actions') }}</th></tr></thead>
+                  <tbody>
+                    @for (client of adminClients; track client.clientId) {
+                      <tr>
+                        <td [attr.data-label]="t('clientId')"><code>{{ client.clientId }}</code></td>
+                        <td [attr.data-label]="t('clientName')"><strong>{{ client.name }}</strong></td>
+                        <td class="site-enabled-cell" [attr.data-label]="t('enabled')"><input type="checkbox" [checked]="client.enabled" disabled /></td>
+                        <td [attr.data-label]="t('actions')">
+                          <div class="meters-table__actions">
+                            <button type="button" class="table-action table-action--icon" (click)="startEditClient(client)" [disabled]="clientsBusy" [attr.title]="t('editClient')" [attr.aria-label]="t('editClient')">
+                              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.1 9.4l-3.5-3.5L4 16.5Zm16.7-9.8a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0l-1.6 1.6 3.5 3.5 1.5-1.7Z" fill="currentColor"/></svg>
+                            </button>
+                            <button type="button" class="table-action table-action--icon table-action--danger" (click)="deleteClient(client)" [disabled]="clientsBusy" [attr.title]="t('deleteClient')" [attr.aria-label]="t('deleteClient')">
+                              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8l1 2h4v2H3V6h4l1-2Zm1 6h2v8H9v-8Zm4 0h2v8h-2v-8Zm-6 0h2v8H7v-8Zm-1 10h12l1-11H5l1 11Z" fill="currentColor"/></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+            <form class="site-editor" (ngSubmit)="saveClient()">
+              <h3>{{ editingClientId === null ? t('addClient') : t('editClient') }}</h3>
+              <label class="login-field"><span>{{ t('clientId') }}</span><input name="clientFormId" [(ngModel)]="clientFormId" [disabled]="clientsBusy || editingClientId !== null" /></label>
+              <label class="login-field"><span>{{ t('clientName') }}</span><input name="clientFormName" [(ngModel)]="clientFormName" [disabled]="clientsBusy" /></label>
+              <label class="toggle-field"><input name="clientFormEnabled" type="checkbox" [(ngModel)]="clientFormEnabled" [disabled]="clientsBusy" /><span>{{ t('enabled') }}</span></label>
+              @if (clientsError) { <p class="login-error">{{ clientsError }}</p> }
+              <div class="login-dialog__actions">
+                <button type="button" class="button button--secondary" (click)="startAddClient()" [disabled]="clientsBusy">{{ t('cancel') }}</button>
+                <button type="submit" class="button button--primary" [disabled]="clientsBusy">{{ editingClientId === null ? t('create') : t('update') }}</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="site-configuration-layout">
+            <div class="site-configuration-list">
+              <h3>{{ t('sites') }}</h3>
+              @if (adminSites.length === 0) {
+                <p class="configuration-empty">{{ t('noSites') }}</p>
+              } @else {
+                <table class="sites-table">
+                  <thead><tr><th>{{ t('client') }}</th><th>{{ t('siteId') }}</th><th>{{ t('siteName') }}</th><th>{{ t('enabled') }}</th><th>{{ t('actions') }}</th></tr></thead>
+                  <tbody>
+                    @for (site of adminSites; track site.id) {
+                      <tr>
+                        <td [attr.data-label]="t('client')"><strong>{{ site.clientName }}</strong><br/><code>{{ site.clientId }}</code></td>
+                        <td [attr.data-label]="t('siteId')"><code>{{ site.siteId }}</code></td>
+                        <td [attr.data-label]="t('siteName')"><strong>{{ site.name }}</strong></td>
+                        <td class="site-enabled-cell" [attr.data-label]="t('enabled')"><input type="checkbox" [checked]="site.enabled" disabled /></td>
+                        <td [attr.data-label]="t('actions')">
+                          <div class="meters-table__actions">
+                            <button type="button" class="table-action table-action--icon" (click)="startEditSite(site)" [disabled]="sitesBusy" [attr.title]="t('editSite')" [attr.aria-label]="t('editSite')">
+                              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.1 9.4l-3.5-3.5L4 16.5Zm16.7-9.8a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0l-1.6 1.6 3.5 3.5 1.5-1.7Z" fill="currentColor"/></svg>
+                            </button>
+                            <button type="button" class="table-action table-action--icon table-action--danger" (click)="deleteSite(site)" [disabled]="sitesBusy" [attr.title]="t('deleteSite')" [attr.aria-label]="t('deleteSite')">
+                              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8l1 2h4v2H3V6h4l1-2Zm1 6h2v8H9v-8Zm4 0h2v8h-2v-8Zm-6 0h2v8H7v-8Zm-1 10h12l1-11H5l1 11Z" fill="currentColor"/></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+            <form class="site-editor" (ngSubmit)="saveSite()">
+              <h3>{{ editingSiteId === null ? t('addSite') : t('editSite') }}</h3>
+              <label class="login-field"><span>{{ t('client') }}</span>
+                <select name="siteFormClientId" [(ngModel)]="siteFormClientId" [disabled]="sitesBusy || editingSiteId !== null">
+                  @for (client of adminClients; track client.clientId) { <option [value]="client.clientId">{{ client.name }}</option> }
+                </select>
+              </label>
+              <label class="login-field"><span>{{ t('siteId') }}</span><input name="siteFormId" [(ngModel)]="siteFormId" [disabled]="sitesBusy || editingSiteId !== null" /></label>
+              <label class="login-field"><span>{{ t('siteName') }}</span><input name="siteFormName" [(ngModel)]="siteFormName" [disabled]="sitesBusy" /></label>
+              <label class="toggle-field"><input name="siteFormEnabled" type="checkbox" [(ngModel)]="siteFormEnabled" [disabled]="sitesBusy" /><span>{{ t('enabled') }}</span></label>
+              @if (sitesError) { <p class="login-error">{{ sitesError }}</p> }
+              <div class="login-dialog__actions">
+                <button type="button" class="button button--secondary" (click)="startAddSite()" [disabled]="sitesBusy">{{ t('cancel') }}</button>
+                <button type="submit" class="button button--primary" [disabled]="sitesBusy">{{ editingSiteId === null ? t('create') : t('update') }}</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      } @else if (adminView === 'edgeConfiguration') {
+        <section class="edge-configuration-panel">
+          <div class="edge-config-header">
+            <div><h2>{{ t('edgeConfiguration') }}</h2></div>
+            <label class="edge-selector">
+              <select [(ngModel)]="selectedEdgeConfigKey" (change)="onEdgeConfigSelectionChanged()">
+                @for (edge of edgeHealth; track edge.clientId + ':' + edge.siteId + ':' + edge.edgeId) {
+                  <option [value]="edgeKey(edge)">{{ edge.clientId }} / {{ edge.siteId }} / {{ edge.edgeId }}</option>
+                }
+              </select>
+            </label>
+          </div>
+
+          @if (edgeConfigurationBusy && !edgeConfiguration) {
+            <p class="configuration-empty">{{ t('loadConfiguration') }}…</p>
+          } @else if (edgeConfigurationError && !edgeConfiguration) {
+            <p class="login-error">{{ edgeConfigurationError }}</p>
+          } @else if (edgeConfiguration) {
+            <form class="edge-config-form" (ngSubmit)="saveEdgeConfiguration()">
+              <section class="edge-config-section">
+                <h3>{{ t('system') }}</h3>
+                <div class="edge-config-grid edge-config-grid--system">
+                  <label class="login-field">
+                    <span>{{ t('clientId') }}</span>
+                    <input name="edgeConfigClientId" [(ngModel)]="edgeConfiguration.clientId" />
+                  </label>
+                  <label class="login-field">
+                    <span>{{ t('siteId') }}</span>
+                    <input name="edgeConfigSiteId" [(ngModel)]="edgeConfiguration.siteId" />
+                  </label>
+                  <label class="login-field">
+                    <span>{{ t('edgeId') }}</span>
+                    <input name="edgeConfigEdgeId" [(ngModel)]="edgeConfiguration.edgeId" />
+                  </label>
+                  <label class="login-field">
+                    <span>{{ t('timeZone') }}</span>
+                    <input
+                      class="timezone-search-input"
+                      name="edgeConfigTimeZone"
+                      type="text"
+                      list="powerguard-time-zones"
+                      [(ngModel)]="edgeConfiguration.timeZone"
+                      [attr.placeholder]="t('timeZoneSearchPlaceholder')"
+                      autocomplete="off"
+                    />
+                    <datalist id="powerguard-time-zones">
+                      @for (zone of timeZoneOptions; track zone) {
+                        <option [value]="zone" [label]="timeZoneSearchLabel(zone)"></option>
+                      }
+                    </datalist>
+                  </label>
+                  <label class="toggle-field edge-raw-obis-toggle">
+                    <input name="edgeIncludeRawObis" type="checkbox" [(ngModel)]="edgeConfiguration.includeRawObis" />
+                    <span>{{ t('includeRawObis') }}</span>
+                  </label>
+                </div>
+              </section>
+
+              <section class="edge-config-section">
+                <div class="edge-config-section__header">
+                  <h3>{{ t('mqttTargets') }}</h3>
+                  <button type="button" class="edge-add-button" (click)="addMqttTarget()"
+                    [attr.title]="t('addMqttTargetTooltip')" [attr.data-tooltip]="t('addMqttTargetTooltip')" [attr.aria-label]="t('addMqttTargetTooltip')">+</button>
+                </div>
+                <div class="edge-config-table-wrap">
+                  <table class="edge-config-table">
+                    <thead>
+                      <tr>
+                        <th>{{ t('serverIp') }}</th>
+                        <th>{{ t('port') }}</th>
+                        <th>{{ t('username') }}</th>
+                        <th>{{ t('password') }}</th>
+                        <th class="qos-header">{{ t('qos') }} <span class="header-info-icon" tabindex="0"
+                          [attr.aria-label]="t('qosHint')"
+                          [attr.title]="t('qosHint')">i</span></th>
+                        <th>{{ t('enabled') }}</th>
+                        <th>{{ t('retainStatus') }}</th>
+                        <th>{{ t('actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (target of edgeConfiguration.mqttTargets; track $index) {
+                        <tr>
+                          <td><input class="table-input" [name]="'mqttServer' + $index" [(ngModel)]="target.serverIp" /></td>
+                          <td><input class="table-input table-input--small" [name]="'mqttPort' + $index" type="number" min="1" max="65535" [(ngModel)]="target.port" /></td>
+                          <td><input class="table-input" [name]="'mqttUser' + $index" [(ngModel)]="target.username" /></td>
+                          <td>
+                            <input class="table-input" [name]="'mqttPassword' + $index" type="password" [(ngModel)]="target.password" />
+                            <small class="field-hint">{{ t('passwordKeepHint') }}</small>
+                          </td>
+                          <td>
+                            <select class="table-input table-input--small" [name]="'mqttQos' + $index" [(ngModel)]="target.qos">
+                              <option [ngValue]="0">0</option><option [ngValue]="1">1</option><option [ngValue]="2">2</option>
+                            </select>
+                          </td>
+                          <td class="table-check"><input [name]="'mqttEnabled' + $index" type="checkbox" [(ngModel)]="target.enabled" /></td>
+                          <td class="table-check"><input [name]="'mqttRetain' + $index" type="checkbox" [(ngModel)]="target.retainStatus" /></td>
+                          <td class="edge-action-cell">
+                            <span class="edge-icon-tooltip" [attr.data-tooltip]="t('deleteMqttTarget')">
+                              <button type="button" class="table-action table-action--icon table-action--danger edge-delete-button"
+                                [disabled]="edgeConfiguration.mqttTargets.length <= 1"
+                                (click)="removeMqttTarget($index)"
+                                [attr.aria-label]="t('deleteMqttTarget')">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M3 6h18"></path>
+                                  <path d="M8 6V4h8v2"></path>
+                                  <path d="M19 6l-1 14H6L5 6"></path>
+                                  <path d="M10 11v5M14 11v5"></path>
+                                </svg>
+                              </button>
+                            </span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section class="edge-config-section">
+                <div class="edge-config-section__header">
+                  <h3>{{ t('edgeMeters') }}</h3>
+                  <button type="button" class="edge-add-button" (click)="addEdgeMeter()"
+                    [attr.title]="t('addEdgeMeterTooltip')" [attr.data-tooltip]="t('addEdgeMeterTooltip')" [attr.aria-label]="t('addEdgeMeterTooltip')">+</button>
+                </div>
+                <div class="edge-config-table-wrap">
+                  <table class="edge-config-table">
+                    <thead>
+                      <tr>
+                        <th>{{ t('uniqueName') }}</th>
+                        <th>{{ t('serialPort') }}</th>
+                        <th [attr.title]="t('meterAddressHint')">{{ t('meterAddress') }}</th>
+                        <th>{{ t('pollDelay') }}</th>
+                        <th>{{ t('enabled') }}</th>
+                        <th>{{ t('actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (meter of edgeConfiguration.meters; track $index) {
+                        <tr>
+                          <td><input class="table-input" [name]="'edgeMeterId' + $index" [(ngModel)]="meter.uniqueName" /></td>
+                          <td>
+                            <select class="table-input" [name]="'edgeMeterPortSelect' + $index" [(ngModel)]="meter.serialPortName">
+                              @if (meter.serialPortName && !availableSerialPorts().includes(meter.serialPortName)) {
+                                <option [value]="meter.serialPortName">{{ meter.serialPortName }}</option>
+                              }
+                              @for (port of availableSerialPorts(); track port) {
+                                <option [value]="port">{{ port }}</option>
+                              }
+                            </select>
+                          </td>
+                          <td><input class="table-input" [name]="'edgeMeterAddress' + $index" [(ngModel)]="meter.address" /></td>
+                          <td><input class="table-input table-input--small" [name]="'edgeMeterPoll' + $index" type="number" min="0" [(ngModel)]="meter.pollDelaySeconds" /></td>
+                          <td class="table-check"><input [name]="'edgeMeterEnabled' + $index" type="checkbox" [(ngModel)]="meter.enabled" /></td>
+                          <td class="edge-action-cell">
+                            <span class="edge-icon-tooltip" [attr.data-tooltip]="t('deleteEdgeMeter')">
+                              <button type="button" class="table-action table-action--icon table-action--danger edge-delete-button"
+                                (click)="removeEdgeMeter($index)"
+                                [attr.aria-label]="t('deleteEdgeMeter')">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M3 6h18"></path>
+                                  <path d="M8 6V4h8v2"></path>
+                                  <path d="M19 6l-1 14H6L5 6"></path>
+                                  <path d="M10 11v5M14 11v5"></path>
+                                </svg>
+                              </button>
+                            </span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              @if (edgeConfigurationError) {
+                <p class="login-error">{{ edgeConfigurationError }}</p>
+              }
+
+              <div class="edge-config-actions">
+                <button type="button" class="button button--secondary" (click)="loadSelectedEdgeConfiguration()" [disabled]="edgeConfigurationBusy">{{ t('loadConfiguration') }}</button>
+                <button type="submit" class="button button--primary" [disabled]="edgeConfigurationBusy">{{ edgeConfigurationBusy ? t('saving') : t('saveEdgeConfiguration') }}</button>
+              </div>
+            </form>
+          }
+        </section>
+      } @else if (adminView === 'measurementData') {
+        <section class="measurement-data-panel">
+          <div class="measurement-data-header">
+            <div>
+              <h2>{{ t('measurementData') }}</h2>
+            </div>
+            <div class="measurement-data-selectors">
+              <label class="edge-selector">
+                <select [(ngModel)]="selectedEdgeConfigKey" (change)="onEdgeConfigSelectionChanged()">
+                  @for (edge of edgeHealth; track edge.clientId + ':' + edge.siteId + ':' + edge.edgeId) {
+                    <option [value]="edgeKey(edge)">{{ edge.clientId }} / {{ edge.siteId }} / {{ edge.edgeId }}</option>
+                  }
+                </select>
+              </label>
+              <label class="edge-selector">
+                <select [(ngModel)]="selectedRawMeterKey" (change)="loadRawMeasurementData(false)">
+                  @for (meterKey of rawMeterKeys(); track meterKey) {
+                    <option [value]="meterKey">{{ meterKey }}</option>
+                  }
+                </select>
+              </label>
+              <button
+                type="button"
+                class="measurement-refresh-button"
+                (click)="loadRawMeasurementData(true)"
+                [disabled]="rawMeasurementDataBusy"
+                [attr.title]="t('refresh')"
+                [attr.aria-label]="t('refresh')"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6v5h-5"></path>
+                  <path d="M4 18v-5h5"></path>
+                  <path d="M6.1 9a7 7 0 0 1 11.7-2.6L20 11"></path>
+                  <path d="M17.9 15a7 7 0 0 1-11.7 2.6L4 13"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          @if (!edgeConfiguration?.includeRawObis) {
+            <p class="configuration-empty">
+              {{ t('rawObisEnableHint') }}
+            </p>
+          } @else if (rawMeasurementDataBusy && !selectedRawMeasurement()) {
+            <p class="configuration-empty">{{ t('measurementDataWaiting') }}</p>
+          } @else if (rawMeasurementDataError) {
+            <p class="login-error">{{ rawMeasurementDataError }}</p>
+          } @else if (selectedRawMeasurement(); as rawData) {
+            <div class="measurement-data-layout">
+              <section class="measurement-summary-card">
+                <h3>{{ t('summary') }}</h3>
+                <div class="measurement-summary-grid">
+                  <div><span>{{ t('meter') }}</span><strong>{{ rawData.meterUniqueKey }}</strong></div>
+                  <div><span>{{ t('port') }}</span><strong>{{ rawSummaryValue(rawData.meterInfo.serialPortName) }}</strong></div>
+                  <div><span>{{ t('manufacturer') }}</span><strong>{{ rawSummaryValue(rawData.meterInfo.manufacturer) }}</strong></div>
+                  <div><span>{{ t('meterIdentification') }}</span><strong>{{ rawSummaryValue(rawData.meterInfo.model || rawData.meterInfo.serialNumber) }}</strong></div>
+                  <div><span>{{ t('negotiatedBaudRate') }}</span><strong>{{ rawSummaryValue(rawData.meterInfo.negotiatedBaudRate) }}</strong></div>
+                  <div><span>{{ t('obisValues') }}</span><strong>{{ rawObisRows(rawData).length }}</strong></div>
+                  <div><span>BCC</span><strong [class.measurement-ok]="rawData.quality.bccValid === true" [class.measurement-error]="rawData.quality.bccValid === false">{{ rawBccLabel(rawData) }}</strong></div>
+                  <div><span>{{ t('finishedAt') }}</span><strong>{{ rawFinishedAt(rawData) }}</strong></div>
+                  <div><span>{{ t('duration') }}</span><strong>{{ rawDurationLabel(rawData) }}</strong></div>
+                </div>
+              </section>
+
+              <section class="measurement-obis-card">
+                <div class="measurement-obis-card__header">
+                  <h3>{{ t('obisValues') }}</h3>
+                  <span>{{ rawFinishedAt(rawData) }}</span>
+                </div>
+                <div class="measurement-obis-table-wrap">
+                  <table class="measurement-obis-table">
+                    <thead>
+                      <tr>
+                        <th>OBIS</th>
+                        <th>{{ t('value') }}</th>
+                        <th>{{ t('unit') }}</th>
+                        <th>RAW</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of rawObisRows(rawData); track row.code + ':' + $index) {
+                        <tr>
+                          <td><strong>{{ row.code }}</strong></td>
+                          <td>{{ row.value || '—' }}</td>
+                          <td>{{ row.unit || '—' }}</td>
+                          <td><code>{{ row.raw || '—' }}</code></td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          } @else if (selectedRawMeterKey) {
+            <div class="measurement-data-layout measurement-data-layout--empty">
+              <section class="measurement-summary-card">
+                <h3>{{ t('summary') }}</h3>
+                <div class="measurement-summary-grid">
+                  <div><span>{{ t('meter') }}</span><strong>{{ selectedRawMeterKey }}</strong></div>
+                  <div>
+                    <span>{{ t('port') }}</span>
+                    <strong>{{ rawSummaryValue(selectedRawMeterConfig()?.serialPortName || selectedRawMeterHealth()?.serialPortName) }}</strong>
+                  </div>
+                  <div>
+                    <span>Status</span>
+                    <strong>{{ rawSummaryValue(selectedRawMeterHealth()?.status) }}</strong>
+                  </div>
+                  <div>
+                    <span>{{ t('lastStatus') }}</span>
+                    <strong>{{ rawSummaryValue(selectedRawMeterHealth()?.lastStatusAt) }}</strong>
+                  </div>
+                </div>
+              </section>
+
+              <section class="measurement-obis-card measurement-obis-card--empty">
+                <div class="measurement-obis-card__header">
+                  <h3>{{ t('obisValues') }}</h3>
+                </div>
+                <div class="measurement-no-data">
+                  <strong>{{ selectedRawMeterKey }}</strong>
+                  <span>
+                    {{ t('rawObisNoDataForMeter') }}
+                  </span>
+                </div>
+              </section>
+            </div>
+          } @else {
+            <p class="configuration-empty">
+              {{ t('noConfiguredMeters') }}
+            </p>
+          }
+        </section>
+      } @else if (adminView === 'settings') {
+        <section class="settings-panel">
+          <div class="meter-configuration-panel__header">
+            <div>
+              <h2>{{ t('settings') }}</h2>
+            </div>
+          </div>
+
+          <form class="settings-form" (ngSubmit)="saveApplicationSettings()">
+            <section class="settings-card">
+              <h3>{{ t('customerInformation') }}</h3>
+              <div class="settings-grid">
+                <label class="login-field">
+                  <span>{{ t('companyName') }}</span>
+                  <input name="settingsCompanyName" [(ngModel)]="settingsCompanyName" [disabled]="settingsBusy" />
+                </label>
+                <label class="login-field">
+                  <span>{{ t('installationName') }}</span>
+                  <input name="settingsInstallationName" [(ngModel)]="settingsInstallationName" [disabled]="settingsBusy" />
+                </label>
+                <label class="login-field settings-field--wide">
+                  <span>{{ t('address') }}</span>
+                  <textarea name="settingsAddress" rows="3" [(ngModel)]="settingsAddress" [disabled]="settingsBusy"></textarea>
+                </label>
+                <label class="login-field">
+                  <span>{{ t('nip') }}</span>
+                  <input name="settingsNip" [(ngModel)]="settingsNip" [disabled]="settingsBusy" />
+                </label>
+                <label class="login-field">
+                  <span>{{ t('contactPerson') }}</span>
+                  <input name="settingsContactPerson" [(ngModel)]="settingsContactPerson" [disabled]="settingsBusy" />
+                </label>
+                <label class="login-field">
+                  <span>{{ t('email') }}</span>
+                  <input name="settingsEmail" type="email" [(ngModel)]="settingsEmail" [disabled]="settingsBusy" />
+                </label>
+                <label class="login-field">
+                  <span>{{ t('phone') }}</span>
+                  <input name="settingsPhone" type="tel" [(ngModel)]="settingsPhone" [disabled]="settingsBusy" />
+                </label>
+              </div>
+            </section>
+
+            @if (settingsError) { <p class="login-error">{{ settingsError }}</p> }
+            <div class="settings-actions">
+              <button type="button" class="button button--secondary" (click)="resetApplicationSettingsEditor()" [disabled]="settingsBusy">{{ t('cancel') }}</button>
+              <button type="submit" class="button button--primary" [disabled]="settingsBusy">{{ settingsBusy ? t('saving') : t('save') }}</button>
+            </div>
+          </form>
+        </section>
+      } @else {
+        <section class="meter-configuration-panel">
+          <div class="meter-configuration-panel__header">
+            <div><h2>{{ t('metersConfiguration') }}</h2></div>
+          </div>
+
+          <div class="meter-configuration-layout">
+            <div class="meter-configuration-list">
+              @if (configuredMeters.length === 0) {
+                <p class="configuration-empty">{{ t('noMeters') }}</p>
+              } @else {
+                <div class="meter-global-search">
+                  <label class="meter-global-search__field">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                      <path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    <input type="search"
+                      [(ngModel)]="meterFilterText"
+                      [ngModelOptions]="{standalone: true}"
+                      placeholder="" />
+                    @if (meterFilterText) {
+                      <button type="button"
+                        class="meter-global-search__clear"
+                        (click)="meterFilterText = ''"
+                        [attr.title]="t('clearFilters')"
+                        [attr.aria-label]="t('clearFilters')">×</button>
+                    }
+                  </label>
+                </div>
+
+                @if (visibleConfiguredMeters.length === 0) {
+                  <p class="configuration-empty configuration-empty--filtered">{{ t('noMatchingMeters') }}</p>
+                } @else {
+                <div class="meters-table-wrap">
+                  <table class="meters-table">
+                    <thead>
+                      <tr>
+                        <th>{{ t('client') }}</th>
+                        <th>{{ t('site') }}</th>
+                        <th>{{ t('edgeId') }}</th>
+                        <th>{{ t('uniqueName') }}</th>
+                        <th><button type="button" class="meter-sort-button" (click)="setMeterSort('name')">{{ t('meterName') }} <span>{{ meterSortIndicator('name') }}</span></button></th>
+                        <th><button type="button" class="meter-sort-button meter-sort-button--multiline" (click)="setMeterSort('instantaneousAlarmOnKw')">{{ t('instantaneousAlarm') }} <span>{{ meterSortIndicator('instantaneousAlarmOnKw') }}</span><small>{{ t('alarmOn') }} / {{ t('alarmOff') }}</small></button></th>
+                        <th><button type="button" class="meter-sort-button meter-sort-button--multiline" (click)="setMeterSort('quarterHourAlarmOnKw')">{{ t('quarterHourAlarm') }} <span>{{ meterSortIndicator('quarterHourAlarmOnKw') }}</span><small>{{ t('alarmOn') }} / {{ t('alarmOff') }}</small></button></th>
+                        <th>{{ t('enabled') }}</th>
+                        <th>{{ t('actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (meter of visibleConfiguredMeters; track meter.id) {
+                        <tr
+                          [class.meters-table__row--editing]="editingMeterId === meter.id"
+                          [class.meters-table__row--disabled]="!meter.enabled"
+                        >
+                          <td [attr.data-label]="t('client')"><strong>{{ meter.clientName }}</strong></td>
+                          <td [attr.data-label]="t('site')"><strong>{{ meter.siteName }}</strong></td>
+                          <td [attr.data-label]="t('edgeId')"><code>{{ meter.edgeId }}</code></td>
+                          <td [attr.data-label]="t('uniqueName')"><code>{{ meter.uniqueKey }}</code></td>
+                          <td class="meters-table__name" [attr.data-label]="t('meterName')">{{ meter.name }}</td>
+                          <td class="meters-table__number" [attr.data-label]="t('instantaneousAlarm')">{{ meter.instantaneousAlarmOnKw ?? '—' }} / {{ meter.instantaneousAlarmOffKw ?? '—' }}</td>
+                          <td class="meters-table__number" [attr.data-label]="t('quarterHourAlarm')">{{ meter.quarterHourAlarmOnKw ?? '—' }} / {{ meter.quarterHourAlarmOffKw ?? '—' }}</td>
+                          <td class="meters-table__enabled" [attr.data-label]="t('enabled')">
+                            <span class="meter-status-dot" [class.meter-status-dot--off]="!meter.enabled"></span>
+                            {{ meter.enabled ? t('enabled') : '—' }}
+                          </td>
+                          <td [attr.data-label]="t('actions')">
+                            <div class="meters-table__actions">
+                              <button type="button" class="table-action table-action--icon"
+                                (click)="moveMeterUp(meter)" [disabled]="metersBusy || !canMoveMeterUp(meter)"
+                                [attr.aria-label]="t('moveUp')" [attr.title]="t('moveUp')">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg>
+                              </button>
+                              <button type="button" class="table-action table-action--icon"
+                                (click)="moveMeterDown(meter)" [disabled]="metersBusy || !canMoveMeterDown(meter)"
+                                [attr.aria-label]="t('moveDown')" [attr.title]="t('moveDown')">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 10 6 6 6-6"/></svg>
+                              </button>
+                              <button type="button" class="table-action table-action--icon"
+                                (click)="startEditMeter(meter)" [disabled]="metersBusy"
+                                [attr.aria-label]="t('editMeter')" [attr.title]="t('editMeter')">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path d="M4 16.5V20h3.5L18.1 9.4l-3.5-3.5L4 16.5Zm16.7-9.8a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0l-1.6 1.6 3.5 3.5 1.5-1.7Z" fill="currentColor"/>
+                                </svg>
+                              </button>
+                              <button type="button" class="table-action table-action--icon table-action--danger"
+                                (click)="deleteMeter(meter)" [disabled]="metersBusy"
+                                [attr.aria-label]="t('deleteMeter')" [attr.title]="t('deleteMeter')">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                  <path d="M8 4h8l1 2h4v2H3V6h4l1-2Zm1 6h2v8H9v-8Zm4 0h2v8h-2v-8Zm-6 0h2v8H7v-8Zm-1 10h12l1-11H5l1 11Z" fill="currentColor"/>
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+                }
+              }
+            </div>
+
+            <form class="meter-editor">
+              <h3>{{ editingMeterId === null ? t('addMeter') : t('editMeter') }}</h3>
+              <label class="login-field">
+                <span>{{ t('client') }}</span>
+                <select name="meterClientId" [(ngModel)]="meterClientId" (change)="onMeterClientChanged()" [disabled]="metersBusy">
+                  @for (client of (authenticatedRole === 'ADMIN' ? adminClients : clients); track client.clientId) {
+                    <option [value]="client.clientId">{{ client.name }}</option>
+                  }
+                </select>
+              </label>
+              <label class="login-field">
+                <span [attr.title]="t('siteIdHint')">{{ t('site') }}</span>
+                <select name="meterSiteId" [(ngModel)]="meterSiteId" (change)="onMeterSiteChanged()" [disabled]="metersBusy">
+                  @for (site of meterEditorSites(); track site.id) {
+                    <option [value]="site.siteId">{{ site.name }}</option>
+                  }
+                </select>
+              </label>
+              <label class="login-field">
+                <span [attr.title]="t('edgeIdHint')">{{ t('edgeId') }}</span>
+                <select name="meterEdgeId" [(ngModel)]="meterEdgeId" (change)="onMeterEdgeChanged()" [disabled]="metersBusy || meterEditorEdgeIds().length === 0">
+                  @for (edgeId of meterEditorEdgeIds(); track edgeId) {
+                    <option [value]="edgeId">{{ edgeId }}</option>
+                  }
+                </select>
+                @if (meterEditorEdgeIds().length === 0) {
+                  <small class="meter-editor__field-hint">{{ language === 'pl' ? 'Brak znanego Edge dla wybranego oddziału.' : 'No known Edge for the selected site.' }}</small>
+                }
+              </label>
+              <label class="login-field">
+                <span [attr.title]="t('uniqueNameHint')">{{ t('uniqueName') }}</span>
+                <select name="meterUniqueName" [(ngModel)]="meterUniqueName" [disabled]="metersBusy || meterEditorMeterIds().length === 0">
+                  @for (meterId of meterEditorMeterIds(); track meterId) {
+                    <option [value]="meterId">{{ meterId }}</option>
+                  }
+                </select>
+                @if (meterEditorMeterIds().length === 0) {
+                  <small class="meter-editor__field-hint">{{ language === 'pl' ? 'Brak wolnych wykrytych liczników dla wybranego Edge.' : 'No unassigned detected meters for the selected Edge.' }}</small>
+                }
+              </label>
+              <label class="login-field">
+                <span>{{ t('meterName') }}</span>
+                <input name="meterName" type="text" [(ngModel)]="meterName" [disabled]="metersBusy" />
+              </label>
+              <div class="alarm-config-grid">
+                <fieldset class="alarm-config-group">
+                  <legend>{{ t('instantaneousAlarm') }}</legend>
+                  <div class="dialog-grid">
+                    <label class="login-field"><span>{{ t('alarmOn') }}</span><input name="meterInstantaneousAlarmOnKw" type="number" min="0" step="0.001" [(ngModel)]="meterInstantaneousAlarmOnKw" [disabled]="metersBusy" /></label>
+                    <label class="login-field"><span>{{ t('alarmOff') }}</span><input name="meterInstantaneousAlarmOffKw" type="number" min="0" step="0.001" [(ngModel)]="meterInstantaneousAlarmOffKw" [disabled]="metersBusy" /></label>
+                  </div>
+                </fieldset>
+                <fieldset class="alarm-config-group">
+                  <legend>{{ t('quarterHourAlarm') }}</legend>
+                  <div class="dialog-grid">
+                    <label class="login-field"><span>{{ t('alarmOn') }}</span><input name="meterQuarterHourAlarmOnKw" type="number" min="0" step="0.001" [(ngModel)]="meterQuarterHourAlarmOnKw" [disabled]="metersBusy" /></label>
+                    <label class="login-field"><span>{{ t('alarmOff') }}</span><input name="meterQuarterHourAlarmOffKw" type="number" min="0" step="0.001" [(ngModel)]="meterQuarterHourAlarmOffKw" [disabled]="metersBusy" /></label>
+                  </div>
+                </fieldset>
+              </div>
+              <p class="dialog-hint">{{ t('hysteresisHint') }}</p>
+              <label class="toggle-field meter-enabled-field">
+                <input name="meterEnabled" type="checkbox" [(ngModel)]="meterEnabled" [disabled]="metersBusy" />
+                <span>{{ t('enabled') }}</span>
+              </label>
+              @if (metersError) {
+                <p class="login-error">{{ metersError }}</p>
+              }
+              <div class="login-dialog__actions meter-editor__actions">
+                <button type="button" class="button button--secondary" (click)="startAddMeter()" [disabled]="metersBusy">{{ t('cancel') }}</button>
+                <button type="button" class="button button--primary" (click)="createMeterFromEditor()" [disabled]="!canCreateMeterFromEditor()">
+                  {{ t('create') }}
+                </button>
+                <button type="button" class="button button--primary" (click)="updateMeterFromEditor()" [disabled]="metersBusy || editingMeterId === null">
+                  {{ t('update') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      }
+    </main>
+  }
+
+  @if (infoOpen) {
+    <div class="modal-backdrop" (click)="closeInfo()">
+      <section class="login-dialog info-dialog" role="dialog" aria-modal="true" [attr.aria-label]="infoTitle()" (click)="$event.stopPropagation()">
+        <button type="button" class="dialog-close info-dialog__close" (click)="closeInfo()" [attr.aria-label]="t('close')">×</button>
+
+        <div class="info-dialog__brand">
+          <strong>PowerGuard</strong>
+          @if (frontendVersion) {
+            <span>{{ frontendVersionLabel() }}: {{ frontendVersion }}</span>
+          }
+          @if (backendVersion && backendVersion !== '—') {
+            <span>{{ backendVersionLabel() }}: {{ backendVersion }}</span>
+          }
+          @if (infoEdgeVersion()) {
+            <span>{{ edgeVersionLabel() }}: {{ infoEdgeVersion() }}</span>
+          }
+        </div>
+
+        @if (hasInfoEndUserSection()) {
+          <div class="info-dialog__section">
+            <span class="info-dialog__label">{{ t('endUser') }}</span>
+            @if (applicationSettings.companyName) { <strong>{{ applicationSettings.companyName }}</strong> }
+            @if (applicationSettings.installationName) { <span>{{ applicationSettings.installationName }}</span> }
+            @if (applicationSettings.address) { <span class="info-dialog__multiline">{{ applicationSettings.address }}</span> }
+            @if (applicationSettings.nip) { <span>{{ t('nip') }}: {{ applicationSettings.nip }}</span> }
+
+            @if (hasInfoContactSection()) {
+              <div class="info-dialog__contact">
+                <span class="info-dialog__label">{{ t('contactPerson') }}</span>
+                @if (applicationSettings.contactPerson) { <strong>{{ applicationSettings.contactPerson }}</strong> }
+                @if (applicationSettings.email) { <span>{{ applicationSettings.email }}</span> }
+                @if (applicationSettings.phone) { <span>{{ applicationSettings.phone }}</span> }
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
+
+  @if (loginOpen) {
+    <div class="modal-backdrop" (click)="closeLogin()">
+      <section class="login-dialog" role="dialog" aria-modal="true" [attr.aria-label]="t('login')" (click)="$event.stopPropagation()">
+        <div class="login-dialog__header">
+          <h2>{{ t('login') }}</h2>
+          <button type="button" class="dialog-close" (click)="closeLogin()" [attr.aria-label]="t('close')">×</button>
+        </div>
+
+        <form (ngSubmit)="submitLogin()">
+          <label class="login-field">
+            <span>{{ t('username') }}</span>
+            <input
+              id="powerguard-login-username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              [(ngModel)]="loginUsername"
+              [disabled]="loginBusy"
+            />
+          </label>
+
+          <label class="login-field">
+            <span>{{ t('password') }}</span>
+            <input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              [(ngModel)]="loginPassword"
+              [disabled]="loginBusy"
+            />
+          </label>
+
+          @if (loginError) {
+            <p class="login-error">{{ loginError }}</p>
+          }
+
+          <div class="login-dialog__actions">
+            <button type="button" class="button button--secondary" (click)="closeLogin()" [disabled]="loginBusy">
+              {{ t('cancel') }}
+            </button>
+            <button type="submit" class="button button--primary" [disabled]="loginBusy || !loginUsername.trim() || !loginPassword">
+              {{ loginBusy ? t('signingIn') : t('login') }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+  @if (profileOpen) {
+    <div class="modal-backdrop" (click)="closeProfile()">
+      <section class="login-dialog profile-dialog" role="dialog" aria-modal="true" [attr.aria-label]="t('profile')" (click)="$event.stopPropagation()">
+        <div class="login-dialog__header">
+          <h2>{{ t('profile') }}</h2>
+          <button type="button" class="dialog-close" (click)="closeProfile()" [attr.aria-label]="t('close')">×</button>
+        </div>
+
+        <form (ngSubmit)="saveProfile()">
+          <label class="login-field">
+            <span>{{ t('username') }}</span>
+            <input name="profileUsername" type="text" [(ngModel)]="profileUsername" [disabled]="profileBusy" />
+          </label>
+
+          <div class="dialog-grid">
+            <label class="login-field">
+              <span>{{ t('firstname') }}</span>
+              <input name="profileFirstname" type="text" [(ngModel)]="profileFirstname" [disabled]="profileBusy" />
+            </label>
+            <label class="login-field">
+              <span>{{ t('lastname') }}</span>
+              <input name="profileLastname" type="text" [(ngModel)]="profileLastname" [disabled]="profileBusy" />
+            </label>
+          </div>
+
+          <div class="dialog-grid">
+            <label class="login-field">
+              <span>{{ t('email') }}</span>
+              <input name="profileEmail" type="email" [(ngModel)]="profileEmail" [disabled]="profileBusy" />
+            </label>
+            <label class="login-field">
+              <span>{{ t('phone') }}</span>
+              <input name="profilePhone" type="tel" [(ngModel)]="profilePhone" [disabled]="profileBusy" />
+            </label>
+          </div>
+
+          <div class="dialog-grid">
+            <label class="login-field">
+              <span>{{ t('newPassword') }}</span>
+              <input name="profilePassword" type="password" autocomplete="new-password" [(ngModel)]="profilePassword" [disabled]="profileBusy" />
+            </label>
+            <label class="login-field">
+              <span>{{ t('confirmPassword') }}</span>
+              <input name="profilePasswordConfirm" type="password" autocomplete="new-password" [(ngModel)]="profilePasswordConfirm" [disabled]="profileBusy" />
+            </label>
+          </div>
+
+          <p class="dialog-hint">{{ t('optionalPasswordHint') }}</p>
+          <div class="login-dialog__actions">
+            <button type="button" class="button button--secondary" (click)="closeProfile()" [disabled]="profileBusy">
+              {{ t('cancel') }}
+            </button>
+            <button type="submit" class="button button--primary" [disabled]="profileBusy || !profileUsername.trim()">
+              {{ profileBusy ? t('saving') : t('save') }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (usersOpen) {
+    <div class="modal-backdrop" (click)="closeUsers()">
+      <section class="users-dialog" role="dialog" aria-modal="true" [attr.aria-label]="t('manageUsers')" (click)="$event.stopPropagation()">
+        <div class="login-dialog__header">
+          <h2>{{ t('manageUsers') }}</h2>
+          <button type="button" class="dialog-close" (click)="closeUsers()" [attr.aria-label]="t('close')">×</button>
+        </div>
+
+        <div class="users-layout">
+          <div class="users-list-wrap">
+            <div class="users-table-wrap">
+              <table class="users-table">
+                <thead>
+                  <tr>
+                    <th>{{ t('username') }}</th>
+                    <th>{{ t('firstname') }}</th>
+                    <th>{{ t('lastname') }}</th>
+                    <th>{{ t('email') }}</th>
+                    <th>{{ t('phone') }}</th>
+                    <th>{{ t('role') }}</th>
+                    <th>{{ t('siteAccess') }}</th>
+                    <th>{{ t('enabled') }}</th>
+                    <th>{{ t('actions') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of users; track user.id) {
+                    <tr [class.users-table__self]="user.id === authenticatedUserId">
+                      <td [attr.data-label]="t('username')">{{ user.username }}</td>
+                      <td [attr.data-label]="t('firstname')">{{ user.firstname || '—' }}</td>
+                      <td [attr.data-label]="t('lastname')">{{ user.lastname || '—' }}</td>
+                      <td [attr.data-label]="t('email')">{{ user.email || '—' }}</td>
+                      <td [attr.data-label]="t('phone')">{{ user.phone || '—' }}</td>
+                      <td [attr.data-label]="t('role')">{{ roleLabel(user.role) }}</td>
+                      <td class="users-table__sites" [attr.data-label]="t('siteAccess')">{{ user.role === 'ADMIN' ? t('allSites') : userSiteNames(user) }}</td>
+                      <td [attr.data-label]="t('enabled')">{{ user.enabled ? '✓' : '—' }}</td>
+                      <td class="users-table__actions" [attr.data-label]="t('actions')">
+                        <button
+                            type="button"
+                            class="table-action table-action--icon"
+                            (click)="startEditUser(user)"
+                            [disabled]="usersBusy"
+                            [attr.title]="t('edit')"
+                            [attr.aria-label]="t('edit')"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 20h9"></path>
+                              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            class="table-action table-action--icon table-action--danger"
+                            (click)="deleteManagedUser(user)"
+                            [disabled]="usersBusy"
+                            [attr.title]="t('delete')"
+                            [attr.aria-label]="t('delete')"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 6h18"></path>
+                              <path d="M8 6V4h8v2"></path>
+                              <path d="M19 6l-1 14H6L5 6"></path>
+                              <path d="M10 11v5M14 11v5"></path>
+                            </svg>
+                          </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <form class="user-editor" (ngSubmit)="saveManagedUser()">
+            <h3>{{ editingUserId === null ? t('addUser') : t('editUser') }}</h3>
+
+            <label class="login-field">
+              <span>{{ t('username') }}</span>
+              <input name="managedUsername" type="text" [(ngModel)]="managedUsername" [disabled]="usersBusy" />
+            </label>
+
+            <div class="dialog-grid">
+              <label class="login-field">
+                <span>{{ t('firstname') }}</span>
+                <input name="managedFirstname" type="text" [(ngModel)]="managedFirstname" [disabled]="usersBusy" />
+              </label>
+              <label class="login-field">
+                <span>{{ t('lastname') }}</span>
+                <input name="managedLastname" type="text" [(ngModel)]="managedLastname" [disabled]="usersBusy" />
+              </label>
+            </div>
+
+            <div class="dialog-grid">
+              <label class="login-field">
+                <span>{{ t('email') }}</span>
+                <input name="managedEmail" type="email" [(ngModel)]="managedEmail" [disabled]="usersBusy" />
+              </label>
+              <label class="login-field">
+                <span>{{ t('phone') }}</span>
+                <input name="managedPhone" type="tel" [(ngModel)]="managedPhone" [disabled]="usersBusy" />
+              </label>
+            </div>
+
+            <div class="dialog-grid">
+              <label class="login-field">
+                <span>{{ t('newPassword') }}</span>
+                <input name="managedPassword" type="password" autocomplete="new-password" [(ngModel)]="managedPassword" [disabled]="usersBusy" />
+              </label>
+              <label class="login-field">
+                <span>{{ t('confirmPassword') }}</span>
+                <input name="managedPasswordConfirm" type="password" autocomplete="new-password" [(ngModel)]="managedPasswordConfirm" [disabled]="usersBusy" />
+              </label>
+            </div>
+
+            @if (editingUserId !== null) {
+              <p class="dialog-hint">{{ t('optionalPasswordHint') }}</p>
+            }
+
+            <div class="dialog-grid">
+              <label class="login-field">
+                <span>{{ t('role') }}</span>
+                <select name="managedRole" [(ngModel)]="managedRole" [disabled]="usersBusy || authenticatedRole === 'INSTALATOR'">
+                  <option value="USER">{{ t('user') }}</option>
+                  @if (authenticatedRole === 'ADMIN') {
+                    <option value="INSTALATOR">{{ roleLabel('INSTALATOR') }}</option>
+                    <option value="ADMIN">{{ t('admin') }}</option>
+                  }
+                </select>
+              </label>
+              <label class="toggle-field">
+                <input name="managedEnabled" type="checkbox" [(ngModel)]="managedEnabled" [disabled]="usersBusy" />
+                <span>{{ t('enabled') }}</span>
+              </label>
+            </div>
+
+            @if (managedRole === 'ADMIN') {
+              <div class="user-site-access user-site-access--all">
+                <span class="user-site-access__title">{{ t('siteAccess') }}</span>
+                <span>{{ t('adminAllSitesHint') }}</span>
+              </div>
+            } @else {
+              <fieldset class="user-site-access">
+                <legend>{{ t('siteAccess') }}</legend>
+                @if (assignableSites.length === 0) {
+                  <p class="dialog-hint">{{ t('noAssignableSites') }}</p>
+                } @else {
+                  <details class="user-site-selector">
+                    <summary>
+                      <span>{{ managedSiteSelectionSummary() }}</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </summary>
+                    <div class="user-site-selector__options">
+                      @for (site of assignableSites; track site.id) {
+                        <label class="user-site-selector__option">
+                          <input
+                            type="checkbox"
+                            [checked]="isManagedSiteSelected(site.id)"
+                            (change)="setManagedSiteSelected(site.id, $any($event.target).checked)"
+                            [disabled]="usersBusy"
+                          />
+                          <span>{{ site.clientName }} / {{ site.name }}</span>
+                        </label>
+                      }
+                    </div>
+                  </details>
+                }
+              </fieldset>
+            }
+
+            @if (usersError) {
+              <p class="login-error">{{ usersError }}</p>
+            }
+
+            <div class="login-dialog__actions">
+              <button type="button" class="button button--secondary" (click)="startAddUser()" [disabled]="usersBusy">
+                {{ t('cancel') }}
+              </button>
+              <button type="submit" class="button button--primary" [disabled]="usersBusy || !managedUsername.trim() || (editingUserId === null && !managedPassword)">
+                {{ editingUserId === null ? t('create') : t('update') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  }
+
+
+  @if (toast.current()) {
+    <div
+      class="toast-message"
+      [class.toast-message--success]="toast.current()!.kind === 'success'"
+      [class.toast-message--error]="toast.current()!.kind === 'error'"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="toast-message__icon" aria-hidden="true">
+        {{ toast.current()!.kind === 'success' ? '✓' : '!' }}
+      </span>
+      <span class="toast-message__text">{{ toast.current()!.message }}</span>
+      <button type="button" class="toast-message__close" (click)="toast.close()" [attr.aria-label]="t('close')">×</button>
+    </div>
+  }
+
+</div>

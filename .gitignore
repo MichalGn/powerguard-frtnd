@@ -41,3 +41,16 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+##[MG]
+# PowerGuard local/runtime files
+.env
+.env.*
+!.env.example
+
+zRun/pgdata/
+zRun/mosquitto/data/
+zRun/mosquitto/log/
+zRun/deployments/
+
+*.log
