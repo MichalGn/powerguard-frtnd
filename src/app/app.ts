@@ -1660,6 +1660,7 @@ export class App implements OnDestroy {
     }
 
     const currentQuarter = this.currentQuarterIndex(now);
+    let quarterChanged = false;
 
     this.meters.forEach(meter => {
       if (meter.quarterIndex === currentQuarter) {
@@ -1667,21 +1668,27 @@ export class App implements OnDestroy {
         return;
       }
 
-      // The UI quarter changes exactly at :00/:15/:30/:45, independently of
-      // the meter read cadence. Do not keep showing the previous quarter for
-      // the few seconds before the first new-quarter telegram arrives.
+      // Roll over all meter cards at the same clock boundary. Do not fabricate
+      // a 0 kW reading in a new quarter before that meter has reported one.
+      quarterChanged = true;
       meter.quarterIndex = currentQuarter;
-      meter.currentQuarterPowerKw = 0;
+      meter.currentQuarterPowerKw = null;
       meter.quarterProgress = 0;
-
       if (this.isSelectedToday()) {
         const index = now.getHours() * 4 + Math.floor(now.getMinutes() / 15);
         if (index >= 0 && index < meter.completedQuarterPowers.length) {
-          meter.completedQuarterPowers[index] = 0;
-          meter.history[index] = 0;
+          meter.completedQuarterPowers[index] = null;
+          meter.history[index] = null;
         }
       }
+      this.rebuildMeter(meter, now);
     });
+
+    // Synchronize completed quarter bars for both meters from persisted data.
+    // Live telemetry will populate each new current-quarter bar independently.
+    if (quarterChanged && this.rangeIncludesToday()) {
+      this.meters.forEach(meter => this.loadRange(meter, true));
+    }
   }
 
   private isTimestampInCurrentQuarter(value: string | null | undefined, now = new Date()): boolean {
