@@ -83,7 +83,7 @@
         <button type="button" (click)="setRangeDays(7)">7d</button>
         <button type="button" (click)="setRangeDays(30)">30d</button>
       </div>
-      <button type="button" class="today-button" (click)="selectToday()" [disabled]="isSelectedToday()" [attr.title]="t('today')">
+      <button type="button" class="today-button" (click)="selectToday()" [attr.title]="t('today')">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M7 2h2v2h6V2h2v2h1.5A2.5 2.5 0 0 1 21 6.5v12A2.5 2.5 0 0 1 18.5 21h-13A2.5 2.5 0 0 1 3 18.5v-12A2.5 2.5 0 0 1 5.5 4H7V2Zm11.5 7h-13v9.5c0 .28.22.5.5.5h12c.28 0 .5-.22.5-.5V9ZM12 11a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"></path>
         </svg>
@@ -294,7 +294,7 @@
   </header>
 
   @if (!authenticated) {
-  <main class="dashboard">
+  <main class="dashboard" [class.dashboard--single-row]="visibleMeters.length <= 2">
 
     <section
       class="meter-grid"
@@ -307,7 +307,10 @@
         <article class="meter-card"
           [class.meter-card--alarm-unack]="hasUnacknowledgedAlarm(meter)"
           [class.meter-card--alarm-ack]="hasAcknowledgedActiveAlarm(meter)"
-          [class.meter-card--expanded]="isMeterExpanded(meter)">
+          [class.meter-card--expanded]="isMeterExpanded(meter)"
+          [class.meter-card--network]="meter.chartView === 'network'"
+          [class.meter-card--alarms]="meter.chartView === 'alarms'"
+          [class.meter-card--details-hidden]="meter.chartView === 'power' && meter.detailsCollapsed">
           <header class="meter-card__header">
             <div>
               <div class="meter-card__title-row">
@@ -328,10 +331,10 @@
             </div>
             <div class="meter-card__header-actions">
               <div class="meter-view-toggle" role="group" [attr.aria-label]="t('networkParameters')">
-                <button type="button" [class.active]="meter.chartView === 'power'" (click)="setMeterChartView(meter, 'power')">{{ t('powerChart') }}</button>
+                <button type="button" [class.active]="meter.chartView === 'power'" (click)="setMeterChartView(meter, 'power')">{{ language === 'pl' ? 'Moce' : 'Powers' }}</button>
                 <button type="button" [class.active]="meter.chartView === 'network'" (click)="setMeterChartView(meter, 'network')">{{ t('networkParameters') }}</button>
+                <button type="button" [class.active]="meter.chartView === 'alarms'" (click)="setMeterChartView(meter, 'alarms')">{{ t('alarmHistory') }}</button>
               </div>
-
               <details class="meter-export-menu">
                 <summary
                   class="meter-zoom-button meter-export-button"
@@ -440,7 +443,7 @@
                 </div>
               }
             </div>
-            @if (isSelectedToday()) {
+            @if (rangeIncludesToday()) {
               <div class="quarter-timer" [attr.title]="t('quarterInterval')">
                 <div class="quarter-timer__clock">
                   <span>{{ t('quarterRemaining') }}</span>
@@ -451,8 +454,8 @@
                   <span>{{ quarterEnergyUsagePercent(meter).toFixed(0) }}%</span>
                 </div>
                 <div class="quarter-timer__details">
-                  <span>{{ t('quarterEnergy') }} <strong>{{ formatEnergySoFar(meter) }} / {{ quarterEnergyBudgetKwh(meter).toFixed(2) }} kWh</strong></span>
-                  <span>{{ t('quarterBudget') }} <strong>{{ meter.limitKw.toFixed(1) }} kW</strong></span>
+                  <span>{{ t('quarterEnergy') }} <strong>{{ formatEnergySoFar(meter) }} / {{ formatQuarterEnergyBudget(meter) }} kWh</strong></span>
+                  <span>{{ t('quarterBudget') }} <strong>{{ formatQuarterLimit(meter) }} kW</strong></span>
                 </div>
               </div>
             }
@@ -469,16 +472,19 @@
                 (click)="meter.showQuarterBars = !meter.showQuarterBars">
                 <i class="legend-swatch legend-swatch--bar"></i>{{ t('average15Min') }}
               </button>
+              @if (meter.limitKw !== null) {
               <button type="button" [class.chart-local-legend__off]="!meter.showLimit"
                 (click)="meter.showLimit = !meter.showLimit">
                 <i class="legend-swatch legend-swatch--limit"></i>{{ t('limit') }}
               </button>
+              }
             </div>
             <svg
               class="power-chart"
               [class.power-chart--zoomed]="isPowerChartZoomed(meter)"
               [class.power-chart--panning]="meter.chartPanActive"
-              viewBox="0 0 1200 285"
+              [attr.viewBox]="powerChartViewBox(meter)"
+              [attr.preserveAspectRatio]="'none'"
               role="img"
               [attr.aria-label]="meter.name + ' power chart'"
               (wheel)="onPowerChartWheel($event, meter)"
@@ -519,7 +525,7 @@
               }
               }
 
-              @if (meter.showLimit) {
+              @if (meter.showLimit && meter.limitKw !== null) {
               <line
                 class="limit-line"
                 x1="34"
@@ -532,7 +538,7 @@
                 x="1174"
                 [attr.y]="meter.limitY - 8"
                 text-anchor="end"
-              >{{ t('limit') }} {{ meter.limitKw.toFixed(1) }} kW</text>
+              >{{ t('limit') }} {{ formatQuarterLimit(meter) }} kW</text>
               }
 
               @if (meter.showInstantPower) {
@@ -547,36 +553,98 @@
               }
               }
 
-              @for (tick of xAxisTicks(meter); track tick.label) {
-                <line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="244" y2="249"></line>
-                <text class="axis-label axis-label--x" [attr.x]="tick.x" y="270" text-anchor="middle">{{ tick.label }}</text>
+              @for (tick of xAxisTicks(meter); track $index) {
+                <line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" [attr.y1]="powerChartBottom(meter)" [attr.y2]="powerChartBottom(meter) + 5"></line>
+                <text class="axis-label axis-label--x" [attr.x]="tick.x" [attr.y]="powerChartXAxisLabelY(meter)" text-anchor="middle">{{ tick.label }}</text>
               }
             </svg>
           </div>
 
-          } @else {
+          } @else if (meter.chartView === 'network') {
             <div class="network-charts">
               <section class="network-chart-card">
                 <header><div><strong>{{ t('powerChart') }}</strong><span>{{ meter.powerRange }} kW</span></div><div class="network-live-values"><b>{{ formatNetworkValue(meter.currentPowerKw, 2) }} kW</b></div></header>
-                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@for (segment of meter.powerSegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--power"></polyline>}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'power')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.powerRange, 'kW'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@for (segment of meter.powerSegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--power"></polyline>}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'power') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <section class="network-chart-card">
                 <header><div><strong>{{ t('voltage') }}</strong><span>{{ meter.voltageRange }} V</span></div><div class="network-live-values">@if (hasPhaseData(meter,'voltage',1)) {<b>L1 {{ formatNetworkValue(meter.voltageL1V) }} V</b>} @if (hasPhaseData(meter,'voltage',2)) {<b>L2 {{ formatNetworkValue(meter.voltageL2V) }} V</b>} @if (hasPhaseData(meter,'voltage',3)) {<b>L3 {{ formatNetworkValue(meter.voltageL3V) }} V</b>} @if (noVoltageData(meter)) {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
-                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@if (hasPhaseData(meter,'voltage',1)) {@for (segment of meter.voltageL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'voltage',2)) {@for (segment of meter.voltageL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'voltage',3)) {@for (segment of meter.voltageL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'voltage')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.voltageRange, 'V'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@if (hasPhaseData(meter,'voltage',1)) {@for (segment of meter.voltageL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'voltage',2)) {@for (segment of meter.voltageL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'voltage',3)) {@for (segment of meter.voltageL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'voltage') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <section class="network-chart-card">
                 <header><div><strong>{{ t('current') }}</strong><span>{{ meter.currentRange }} A</span></div><div class="network-live-values">@if (hasPhaseData(meter,'current',1)) {<b>L1 {{ formatNetworkValue(meter.currentL1A, 2) }} A</b>} @if (hasPhaseData(meter,'current',2)) {<b>L2 {{ formatNetworkValue(meter.currentL2A, 2) }} A</b>} @if (hasPhaseData(meter,'current',3)) {<b>L3 {{ formatNetworkValue(meter.currentL3A, 2) }} A</b>} @if (noCurrentData(meter)) {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
-                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@if (hasPhaseData(meter,'current',1)) {@for (segment of meter.currentL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'current',2)) {@for (segment of meter.currentL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'current',3)) {@for (segment of meter.currentL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'current')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.currentRange, 'A'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@if (hasPhaseData(meter,'current',1)) {@for (segment of meter.currentL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'current',2)) {@for (segment of meter.currentL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'current',3)) {@for (segment of meter.currentL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'current') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <section class="network-chart-card">
                 <header><div><strong>{{ t('frequency') }}</strong><span>{{ meter.frequencyRange }} Hz</span></div><div class="network-live-values">@if (!noFrequencyData(meter)) {<b>{{ formatNetworkValue(meter.frequencyHz, 2) }} Hz</b>} @else {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
-                <svg viewBox="0 0 720 138" class="network-mini-chart"><line x1="10" x2="710" y1="108" y2="108" class="network-grid-line"></line>@for (segment of meter.frequencySegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--frequency"></polyline>}@for (tick of networkXAxisTicks(meter); track tick.label) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="108" y2="113"></line><text class="network-axis-label" [attr.x]="tick.x" y="130" text-anchor="middle">{{ tick.label }}</text>}</svg>
+                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'frequency')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.frequencyRange, 'Hz'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@for (segment of meter.frequencySegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--frequency"></polyline>}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'frequency') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <div class="network-legend">@if (hasPhaseData(meter,'voltage',1) || hasPhaseData(meter,'current',1)) {<span><i class="network-dot network-dot--l1"></i>L1</span>} @if (hasPhaseData(meter,'voltage',2) || hasPhaseData(meter,'current',2)) {<span><i class="network-dot network-dot--l2"></i>L2</span>} @if (hasPhaseData(meter,'voltage',3) || hasPhaseData(meter,'current',3)) {<span><i class="network-dot network-dot--l3"></i>L3</span>}</div>
             </div>
+          } @else {
+            <section class="meter-alarm-history meter-alarm-history--tab">
+              <div class="meter-alarm-history__title">{{ t('alarmHistory') }}</div>
+              @if (meter.alarmHistory.length === 0) {
+                <div class="meter-alarm-history__empty">{{ t('noAlarms') }}</div>
+              } @else {
+                <div class="meter-alarm-history__rows">
+                  <div class="meter-alarm-row meter-alarm-row--head">
+                    <span>{{ t('alarmLabel') }}</span>
+                    <span>{{ t('alarmPeriod') }}</span>
+                    <span class="meter-alarm-row__duration meter-alarm-row__header">
+                      <span>{{ t('alarmDuration') }}</span>
+                      <small>[hh:mm:ss]</small>
+                    </span>
+                    <span class="meter-alarm-row__max meter-alarm-row__header">
+                      <span>{{ t('alarmMaximumPower') }}</span>
+                      <small>[kW]</small>
+                    </span>
+                  </div>
+                  @for (alarm of meter.alarmHistory; track alarm.id) {
+                    <div class="meter-alarm-row" [class.meter-alarm-row--active]="alarm.active" [class.meter-alarm-row--unack]="alarm.active && !alarm.acknowledged" [class.meter-alarm-row--ack]="alarm.active && alarm.acknowledged">
+                      <span class="meter-alarm-row__type">
+                        {{ alarmTypeLabel(alarm.type) }}
+                        @if (alarm.active && alarm.acknowledged) { <span class="alarm-ack-label">{{ t('acknowledged') }}</span> }
+                      </span>
+                      <span class="meter-alarm-row__period">{{ formatAlarmPeriod(alarm.startedAt, alarm.endedAt) }}</span>
+                      <span class="meter-alarm-row__duration">{{ formatAlarmDuration(alarm.startedAt, alarm.endedAt) }}</span>
+                      <span class="meter-alarm-row__max">{{ formatPower(alarmMaximumPower(alarm)) }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </section>
           }
 
-          <section class="communication-diagnostics">
+          @if (meter.chartView === 'power' || meter.chartView === 'network') {
+            <div class="meter-details-divider"
+                 [class.meter-details-divider--collapsed]="meter.detailsCollapsed">
+              <button type="button"
+                class="meter-details-divider__button"
+                (click)="toggleMeterDetails(meter)"
+                [attr.title]="meter.detailsCollapsed
+                  ? (language === 'pl' ? 'Pokaż szczegóły' : 'Show details')
+                  : (language === 'pl' ? 'Ukryj szczegóły' : 'Hide details')"
+                [attr.aria-label]="meter.detailsCollapsed
+                  ? (language === 'pl' ? 'Pokaż diagnostykę komunikacji' : 'Show communication diagnostics')
+                  : (language === 'pl' ? 'Ukryj diagnostykę komunikacji' : 'Hide communication diagnostics')"
+                [attr.aria-pressed]="meter.detailsCollapsed">
+                @if (meter.detailsCollapsed) {
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 15l6-6 6 6"></path>
+                  </svg>
+                } @else {
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9l6 6 6-6"></path>
+                  </svg>
+                }
+              </button>
+            </div>
+          }
+
+          @if ((meter.chartView === 'power' || meter.chartView === 'network') && !meter.detailsCollapsed) {
+          <section class="communication-diagnostics" [class.communication-diagnostics--power]="meter.chartView === 'power'">
             <div class="communication-diagnostics__header">
               <strong>{{ language === 'pl' ? 'Diagnostyka komunikacji' : 'Communication diagnostics' }}</strong>
               <div class="communication-diagnostics__legend">
@@ -633,39 +701,7 @@
               </div>
             </div>
           </section>
-
-          <section class="meter-alarm-history">
-            <div class="meter-alarm-history__title">{{ t('alarmHistory') }}</div>
-            @if (meter.alarmHistory.length === 0) {
-              <div class="meter-alarm-history__empty">{{ t('noAlarms') }}</div>
-            } @else {
-              <div class="meter-alarm-history__rows">
-                <div class="meter-alarm-row meter-alarm-row--head">
-                  <span>{{ t('alarmLabel') }}</span>
-                  <span>{{ t('alarmPeriod') }}</span>
-                  <span class="meter-alarm-row__duration meter-alarm-row__header">
-                    <span>{{ t('alarmDuration') }}</span>
-                    <small>[hh:mm:ss]</small>
-                  </span>
-                  <span class="meter-alarm-row__max meter-alarm-row__header">
-                    <span>{{ t('alarmMaximumPower') }}</span>
-                    <small>[kW]</small>
-                  </span>
-                </div>
-                @for (alarm of meter.alarmHistory; track alarm.id) {
-                  <div class="meter-alarm-row" [class.meter-alarm-row--active]="alarm.active" [class.meter-alarm-row--unack]="alarm.active && !alarm.acknowledged" [class.meter-alarm-row--ack]="alarm.active && alarm.acknowledged">
-                    <span class="meter-alarm-row__type">
-                      {{ alarmTypeLabel(alarm.type) }}
-                      @if (alarm.active && alarm.acknowledged) { <span class="alarm-ack-label">{{ t('acknowledged') }}</span> }
-                    </span>
-                    <span class="meter-alarm-row__period">{{ formatAlarmPeriod(alarm.startedAt, alarm.endedAt) }}</span>
-                    <span class="meter-alarm-row__duration">{{ formatAlarmDuration(alarm.startedAt, alarm.endedAt) }}</span>
-                    <span class="meter-alarm-row__max">{{ formatPower(alarmMaximumPower(alarm)) }}</span>
-                  </div>
-                }
-              </div>
-            }
-          </section>
+          }
 
         </article>
       }

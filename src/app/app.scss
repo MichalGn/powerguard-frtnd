@@ -1871,8 +1871,6 @@ h1 {
   .meter-grid--three, .meter-grid--two { grid-template-columns: 1fr; }
 }
 
-/* 261014c - keep the power SVG at its native aspect ratio.
-   This removes the artificial top/bottom letterboxing visible on narrower cards. */
 .power-chart {
   height: auto;
   min-height: 0;
@@ -2509,7 +2507,12 @@ h1 {
 .network-live-values { display: flex; gap: 9px; color: #42607c; font-size: 9px; }
 .network-live-values b { font-weight: 700; }
 
-.network-mini-chart { width: 100%; height: 64px; display: block; }
+.network-mini-chart {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 720 / 100;
+  display: block;
+}
 .network-grid-line { stroke: rgba(72,105,137,.15); stroke-width: 1; }
 .network-line { fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .network-line--l1 { stroke: #00a97a; }
@@ -5638,8 +5641,6 @@ h1 {
   border-top: 1px solid rgba(21, 60, 105, .08);
 }
 
-
-/* 261011b - application settings */
 .settings-panel {
   width: min(1080px, calc(100vw - 48px));
   margin: 0 auto;
@@ -5673,7 +5674,7 @@ h1 {
 }
 
 /* =========================================================
-   PowerGuard 261011c - responsive layout pass
+    responsive layout pass
    Breakpoints: tablet <= 900px, mobile <= 640px, small mobile <= 420px
    ========================================================= */
 
@@ -6142,7 +6143,6 @@ svg {
   }
 }
 
-/* 261011d - per-user site access */
 .users-table__sites {
   max-width: 260px;
   white-space: normal !important;
@@ -6227,7 +6227,7 @@ svg {
 }
 
 /* =========================================================
-   PowerGuard 261011e - compact filters, site selector,
+   compact filters, site selector,
    and responsive administration tables
    ========================================================= */
 
@@ -6498,7 +6498,6 @@ svg {
   }
 }
 
-/* 261011g - live last-reading age */
 .meter-last-reading {
   display: inline-flex;
   align-items: center;
@@ -6521,8 +6520,6 @@ svg {
   .meter-last-reading > span { display: none; }
 }
 
-
-/* PowerGuard 261012e - simplified global meter search */
 .meter-global-search {
   margin: 0 0 12px;
 }
@@ -6900,7 +6897,6 @@ svg {
 }
 
 
-/* 261014a - alarm table units on a second, smaller header line. */
 .meter-alarm-row--head .meter-alarm-row__header {
   display: flex;
   flex-direction: column;
@@ -6919,8 +6915,6 @@ svg {
   text-transform: none;
 }
 
-
-/* 261014a - compact export format selector below the export icon. */
 .meter-export-menu {
   position: relative;
   display: inline-flex;
@@ -6961,8 +6955,6 @@ svg {
   color: #087c68;
 }
 
-
-/* 261014a - separate create/update actions in the meter editor. */
 .meter-editor__actions {
   display: grid;
   grid-template-columns: auto 1fr 1fr;
@@ -6973,8 +6965,6 @@ svg {
   cursor: not-allowed;
 }
 
-
-/* 261014b - expanded view: use the available viewport more efficiently. */
 @media (min-width: 1000px) and (min-height: 760px) {
   .meter-card--expanded {
     overflow-y: auto !important;
@@ -7003,7 +6993,6 @@ svg {
   }
 }
 
-/* 261014b - make the alarm-history row under the mouse clearly visible. */
 .meter-alarm-row:not(.meter-alarm-row--head) {
   transition: background-color .12s ease, box-shadow .12s ease, color .12s ease;
 }
@@ -7021,7 +7010,6 @@ svg {
 }
 
 
-/* 261014c - export format icons are self-authored inline SVGs (no external icon package/license). */
 .meter-export-menu__popup button {
   display: flex;
   align-items: center;
@@ -7034,7 +7022,6 @@ svg {
   flex: 0 0 15px;
 }
 
-/* 261014c - compact expanded body; no artificial footer-sized blank area. */
 .meter-card--expanded {
   height: auto !important;
 }
@@ -7045,8 +7032,6 @@ svg {
 }
 
 
-/* 261014d - expanded mode uses the full available viewport.
-   Keep the header/live strip compact, then give remaining space to charts and alarms. */
 @media (min-width: 1000px) and (min-height: 700px) {
   .meter-card--expanded {
     top: 74px !important;
@@ -7149,12 +7134,10 @@ svg {
 }
 
 
-/* 261014e - dialogs must always be above an expanded meter card. */
 .modal-backdrop {
   z-index: 5000 !important;
 }
 
-/* 261014e - network diagnostics touch the chart area just like in the power view. */
 .meter-card--expanded .network-charts {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
@@ -7280,7 +7263,6 @@ svg {
 }
 
 
-/* 261014f - measurement-data page uses one internal OBIS scroll area, not the browser scrollbar. */
 body:has(.measurement-data-panel) {
   overflow-y: hidden;
 }
@@ -7397,9 +7379,6 @@ body:has(.measurement-data-panel) {
   }
 }
 
-
-/* 261014i - Dane pomiarowe stays inside the viewport on desktop.
-   Only the OBIS list scrolls vertically. */
 .measurement-data-panel {
   height: calc(100dvh - 150px) !important;
   max-height: calc(100dvh - 150px) !important;
@@ -7469,9 +7448,6 @@ body:has(.measurement-data-panel) {
 }
 
 
-/* 261014k - Measurement data: eliminate the page/global scrollbar.
-   The configuration dashboard itself is constrained to the viewport;
-   only the OBIS table keeps its internal scrollbar. */
 .configuration-dashboard--measurement-data {
   height: calc(100dvh - 72px);
   max-height: calc(100dvh - 72px);
@@ -7526,3 +7502,789 @@ body:has(.measurement-data-panel) {
     max-height: 55vh !important;
   }
 }
+
+
+/* =========================================================
+   PowerGuard 261015f - compact power chart on 1/2 meter dashboards
+   The previous 285px min-height forced a wide 1200:285 SVG into a
+   disproportionately tall box. SVG preserveAspectRatio then created
+   visible empty bands above and below the actual plot and made shorter
+   screens require a page scrollbar.
+   ========================================================= */
+.meter-grid--one .power-chart,
+.meter-grid--two .power-chart {
+  min-height: 0 !important;
+  height: auto !important;
+  aspect-ratio: 1200 / 285;
+}
+
+/* Keep the chart tight to the surrounding sections. */
+.meter-grid--one .chart-wrap,
+.meter-grid--two .chart-wrap {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* On shorter desktop/laptop screens compact the public dashboard enough
+   that the page itself does not need a distracting global scrollbar.
+   Alarm history already owns its internal scrolling when rows overflow. */
+@media (min-width: 901px) and (max-height: 900px) {
+  .dashboard {
+    padding-top: 10px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .meter-grid--one,
+  .meter-grid--two {
+    gap: 12px !important;
+  }
+
+  .meter-grid--one .meter-card:not(.meter-card--expanded) .meter-card__header,
+  .meter-grid--two .meter-card:not(.meter-card--expanded) .meter-card__header {
+    padding-top: 10px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .meter-grid--one .meter-card:not(.meter-card--expanded) .meter-card__live-strip,
+  .meter-grid--two .meter-card:not(.meter-card--expanded) .meter-card__live-strip {
+    margin-bottom: 6px !important;
+  }
+
+  .meter-grid--one .meter-card:not(.meter-card--expanded) .communication-diagnostics,
+  .meter-grid--two .meter-card:not(.meter-card--expanded) .communication-diagnostics {
+    margin-top: 2px !important;
+  }
+
+  .meter-grid--one .meter-card:not(.meter-card--expanded) .meter-alarm-history,
+  .meter-grid--two .meter-card:not(.meter-card--expanded) .meter-alarm-history {
+    margin-bottom: 6px !important;
+  }
+}
+
+
+/* =========================================================
+   PowerGuard 261016a
+   - compact Network parameters view
+   - optional Power focus mode (hide diagnostics + alarms)
+   ========================================================= */
+
+/* The details toggle is intentionally identical in size to the existing
+   export/zoom controls so the header does not grow. */
+/* NETWORK PARAMETERS
+   Four parameter cards use a 2x2 matrix on desktop instead of four tall rows.
+   This cuts the tab height roughly in half while keeping each SVG's natural
+   aspect ratio, so we don't reintroduce the large left/right letterboxing. */
+@media (min-width: 901px) {
+  .meter-card--network:not(.meter-card--expanded) .network-charts {
+    min-height: 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px !important;
+    padding: 4px 12px 5px !important;
+    align-items: stretch;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .network-chart-card > header {
+    padding: 5px 8px 0 !important;
+    min-height: 22px;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .network-chart-card header strong {
+    font-size: 10px;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .network-live-values {
+    gap: 5px;
+    font-size: 8px;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .network-legend {
+    grid-column: 1 / -1;
+    padding: 0 2px !important;
+    min-height: 10px;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .communication-diagnostics {
+    margin-top: 2px !important;
+    padding-top: 4px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .meter-alarm-history {
+    margin-top: 3px !important;
+    margin-bottom: 5px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+}
+
+/* On shorter laptop displays keep network mode especially tight so the
+   browser-level vertical scrollbar is avoided whenever the viewport allows it. */
+@media (min-width: 901px) and (max-height: 820px) {
+  .meter-card--network:not(.meter-card--expanded) .meter-card__header {
+    padding-top: 8px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .meter-card__live-strip {
+    margin-bottom: 3px !important;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .network-charts {
+    gap: 4px !important;
+    padding-top: 2px !important;
+    padding-bottom: 3px !important;
+  }
+
+  .meter-card--network:not(.meter-card--expanded) .communication-row {
+    margin-top: 2px !important;
+  }
+}
+
+
+
+
+/* =========================================================
+   PowerGuard 261016c - power focus mode
+   Keep the meter card width unchanged. When details are hidden, use a real
+   1200x500 SVG geometry so the plotting area itself becomes taller instead of
+   merely making the SVG element taller and letterboxing the same plot.
+   ========================================================= */
+.meter-card--details-hidden {
+  grid-column: auto !important;
+  align-self: start;
+}
+
+.meter-grid--one .meter-card--details-hidden:not(.meter-card--expanded) .power-chart,
+.meter-grid--two .meter-card--details-hidden:not(.meter-card--expanded) .power-chart {
+  width: 100%;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  aspect-ratio: 1200 / 500 !important;
+}
+
+.meter-card--details-hidden:not(.meter-card--expanded) .chart-wrap {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Hide/show control sits on the border between the power chart and the
+   communication/alarm details, not in the meter header. */
+.meter-details-divider {
+  position: relative;
+  height: 0;
+  margin: 0 18px;
+  border-top: 1px solid rgba(11,61,111,.11);
+  z-index: 5;
+}
+
+.meter-details-divider__button {
+  position: absolute;
+  right: 12px;
+  left: auto;
+  top: 0;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 22px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(11,61,111,.16);
+  border-radius: 7px;
+  background: #fff;
+  color: #315674;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgba(26,65,102,.08);
+}
+
+.meter-details-divider__button:hover {
+  background: #f4fbf8;
+  border-color: rgba(0,177,117,.32);
+  color: #087d5c;
+}
+
+.meter-details-divider__button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.meter-details-divider--collapsed {
+  margin-top: 2px;
+  margin-bottom: 10px;
+}
+
+.meter-details-divider--collapsed .meter-details-divider__button {
+  background: #f4fbf8;
+  border-color: rgba(0,177,117,.28);
+  color: #087d5c;
+}
+
+/* Give the visible details a little clearance below the floating border button. */
+.meter-details-divider + .communication-diagnostics {
+  margin-top: 12px !important;
+}
+
+/* =========================================================
+   PowerGuard 261016e
+   - separate Alarm history tab
+   - clearer chart/communication legends
+   ========================================================= */
+.meter-card--alarms .meter-alarm-history--tab {
+  margin: 8px 18px 12px;
+  padding: 10px 12px;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(249,251,253,.94);
+}
+
+.meter-card--alarms .meter-alarm-history--tab .meter-alarm-history__rows {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  max-height: clamp(220px, 34vh, 460px);
+}
+
+.meter-card--alarms .meter-alarm-history--tab .meter-alarm-history__empty {
+  padding: 16px 0;
+  font-size: 11px;
+}
+
+.meter-grid--one .meter-card--alarms:not(.meter-card--expanded) .meter-alarm-history--tab,
+.meter-grid--two .meter-card--alarms:not(.meter-card--expanded) .meter-alarm-history--tab {
+  min-height: 390px;
+}
+
+.communication-diagnostics__legend {
+  gap: 9px;
+  font-size: 8px;
+}
+
+.communication-diagnostics__legend span {
+  gap: 5px;
+}
+
+.comm-swatch {
+  width: 7px;
+  height: 7px;
+}
+
+.chart-local-legend {
+  gap: 12px;
+  padding: 4px 8px;
+}
+
+.chart-local-legend button {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+/* =========================================================
+   PowerGuard 261016f
+   Single-row dashboards use the full available viewport height.
+   Multi-row dashboards keep compact cards so all rows remain real rows.
+   Also align communication timelines more closely with chart plotting area.
+   ========================================================= */
+@media (min-width: 1081px) and (min-height: 700px) {
+  .meter-grid--one,
+  .meter-grid--two {
+    min-height: calc(100dvh - 116px);
+    align-items: stretch;
+  }
+
+  .meter-grid--one > .meter-card:not(.meter-card--expanded),
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) {
+    min-height: calc(100dvh - 116px);
+    height: calc(100dvh - 116px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meter-grid--one > .meter-card--details-hidden:not(.meter-card--expanded) .chart-wrap,
+  .meter-grid--two > .meter-card--details-hidden:not(.meter-card--expanded) .chart-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meter-grid--one > .meter-card--details-hidden:not(.meter-card--expanded) .power-chart,
+  .meter-grid--two > .meter-card--details-hidden:not(.meter-card--expanded) .power-chart {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    width: 100%;
+    height: 100% !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+  }
+}
+
+/* When the diagnostics are visible, preserve the current chart sizing; only
+   the card itself is allowed to occupy the available single-row height. */
+.meter-grid--one > .meter-card:not(.meter-card--details-hidden):not(.meter-card--expanded),
+.meter-grid--two > .meter-card:not(.meter-card--details-hidden):not(.meter-card--expanded) {
+  align-self: stretch;
+}
+
+/* The communication tracks were visually inset a little more than the chart
+   on narrower cards. Reduce those percentage gutters while retaining room for
+   rounded ends and labels. */
+.communication-row__label {
+  margin-left: 1.6% !important;
+  margin-right: .5% !important;
+}
+
+.communication-track {
+  margin-left: 1.6% !important;
+  margin-right: .5% !important;
+}
+
+
+/* =========================================================
+   PowerGuard 261016g
+   Single-row layout refinement.
+   The chart fills all available space above diagnostics, diagnostics are pinned
+   to the card bottom, and expanded view uses the full viewport height.
+   ========================================================= */
+@media (min-width: 1081px) and (min-height: 700px) {
+  .meter-grid--one,
+  .meter-grid--two {
+    height: calc(100dvh - 104px) !important;
+    min-height: calc(100dvh - 104px) !important;
+    align-items: stretch !important;
+  }
+
+  .meter-grid--one > .meter-card:not(.meter-card--expanded),
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) {
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  /* Reduce unused vertical chrome around the main plot. */
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .meter-card__live-strip,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .meter-card__live-strip {
+    margin-bottom: 0 !important;
+  }
+
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .chart-wrap,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .chart-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .power-chart,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .power-chart {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+  }
+
+  /* Diagnostics remain the final fixed-height block at the very bottom. */
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .meter-details-divider,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .meter-details-divider,
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .communication-diagnostics,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .communication-diagnostics {
+    flex: 0 0 auto !important;
+  }
+
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .communication-diagnostics,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .communication-diagnostics {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Align communication timelines with the plotting area: x=34..1180 of 1200. */
+.communication-row__label {
+  margin-left: 2.83% !important;
+  margin-right: 1.67% !important;
+}
+.communication-track {
+  margin-left: 2.83% !important;
+  margin-right: 1.67% !important;
+}
+
+/* Expanded meter: use the complete area down to the bottom edge. */
+@media (min-width: 1000px) and (min-height: 700px) {
+  .meter-card--expanded {
+    top: 74px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    height: auto !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .meter-card--expanded .meter-card__header,
+  .meter-card--expanded .meter-card__live-strip,
+  .meter-card--expanded .meter-details-divider,
+  .meter-card--expanded .communication-diagnostics {
+    flex: 0 0 auto !important;
+  }
+
+  .meter-card--expanded .chart-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .meter-card--expanded .power-chart {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+  }
+
+  .meter-card--expanded .communication-diagnostics {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+
+/* =========================================================
+   PowerGuard 261016h
+   - no global scrollbar for true one-row desktop dashboards
+   - Power chart uses the full card area with minimal outer vertical padding
+   - Network parameters: four charts stacked vertically
+   - Communication diagnostics available/collapsible on Power and Network
+   ========================================================= */
+@media (min-width: 1081px) and (min-height: 700px) {
+  :host:has(.dashboard--single-row) {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  :host:has(.dashboard--single-row) .shell {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .dashboard--single-row {
+    height: calc(100dvh - 72px) !important;
+    min-height: 0 !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboard--single-row .meter-grid--one,
+  .dashboard--single-row .meter-grid--two {
+    height: 100% !important;
+    min-height: 0 !important;
+    gap: 14px !important;
+  }
+
+  .dashboard--single-row .meter-grid--one > .meter-card:not(.meter-card--expanded),
+  .dashboard--single-row .meter-grid--two > .meter-card:not(.meter-card--expanded) {
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
+  .dashboard--single-row .meter-card:not(.meter-card--expanded) .chart-wrap {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .dashboard--single-row .meter-card:not(.meter-card--expanded) .power-chart {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .dashboard--single-row .meter-card--network:not(.meter-card--expanded) .network-charts {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    gap: 4px !important;
+    padding: 2px 12px 2px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboard--single-row .meter-card--network:not(.meter-card--expanded) .network-chart-card {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .dashboard--single-row .meter-card--network:not(.meter-card--expanded) .network-chart-card > header {
+    flex: 0 0 auto !important;
+    min-height: 20px !important;
+    padding: 3px 8px 0 !important;
+  }
+
+  .dashboard--single-row .meter-card--network:not(.meter-card--expanded) .network-mini-chart {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .dashboard--single-row .meter-card--network:not(.meter-card--expanded) .network-legend {
+    flex: 0 0 auto !important;
+    padding: 0 2px !important;
+    min-height: 8px !important;
+  }
+
+  .dashboard--single-row .meter-card:not(.meter-card--expanded) .communication-diagnostics {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 1080px) {
+  :host,
+  .shell {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+  }
+}
+
+.meter-card--network .meter-details-divider {
+  margin-top: 0 !important;
+}
+
+.communication-row__label,
+.communication-track {
+  margin-left: 2.83% !important;
+  margin-right: 1.67% !important;
+}
+
+/* PowerGuard 261016i: viewport-safe expand/restore and tab transitions. */
+.meter-floating-restore {
+  position: fixed;
+  z-index: 3100;
+  top: 83px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid #b9d3e6;
+  border-radius: 8px;
+  background: #fff;
+  color: #174b77;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 14px rgba(14, 52, 83, .15);
+}
+.meter-floating-restore svg { width: 18px; height: 18px; }
+.meter-floating-restore:hover { background: #eaf5fc; }
+.meter-card--expanded {
+  position: fixed !important;
+  top: 74px !important;
+  left: 10px !important;
+  right: 10px !important;
+  bottom: 10px !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+.meter-card--expanded .meter-card__header {
+  flex: 0 0 auto !important;
+  padding-right: 166px !important; /* Floating restore button must not cover actions. */
+}
+.meter-card--expanded .chart-wrap {
+  min-height: 0 !important;
+  flex: 1 1 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  padding-block: 0 !important;
+}
+.meter-card--expanded .power-chart {
+  min-height: 0 !important;
+  flex: 1 1 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+.meter-card--expanded .network-charts,
+.meter-card--expanded .meter-alarm-history--tab {
+  min-height: 0 !important;
+  flex: 1 1 0 !important;
+  overflow: auto !important;
+}
+@media (max-width: 720px) {
+  .meter-floating-restore { top: 77px; right: 12px; font-size: 11px; padding: 5px 7px; }
+  .meter-card--expanded .meter-card__header { padding-right: 0 !important; padding-top: 42px !important; }
+}
+
+/* PowerGuard 261016j: single, consistent restore control and compact alarm rows. */
+.meter-card--expanded .meter-card__header {
+  padding-right: 14px !important;
+}
+/* Open below the header button rather than covering the top toolbar. */
+.meter-zoom-tooltip::after {
+  top: calc(100% + 7px) !important;
+  bottom: auto !important;
+  transform: translateY(-2px);
+}
+.meter-zoom-tooltip:hover::after,
+.meter-zoom-tooltip:focus-within::after {
+  transform: translateY(0);
+}
+/* Alarm tab can occupy remaining panel area, but its rows never stretch. */
+.meter-card--alarms .meter-alarm-history--tab .meter-alarm-history__rows,
+.meter-card--expanded .meter-alarm-history--tab .meter-alarm-history__rows {
+  display: grid !important;
+  grid-auto-flow: row !important;
+  grid-auto-rows: max-content !important;
+  align-content: start !important;
+  align-items: start !important;
+  justify-content: stretch !important;
+  align-self: stretch !important;
+  flex: 0 1 auto !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  gap: 3px !important;
+}
+.meter-card--alarms .meter-alarm-row,
+.meter-card--expanded .meter-alarm-history--tab .meter-alarm-row {
+  min-height: 0 !important;
+  height: auto !important;
+  align-self: start !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+.meter-card--alarms .meter-alarm-row--head {
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+@media (max-width: 720px) {
+  .meter-card--expanded .meter-card__header { padding-top: 8px !important; }
+}
+
+/* PowerGuard 261017a: chart axis readability and diagnostics alignment. */
+.axis-label--x { font-size: 16px !important; font-weight: 600; }
+.network-axis-label { font-size: 11px !important; font-weight: 600; }
+.communication-diagnostics__legend { font-size: 11px !important; font-weight: 600; gap: 11px; }
+.communication-diagnostics__header { font-size: 11px; }
+.communication-row__label { font-size: 10px; }
+.communication-diagnostics .communication-row__label,
+.communication-diagnostics .communication-track {
+  margin-left: 1.4% !important;
+  margin-right: 0 !important;
+}
+@media (max-width:720px) { .communication-diagnostics__legend { font-size: 10px !important; } }
+
+/* PowerGuard 261017b: use full available width in enlarged power view.
+   Non-uniform SVG scaling is limited to fullscreen mode; regular charts keep
+   their original proportions and positions. */
+.meter-card--expanded .chart-wrap {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.meter-card--expanded .power-chart {
+  display: block !important;
+  max-width: 100% !important;
+}
+
+/* PowerGuard 261017c: keep the maximized Power card full viewport height
+   even when its communication diagnostics are collapsed.  The compact
+   details-hidden rule must never shrink the expanded grid item. */
+@media (min-width: 1000px) and (min-height: 700px) {
+  .meter-card.meter-card--expanded,
+  .meter-card.meter-card--expanded.meter-card--details-hidden {
+    position: fixed !important;
+    inset: 74px 10px 10px !important;
+    width: auto !important;
+    height: calc(100dvh - 84px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    align-self: stretch !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  .meter-card--expanded.meter-card--details-hidden .chart-wrap {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
+  }
+  .meter-card--expanded.meter-card--details-hidden .power-chart {
+    flex: 1 1 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+  }
+}
+
+/* PowerGuard 261017e: legible axes; avoid clipped network end timestamps. */
+.axis-label--x, .axis-label--y { font-size: 11px !important; font-weight: 600 !important; }
+.axis-unit { font-size: 11px !important; }
+.network-axis-label { font-size: 10px !important; font-weight: 600 !important; }
+
+/* The diagnostics divider stays at the bottom; give the plot all remaining height.
+   The SVG is fluid in both axes instead of keeping a fixed aspect ratio and
+   leaving a large unused band between the plot and its divider. */
+@media (min-width: 901px) {
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .chart-wrap,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .chart-wrap {
+    flex: 1 1 0 !important; height: auto !important; min-height: 0 !important;
+    display: flex !important; flex-direction: column !important; overflow: hidden !important;
+    padding-top: 0 !important; padding-bottom: 0 !important;
+  }
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .power-chart,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .power-chart {
+    display: block !important; flex: 1 1 0 !important; height: 100% !important;
+    width: 100% !important; min-height: 0 !important; max-height: none !important;
+    aspect-ratio: auto !important; margin-bottom: 0 !important;
+  }
+}
+
+/* 261017f: map communication time tracks to the unchanged power SVG plot.
+   SVG width=1200; x axis starts at 34 and ends at 1180. */
+.communication-diagnostics--power .communication-row__label,
+.communication-diagnostics--power .communication-track {
+  margin-left: 2.833333% !important;
+  margin-right: 1.666667% !important;
+}
+
+/* 261017g: network chart axis and hover, without changing Moce or diagnostics */
+.network-y-axis-label { fill:#70849a; font-size:7px; font-weight:600; }
+.network-hover-tooltip { pointer-events:none; }
+.network-hover-tooltip rect { fill:#173b5b; opacity:.94; }
+.network-hover-tooltip text { fill:#fff; font-size:6.1px; font-weight:600; }
+.meter-card--expanded .network-charts { padding-bottom:2px !important; }
+.meter-card--expanded .network-chart-card { display:flex; flex-direction:column; min-height:0; }
+.meter-card--expanded .network-chart-card .network-mini-chart { flex:1 1 0; min-height:0; }
+
+/* 261017h: smaller blank area below the network x-axis; all power-chart styling unchanged. */
+.network-mini-chart { aspect-ratio: 720 / 94; }

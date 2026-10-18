@@ -16,3 +16,10 @@ select,
 textarea {
   font: inherit;
 }
+
+/* An expanded meter is a fixed viewport overlay, not an additional scrollable page. */
+html:has(.meter-card--expanded),
+body:has(.meter-card--expanded) {
+  height: 100%;
+  overflow: hidden !important;
+}

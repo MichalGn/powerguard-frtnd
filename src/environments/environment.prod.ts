@@ -4,6 +4,5 @@ const backend = env['backend'] || `${window.location.origin}/powerguard-bcknd/ap
 
 export const environment = {
   production: true,
-  version: '261014k',
   apiUrl: `${backend}`
 };

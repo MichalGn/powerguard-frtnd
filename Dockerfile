@@ -11,7 +11,17 @@
 #sudo docker build -t powerguard-frtnd_image .
 #sudo docker build -t powerguard-frtnd_image:1.0.0 .
 
-#sudo docker save -o powerguard-frtnd-261013c.tar powerguard-frtnd_image
+#sudo docker save -o powerguard-frtnd-261017.tar powerguard-frtnd_image
+
+#********************************************************************************
+# *** RASPBERRY ***
+#docker buildx build --platform linux/arm64 -f Dockerfile.arm64 -t powerguard-frtnd_image_arm64 --load .
+
+#Spr. na raspberry
+#docker image inspect powerguard-frtnd_image_arm64 --format "{{.Architecture}}"
+
+#sudo docker save -o powerguard-frtnd-261017_arm64.tar powerguard-frtnd_image_arm64
+#=================================================================================
 
 #NA SERWERZE
 #sudo docker load -i powerguard-frtnd_image-260930.tar 
@@ -43,6 +53,7 @@
 # When the container starts, replace the env.js with values from environment variables
 #CMD ["/bin/sh", "-c", "envsubst < /usr/share/nginx/html/env.template.js > /usr/share/nginx/html/env.js && exec nginx -g 'daemon off;'"]
 #=====
+
 
 # 1) build stage
 FROM node:lts AS build

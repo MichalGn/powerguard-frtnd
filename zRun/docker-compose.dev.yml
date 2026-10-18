@@ -2,14 +2,13 @@ services:
   frontend_service:
     environment:
       BACKEND: http://localhost:9084/powerguard-bcknd/api/
-
   backend_service:
     environment:
       CORS_ALLOWED_ORIGINS: http://localhost:8084,http://127.0.0.1:8084
-
+      MQTT_BROKER: 10.78.0.251
+      MQTT_PORT: '1884'
   postgres_service:
     ports:
-      - "127.0.0.1:5432:5432"
-
+    - 127.0.0.1:5432:5432
     volumes:
-      - ../../db/pgdata:/var/lib/postgresql/data
+    - ../../db/pgdata:/var/lib/postgresql/data

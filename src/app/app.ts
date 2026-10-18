@@ -6,7 +6,8 @@ import { ToastService } from './shared/toast/toast.service';
 import { AlarmView, CommunicationStatusView, EdgeConfigurationView, EdgeHealthView, EdgeMeterConfig, EdgeMeterHealthView, EdgeMqttTargetConfig, EdgeRawMeasurementView, ClientInput, ClientView, MeterConfigurationInput, MeterConfigurationView, MeterService, MeasurementSnapshotView, MeasurementView, SiteInput, SiteView } from './meter/meter.service';
 import { LiveMeasurementService, PowerguardLiveMessage } from './meter/live-measurement.service';
 import { TranslationService, Language } from './shared/i18n/translation.service';
-import { environment } from '../environments/environment';
+import { environment } from '../environments/environment.development';
+import { POWERGUARD_FRONTEND_VERSION } from './build-info';
 import { ApplicationSettingsView, SettingsService } from './settings/settings.service';
 
 interface BarPoint {
@@ -62,7 +63,8 @@ interface MeterCard {
   siteName: string;
   edgeId: string;
   uniqueKey: string;
-  chartView: 'power' | 'network';
+  chartView: 'power' | 'network' | 'alarms';
+  detailsCollapsed: boolean;
   status: 'ONLINE' | 'WARNING' | 'OFFLINE';
   currentPowerKw: number | null;
   currentQuarterPowerKw: number | null;
@@ -90,6 +92,7 @@ interface MeterCard {
   currentL2Segments: string[];
   currentL3Segments: string[];
   frequencySegments: string[];
+  networkHover?: { chart: string; text: string; x: number };
   powerRange: string;
   voltageRange: string;
   currentRange: string;
@@ -118,7 +121,7 @@ interface MeterCard {
   completedQuarterPowers: Array<number | null>;
   quarterTargetKw: number;
   quarterIndex: number;
-  limitKw: number;
+  limitKw: number | null;
   limitY: number;
   instantaneousAlarmOnKw: number | null;
   instantaneousAlarmOffKw: number | null;
@@ -139,7 +142,7 @@ interface MeterCard {
   styleUrl: './app.scss'
 })
 export class App implements OnDestroy {
-  readonly frontendVersion = environment.version;
+  readonly frontendVersion = POWERGUARD_FRONTEND_VERSION;
   private readonly authService = inject(AuthService);
   readonly toast = inject(ToastService);
   private readonly meterService = inject(MeterService);
@@ -275,7 +278,7 @@ export class App implements OnDestroy {
   // Live values come from the backend WebSocket. REST latest is initial/fallback data.
   private readonly timerId = window.setInterval(() => this.refreshMeasurements(), 30000);
   private readonly historyTimerId = window.setInterval(() => {
-    if (this.rangeIncludesToday()) this.meters.forEach(meter => this.loadRange(meter));
+    if (this.rangeIncludesToday()) this.meters.forEach(meter => this.loadRange(meter, true));
   }, 60000);
   private readonly clockTimerId = window.setInterval(() => this.tickClock(), 1000);
   private readonly alarmTimerId = window.setInterval(() => this.refreshAllActiveAlarms(), 4000);
@@ -509,7 +512,7 @@ export class App implements OnDestroy {
       meter.chartZoomStartMs = start;
       meter.chartZoomEndMs = end;
       this.rebuildMeter(meter, new Date(nowMs));
-      this.rebuildCommunicationDiagnostics(meter);
+      this.rebuildAllCommunicationDiagnostics();
       this.rebuildNetworkCharts(meter);
     });
   }
@@ -1372,7 +1375,15 @@ export class App implements OnDestroy {
     meter.frequencyHz = this.numberOrNull(message.frequencyHz);
     if (this.rangeIncludesToday()) {
       meter.dayMeasurements.push({ id: -Date.now(), meterId: meter.meterId, measuredAt: message.measuredAt, activePowerKw: message.currentPowerKw, activeEnergyImportKwh: message.activeEnergyImportKwh, activeEnergyExportKwh: message.activeEnergyExportKwh, currentQuarterPowerKw: messageIsCurrentQuarter ? message.currentQuarterPowerKw : null, voltageL1V: message.voltageL1V, voltageL2V: message.voltageL2V, voltageL3V: message.voltageL3V, currentL1A: message.currentL1A, currentL2A: message.currentL2A, currentL3A: message.currentL3A, frequencyHz: message.frequencyHz });
-      if (meter.dayMeasurements.length > 1500) meter.dayMeasurements = meter.dayMeasurements.slice(-1500);
+      // Do not trim by an arbitrary item count: at ~10 s cadence 1500 samples are only ~4 h,
+      // which used to delete the morning part of today's chart after the first live WebSocket sample.
+      // Keep all points belonging to the currently selected date range instead.
+      const rangeStart = this.rangeStartMs();
+      const rangeEnd = this.rangeEndExclusiveMs();
+      meter.dayMeasurements = meter.dayMeasurements.filter(reading => {
+        const ts = new Date(reading.measuredAt).getTime();
+        return ts >= rangeStart && ts < rangeEnd;
+      });
       this.rebuildNetworkCharts(meter);
     }
     meter.lastReadingAt = message.measuredAt || '';
@@ -1749,15 +1760,24 @@ export class App implements OnDestroy {
     return meter.currentQuarterPowerKw == null ? '—' : this.quarterEnergySoFarKwh(meter).toFixed(2);
   }
 
-  quarterEnergyBudgetKwh(meter: MeterCard): number {
-    return Math.max(0, meter.limitKw * 0.25);
+  quarterEnergyBudgetKwh(meter: MeterCard): number | null {
+    return meter.limitKw == null ? null : Math.max(0, meter.limitKw * 0.25);
   }
 
   quarterEnergyUsagePercent(meter: MeterCard): number {
     if (meter.currentQuarterPowerKw == null) return 0;
     const budget = this.quarterEnergyBudgetKwh(meter);
-    if (budget <= 0) return 0;
+    if (budget == null || budget <= 0) return 0;
     return Math.min(100, Math.max(0, this.quarterEnergySoFarKwh(meter, this.now) / budget * 100));
+  }
+
+  formatQuarterEnergyBudget(meter: MeterCard): string {
+    const budget = this.quarterEnergyBudgetKwh(meter);
+    return budget == null ? '—' : budget.toFixed(2);
+  }
+
+  formatQuarterLimit(meter: MeterCard): string {
+    return meter.limitKw == null ? '—' : meter.limitKw.toFixed(1);
   }
 
 
@@ -1769,7 +1789,7 @@ export class App implements OnDestroy {
 
   quarterRiskClass(meter: MeterCard): string {
     const projected = this.projectedQuarterPowerKw(meter);
-    if (projected == null || meter.limitKw <= 0) return 'quarter-tank--green';
+    if (projected == null || meter.limitKw == null || meter.limitKw <= 0) return 'quarter-tank--green';
     const ratio = projected / meter.limitKw;
     if (ratio > 1) return 'quarter-tank--red';
     if (ratio >= 0.8) return 'quarter-tank--yellow';
@@ -1925,6 +1945,42 @@ export class App implements OnDestroy {
     this.rebuildCommunicationDiagnostics(meter);
   }
 
+  networkYAxisTicks(range: string, unit: string): Array<{y: number; label: string}> {
+    if (!range || range === '—') return [];
+    const values = range.split('–').map(v => Number(v.trim()));
+    if (values.length !== 2 || values.some(v => !Number.isFinite(v))) return [];
+    const [min, max] = values;
+    const pad = unit === 'V' || unit === 'A'
+      ? Math.max((max-min)*0.08, Math.abs(max)*0.005, 0.1)
+      : Math.max((max-min)*0.08, 0.02);
+    const low = min-pad, high = max+pad;
+    return [0,0.5,1].map(r => ({ y: 72-r*56, label: (low+(high-low)*r).toFixed(unit === 'V' ? 1 : 2) }));
+  }
+
+  onNetworkHover(event: MouseEvent, meter: MeterCard, chart: string): void {
+    const svg = event.currentTarget as SVGSVGElement;
+    const rect = svg.getBoundingClientRect();
+    if (!rect.width) return;
+    const x = Math.max(10, Math.min(710, (event.clientX-rect.left)*720/rect.width));
+    const start = this.meterChartStartMs(meter);
+    const at = start+(x-10)/700*(this.meterChartEndMs(meter)-start);
+    const keys: Record<string, string[]> = {
+      power: ['activePowerKw'], voltage: ['voltageL1V','voltageL2V','voltageL3V'],
+      current: ['currentL1A','currentL2A','currentL3A'], frequency: ['frequencyHz']
+    };
+    const fields = keys[chart] || [];
+    const rows = meter.dayMeasurements.filter(row => fields.some(key => Number.isFinite(Number((row as unknown as Record<string,unknown>)[key])) && (row as unknown as Record<string,unknown>)[key] != null));
+    if (!rows.length) { meter.networkHover = undefined; return; }
+    const closest = rows.reduce((best, row) => Math.abs(new Date(row.measuredAt).getTime()-at)<Math.abs(new Date(best.measuredAt).getTime()-at) ? row : best);
+    const unit = chart === 'power' ? 'kW' : chart === 'voltage' ? 'V' : chart === 'current' ? 'A' : 'Hz';
+    const valueText = fields.map((key,i) => {
+      const val = (closest as unknown as Record<string,unknown>)[key];
+      return typeof val === 'number' && Number.isFinite(val) ? `${fields.length>1?'L'+(i+1)+': ':''}${val.toFixed(2)} ${unit}` : '';
+    }).filter(Boolean).join(' | ');
+    const date = new Date(closest.measuredAt);
+    meter.networkHover = { chart, x: Math.max(85,Math.min(630,x)), text: `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}  ${valueText}` };
+  }
+
   networkXAxisTicks(meter: MeterCard): Array<{x:number,label:string}> {
     const left = 10, right = 710;
     const start = this.meterChartStartMs(meter), end = this.meterChartEndMs(meter);
@@ -1942,7 +1998,9 @@ export class App implements OnDestroy {
 
   quarterEnergyRemainingKwh(meter: MeterCard): number | null {
     if (meter.currentQuarterPowerKw == null) return null;
-    return Math.max(0, this.quarterEnergyBudgetKwh(meter) - this.quarterEnergySoFarKwh(meter, this.now));
+    const budget = this.quarterEnergyBudgetKwh(meter);
+    if (budget == null) return null;
+    return Math.max(0, budget - this.quarterEnergySoFarKwh(meter, this.now));
   }
 
   formatRemainingQuarterEnergy(meter: MeterCard): string {
@@ -1963,7 +2021,7 @@ export class App implements OnDestroy {
   }
 
   private createMeter(config: MeterConfigurationView): MeterCard {
-    const limitKw = config.quarterHourAlarmOnKw ?? config.instantaneousAlarmOnKw ?? 10;
+    const limitKw = config.quarterHourAlarmOnKw;
     const meter: MeterCard = {
       id: `meter-${config.id}`,
       meterId: config.id,
@@ -1975,6 +2033,7 @@ export class App implements OnDestroy {
       edgeId: config.edgeId,
       uniqueKey: config.uniqueKey,
       chartView: 'power',
+      detailsCollapsed: true,
       status: 'OFFLINE',
       currentPowerKw: null,
       currentQuarterPowerKw: null,
@@ -1990,7 +2049,7 @@ export class App implements OnDestroy {
       quarterProgress: this.currentQuarterProgress(),
       lastUpdated: '',
       lastReadingAt: '',
-      maxKw: this.niceMaximum(Math.max(limitKw * 1.2, 0.5)),
+      maxKw: this.niceMaximum(Math.max((limitKw ?? 0) * 1.2, 0.5)),
       linePoints: '',
       lineSegments: [],
       lineHoverPoints: [],
@@ -2030,10 +2089,15 @@ export class App implements OnDestroy {
     return Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
   }
 
-  private loadRangeMeasurementFallback(meter: MeterCard): void {
+  private readonly rangeLoadSequence = new Map<number, number>();
+
+  private loadRangeMeasurementFallback(meter: MeterCard, sequence: number, preserveExistingOnEmpty: boolean): void {
     const days = this.selectedRangeDayCount();
-    // For short multi-day ranges, recover the complete chart from day endpoints if
-    // the sampled range endpoint is unavailable or unexpectedly empty.
+    const isCurrentRequest = () => this.rangeLoadSequence.get(meter.meterId) === sequence;
+    const keepExisting = () => preserveExistingOnEmpty && meter.dayMeasurements.length > 0;
+
+    // For short ranges, recover the complete chart from day endpoints if the sampled
+    // range endpoint is unavailable or unexpectedly empty.
     if (days <= 7) {
       const requests = Array.from({ length: days }, (_, index) => {
         const d = this.selectedDateFromAsLocalDate();
@@ -2042,12 +2106,22 @@ export class App implements OnDestroy {
       });
       forkJoin(requests).subscribe({
         next: groups => {
+          if (!isCurrentRequest()) return;
           const readings = groups.flat().sort((a,b) => new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime());
+          if (!readings.length && keepExisting()) {
+            console.warn(`[PowerGuard] Empty measurement fallback for meter ${meter.meterId}; keeping ${meter.dayMeasurements.length} existing points.`);
+            return;
+          }
           this.applyDayMeasurements(meter, readings);
           if (this.selectedQuickRangeMinutes != null) this.updateRollingQuickRange();
           else this.rebuildMeter(meter, new Date());
         },
-        error: () => {
+        error: error => {
+          if (!isCurrentRequest()) return;
+          if (keepExisting()) {
+            console.warn(`[PowerGuard] Measurement fallback failed for meter ${meter.meterId}; keeping existing history.`, error);
+            return;
+          }
           meter.history = Array(96).fill(null);
           meter.completedQuarterPowers = Array(96).fill(null);
           meter.dayMeasurements = [];
@@ -2058,11 +2132,24 @@ export class App implements OnDestroy {
       return;
     }
 
-    // For long ranges, avoid downloading millions of raw rows. Fall back to the
-    // final day so the chart never disappears completely while preserving a light request.
+    // For long ranges, avoid downloading millions of raw rows. Fall back to the final
+    // day so the chart does not disappear completely while preserving a light request.
     this.meterService.dayMeasurements(meter.meterId, this.selectedDateTo).subscribe({
-      next: readings => { this.applyDayMeasurements(meter, readings); this.rebuildMeter(meter, new Date()); },
-      error: () => {
+      next: readings => {
+        if (!isCurrentRequest()) return;
+        if (!readings.length && keepExisting()) {
+          console.warn(`[PowerGuard] Empty final-day measurement fallback for meter ${meter.meterId}; keeping existing history.`);
+          return;
+        }
+        this.applyDayMeasurements(meter, readings);
+        this.rebuildMeter(meter, new Date());
+      },
+      error: error => {
+        if (!isCurrentRequest()) return;
+        if (keepExisting()) {
+          console.warn(`[PowerGuard] Final-day measurement fallback failed for meter ${meter.meterId}; keeping existing history.`, error);
+          return;
+        }
         meter.history = Array(96).fill(null);
         meter.completedQuarterPowers = Array(96).fill(null);
         meter.dayMeasurements = [];
@@ -2072,17 +2159,27 @@ export class App implements OnDestroy {
     });
   }
 
-  private loadRange(meter: MeterCard): void {
+  private loadRange(meter: MeterCard, preserveExistingOnEmpty = false): void {
+    const sequence = (this.rangeLoadSequence.get(meter.meterId) ?? 0) + 1;
+    this.rangeLoadSequence.set(meter.meterId, sequence);
+    const isCurrentRequest = () => this.rangeLoadSequence.get(meter.meterId) === sequence;
+
     this.meterService.rangeMeasurements(meter.meterId, this.selectedDateFrom, this.selectedDateTo).subscribe({
       next: readings => {
-        if (readings.length || this.selectedRangeDayCount() === 1) {
+        if (!isCurrentRequest()) return;
+        if (readings.length) {
           this.applyDayMeasurements(meter, readings);
           this.rebuildMeter(meter, new Date());
         } else {
-          this.loadRangeMeasurementFallback(meter);
+          console.warn(`[PowerGuard] Empty range response for meter ${meter.meterId}, ${this.selectedDateFrom}..${this.selectedDateTo}; trying day fallback.`);
+          this.loadRangeMeasurementFallback(meter, sequence, preserveExistingOnEmpty);
         }
       },
-      error: () => this.loadRangeMeasurementFallback(meter),
+      error: error => {
+        if (!isCurrentRequest()) return;
+        console.warn(`[PowerGuard] Range request failed for meter ${meter.meterId}; trying day fallback.`, error);
+        this.loadRangeMeasurementFallback(meter, sequence, preserveExistingOnEmpty);
+      },
     });
     this.meterService.rangeAlarms(meter.meterId, this.selectedDateFrom, this.selectedDateTo).subscribe({
       next: alarms => {
@@ -2098,14 +2195,12 @@ export class App implements OnDestroy {
     this.meterService.communicationHistory(meter.clientId, meter.siteId, meter.edgeId, meter.uniqueKey, this.selectedDateFrom, this.selectedDateTo).subscribe({
       next: samples => {
         meter.communicationSamples = samples;
-        this.rebuildCommunicationDiagnostics(meter);
+        this.rebuildAllCommunicationDiagnostics();
         this.rebuildNetworkCharts(meter);
       },
       error: () => {
         meter.communicationSamples = [];
-        meter.serverCommunicationSegments = [];
-        meter.edgeCommunicationSegments = [];
-        meter.meterCommunicationSegments = [];
+        this.rebuildAllCommunicationDiagnostics();
       },
     });
   }
@@ -2703,7 +2798,7 @@ export class App implements OnDestroy {
   private applyDayMeasurements(meter: MeterCard, readings: MeasurementView[]): void {
     meter.dayMeasurements = readings;
     this.rebuildNetworkCharts(meter);
-    this.rebuildCommunicationDiagnostics(meter);
+    this.rebuildAllCommunicationDiagnostics();
     const quarter = Array(96).fill(null) as Array<number | null>;
     const latestAt = Array(96).fill(-1) as number[];
 
@@ -2741,16 +2836,17 @@ export class App implements OnDestroy {
     ]).filter((v): v is number => v !== null && Number.isFinite(v));
     if (this.rangeIncludesToday() && meter.currentPowerKw !== null) values.push(meter.currentPowerKw);
     if (this.rangeIncludesToday() && meter.currentQuarterPowerKw !== null) values.push(meter.currentQuarterPowerKw);
-    values.push(meter.limitKw);
+    if (meter.limitKw != null) values.push(meter.limitKw);
     const peak = Math.max(...values, 0.5);
 
-    meter.maxKw = this.niceMaximum(Math.max(peak * 1.10, meter.limitKw * 1.05, 0.5));
-    meter.yTicks = this.buildTicks(meter.maxKw);
-    meter.limitY = this.valueToChartY(meter.limitKw, meter.maxKw);
-    meter.lineSegments = this.buildTimedLineSegments(visibleMeasurements, 'activePowerKw', meter.maxKw, chartStart, chartEnd);
+    const limitScaleKw = meter.limitKw ?? 0;
+    meter.maxKw = this.niceMaximum(Math.max(peak * 1.10, limitScaleKw * 1.05, 0.5));
+    meter.yTicks = this.buildTicks(meter.maxKw, meter);
+    meter.limitY = meter.limitKw == null ? 0 : this.valueToChartY(meter.limitKw, meter.maxKw, meter);
+    meter.lineSegments = this.buildTimedLineSegments(visibleMeasurements, 'activePowerKw', meter.maxKw, chartStart, chartEnd, meter);
     meter.linePoints = meter.lineSegments.join(' ');
-    meter.lineHoverPoints = this.buildTimedLineHoverPoints(visibleMeasurements, 'activePowerKw', meter.maxKw, chartStart, chartEnd);
-    meter.bars = this.buildTimedQuarterBars(visibleMeasurements, meter.maxKw, currentIndex, chartStart, chartEnd);
+    meter.lineHoverPoints = this.buildTimedLineHoverPoints(visibleMeasurements, 'activePowerKw', meter.maxKw, chartStart, chartEnd, meter);
+    meter.bars = this.buildTimedQuarterBars(visibleMeasurements, meter.maxKw, currentIndex, chartStart, chartEnd, meter);
   }
 
   get clientIds(): string[] {
@@ -2808,10 +2904,51 @@ export class App implements OnDestroy {
     if (siteId) localStorage.setItem('powerguard-site-id', siteId); else localStorage.removeItem('powerguard-site-id');
   }
 
-  setMeterChartView(meter: MeterCard, view: 'power' | 'network'): void { meter.chartView = view; }
+  setMeterChartView(meter: MeterCard, view: 'power' | 'network' | 'alarms'): void {
+    if (meter.chartView === view) return;
+    meter.chartView = view;
+    // SVG plotting coordinates depend on the active layout and the available height.
+    // Recalculate when coming back from Network Parameters / Alarm History.
+    if (view === 'power') this.rebuildMeter(meter, new Date());
+  }
+
+  toggleMeterDetails(meter: MeterCard): void {
+    meter.detailsCollapsed = !meter.detailsCollapsed;
+    // Rebuild chart coordinates because focus mode uses a taller SVG geometry.
+    this.rebuildMeter(meter, new Date());
+  }
+
+  powerChartViewHeight(meter: MeterCard): number {
+    if (meter.chartView !== 'power') return 285;
+
+    // One-row dashboards may use all available vertical space.  When
+    // communication diagnostics are visible, keep a little room for them at
+    // the bottom but still make the plot much taller than the compact 285px
+    // geometry used by multi-row layouts.
+    const wideDesktop = typeof window !== 'undefined' && window.innerWidth > 1080;
+    if (this.isMeterExpanded(meter)) return meter.detailsCollapsed ? 750 : 650;
+    if (this.visibleMeters.length === 1 && wideDesktop) return meter.detailsCollapsed ? 800 : 700;
+    if (this.visibleMeters.length === 2 && wideDesktop) return meter.detailsCollapsed ? 850 : 650;
+    return meter.detailsCollapsed ? 500 : 285;
+  }
+
+  powerChartViewBox(meter: MeterCard): string {
+    return `0 0 1200 ${this.powerChartViewHeight(meter)}`;
+  }
+
+  powerChartBottom(meter: MeterCard): number {
+    return this.powerChartViewHeight(meter) - 41;
+  }
+
+  powerChartXAxisLabelY(meter: MeterCard): number {
+    return this.powerChartViewHeight(meter) - 15;
+  }
+
 
   toggleMeterExpanded(meter: MeterCard): void {
     this.expandedMeterId = this.expandedMeterId === meter.id ? null : meter.id;
+    // Expanded and normal single-row layouts use different chart geometry.
+    this.rebuildMeter(meter, new Date());
   }
 
   isMeterExpanded(meter: MeterCard): boolean { return this.expandedMeterId === meter.id; }
@@ -3050,15 +3187,15 @@ export class App implements OnDestroy {
         : group;
 
       return sampled.map(x => {
-        const px=10+((new Date(x.measuredAt).getTime()-startMs)/span)*700;
-        const py=108-((Number(x[key])-min)/range)*88;
-        return `${Math.max(10,Math.min(710,px)).toFixed(1)},${Math.max(20,Math.min(108,py)).toFixed(1)}`;
+        const px = 10 + ((new Date(x.measuredAt).getTime() - startMs) / span) * 700;
+        const py = 72 - ((Number(x[key]) - min) / range) * 56;
+        return `${Math.max(10, Math.min(710, px)).toFixed(1)},${Math.max(16, Math.min(72, py)).toFixed(1)}`;
       }).join(' ');
     }).filter(Boolean);
   }
 
-  private buildTimedLineSegments(readings: MeasurementView[], key: keyof MeasurementView, maxKw: number, start: number, end: number): string[] {
-    const left = 34, right = 1180, top = 24, bottom = 244;
+  private buildTimedLineSegments(readings: MeasurementView[], key: keyof MeasurementView, maxKw: number, start: number, end: number, meter: MeterCard): string[] {
+    const left = 34, right = 1180, top = 24, bottom = this.powerChartBottom(meter);
     const span = Math.max(1, end - start);
     const usable = readings
       .filter(r => typeof r[key] === 'number' && Number.isFinite(Number(r[key])))
@@ -3090,8 +3227,8 @@ export class App implements OnDestroy {
     }).filter(points => points.length > 0);
   }
 
-  private buildTimedLineHoverPoints(readings: MeasurementView[], key: keyof MeasurementView, maxKw: number, start: number, end: number): LineHoverPoint[] {
-    const left = 34, right = 1180, top = 24, bottom = 244;
+  private buildTimedLineHoverPoints(readings: MeasurementView[], key: keyof MeasurementView, maxKw: number, start: number, end: number, meter: MeterCard): LineHoverPoint[] {
+    const left = 34, right = 1180, top = 24, bottom = this.powerChartBottom(meter);
     const span = Math.max(1, end - start);
     const usable = readings
       .filter(r => typeof r[key] === 'number' && Number.isFinite(Number(r[key])))
@@ -3117,8 +3254,8 @@ export class App implements OnDestroy {
     });
   }
 
-  private buildTimedQuarterBars(readings: MeasurementView[], maxKw: number, currentIndex: number, start: number, end: number): BarPoint[] {
-    const left = 34, right = 1180, top = 24, bottom = 244;
+  private buildTimedQuarterBars(readings: MeasurementView[], maxKw: number, currentIndex: number, start: number, end: number, meter: MeterCard): BarPoint[] {
+    const left = 34, right = 1180, top = 24, bottom = this.powerChartBottom(meter);
     const span = Math.max(1,end-start);
     const buckets = new Map<number, {value:number; at:number}>();
     readings.forEach(r => {
@@ -3149,28 +3286,60 @@ export class App implements OnDestroy {
   }
 
   private rebuildCommunicationDiagnostics(meter: MeterCard): void {
-    // A stored meter measurement is positive evidence that the whole path
-    // Server <- MQTT <- Edge <- Meter was working at that moment.
-    // Therefore measurements must make all three rows green around the read.
-    const meterRaw = this.buildMeasurementEvidenceTimeline(meter.dayMeasurements);
+    // Infrastructure diagnostics are shared:
+    // - PowerGuard Server is common to every meter card.
+    // - PowerGuard-Edge is common to every meter attached to that same Edge.
+    // Only the meter row is meter-specific.
+    //
+    // This is important when, for example, m23 is online and m24 is offline:
+    // m23 proves that the Server and that Edge are working, so m24 must show
+    // Server=ONLINE, Edge=ONLINE, Meter=OFFLINE for the same time interval.
 
-    const serverHeartbeatRaw = this.buildServerHeartbeatTimeline(
-      meter.communicationSamples.filter(s => s.entityType === 'SERVER')
+    const sameEdgeMeters = this.meters.filter(candidate =>
+      candidate.clientId === meter.clientId &&
+      candidate.siteId === meter.siteId &&
+      candidate.edgeId === meter.edgeId
     );
-    const serverRaw = this.addOnlineEvidence(serverHeartbeatRaw, meterRaw);
 
-    const edgeStatusRaw = this.buildStatusEvidenceTimeline(
-      meter.communicationSamples.filter(s => s.entityType === 'EDGE'),
-      120_000
+    // Any measurement received by this backend is positive evidence that the
+    // PowerGuard Server was alive at that moment.
+    const allServerMeasurements = this.meters.flatMap(candidate => candidate.dayMeasurements || []);
+    const serverMeasurementEvidence = this.buildMeasurementEvidenceTimeline(allServerMeasurements);
+
+    // Server heartbeat/history may be returned together with any meter's
+    // communication history. Merge it from every card so an offline meter does
+    // not lose the shared server state.
+    const sharedServerSamples = this.meters.flatMap(candidate =>
+      (candidate.communicationSamples || []).filter(sample => sample.entityType === 'SERVER')
     );
-    const edgeRaw = this.addOnlineEvidence(edgeStatusRaw, meterRaw);
+    const serverHeartbeatRaw = this.buildServerHeartbeatTimeline(sharedServerSamples);
+    const serverRaw = this.addOnlineEvidence(serverHeartbeatRaw, serverMeasurementEvidence);
 
+    // The Edge state is shared only between meters attached to this exact Edge.
+    // A measurement from any sibling meter proves that the Edge path was alive.
+    const edgeMeasurements = sameEdgeMeters.flatMap(candidate => candidate.dayMeasurements || []);
+    const edgeMeasurementEvidence = this.buildMeasurementEvidenceTimeline(edgeMeasurements);
+
+    const sharedEdgeSamples = sameEdgeMeters.flatMap(candidate =>
+      (candidate.communicationSamples || []).filter(sample => sample.entityType === 'EDGE')
+    );
+    const edgeStatusRaw = this.buildStatusEvidenceTimeline(sharedEdgeSamples, 120_000);
+    const edgeRaw = this.addOnlineEvidence(edgeStatusRaw, edgeMeasurementEvidence);
     const edgeVisible = this.maskByServerAvailability(edgeRaw, serverRaw);
+
+    // The final row remains meter-specific. When Server and Edge are online but
+    // this meter has no readings, buildMeasurementEvidenceTimeline returns
+    // OFFLINE, which is exactly the desired red meter row.
+    const meterRaw = this.buildMeasurementEvidenceTimeline(meter.dayMeasurements || []);
     const meterVisible = this.maskByEdgeAndServerAvailability(meterRaw, edgeVisible, serverRaw);
 
     meter.serverCommunicationSegments = this.toCommunicationSegments(serverRaw, meter);
     meter.edgeCommunicationSegments = this.toCommunicationSegments(edgeVisible, meter);
     meter.meterCommunicationSegments = this.toCommunicationSegments(meterVisible, meter);
+  }
+
+  private rebuildAllCommunicationDiagnostics(): void {
+    this.meters.forEach(candidate => this.rebuildCommunicationDiagnostics(candidate));
   }
 
   private addOnlineEvidence(base: TimeStatusSegment[], evidence: TimeStatusSegment[]): TimeStatusSegment[] {
@@ -3321,9 +3490,9 @@ export class App implements OnDestroy {
       }));
   }
 
-  private valueToChartY(value: number, maxKw: number): number {
+  private valueToChartY(value: number, maxKw: number, meter: MeterCard): number {
     const top = 24;
-    const bottom = 244;
+    const bottom = this.powerChartBottom(meter);
     const height = bottom - top;
     return bottom - (Math.max(0, value) / maxKw) * height;
   }
@@ -3383,15 +3552,15 @@ export class App implements OnDestroy {
     });
   }
 
-  private buildTicks(maxKw: number): AxisTick[] {
+  private buildTicks(maxKw: number, meter: MeterCard): AxisTick[] {
     const step = this.niceStep(maxKw / 4);
     const ticks: AxisTick[] = [];
     for (let value = 0; value <= maxKw + step * 0.001; value += step) {
       const normalized = Number(value.toFixed(step < 1 ? 2 : step < 10 ? 1 : 0));
-      ticks.push({ value: normalized, y: this.valueToChartY(normalized, maxKw) });
+      ticks.push({ value: normalized, y: this.valueToChartY(normalized, maxKw, meter) });
     }
     if (!ticks.length || ticks[ticks.length - 1].value < maxKw) {
-      ticks.push({ value: maxKw, y: this.valueToChartY(maxKw, maxKw) });
+      ticks.push({ value: maxKw, y: this.valueToChartY(maxKw, maxKw, meter) });
     }
     return ticks;
   }

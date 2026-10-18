@@ -5,5 +5,4 @@ const backend = runtime['backend']
 export const environment = {
   production: false,
   apiUrl: `${backend}`,
-  version: '261014k',
 };
