@@ -8288,3 +8288,1385 @@ body:has(.measurement-data-panel) {
 
 /* 261017h: smaller blank area below the network x-axis; all power-chart styling unchanged. */
 .network-mini-chart { aspect-ratio: 720 / 94; }
+
+/* Quarter-aligned rolling charts: readable axes without changing chart geometry. */
+.axis-label--x, .axis-label--y { font-size: 13px !important; font-weight: 600 !important; }
+.axis-unit { font-size: 13px !important; }
+
+/* Authentication landing page */
+.pg-login-page { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 80% 10%, #dff6ef, transparent 45%), linear-gradient(140deg,#eef5ff,#f7fbff); }
+.pg-login-card { width: min(100%, 420px); display: flex; flex-direction: column; gap: 18px; padding: 38px; background: white; border: 1px solid #dfe8ef; border-radius: 18px; box-shadow: 0 22px 70px #1d33541a; }
+.pg-login-card h1 { margin: 0; font-size: 28px; color: #163766; }
+.pg-login-card p { margin: 0 0 8px; color: #63738b; }
+.pg-login-card .button { min-height: 44px; justify-content: center; }
+
+/* v403: compact range presets and collision-free authenticated toolbar */
+.date-range-compact { display: none; }
+.date-range-presets__long { margin-left: 7px !important; }
+@media (max-width: 1850px) {
+  .topbar:has(.admin-nav):has(.topbar__date-controls) {
+    height: auto !important;
+    min-height: 90px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) !important;
+    grid-template-rows: auto auto !important;
+    row-gap: 5px !important;
+  }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .topbar__left { grid-column: 1; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .admin-nav { grid-column: 2; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .topbar__actions { grid-column: 3; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .topbar__date-controls {
+    grid-column: 1 / -1; grid-row: 2; justify-self: center !important;
+    width: max-content; max-width: 100%;
+  }
+  .date-range-presets { display: none !important; }
+  .date-range-compact { display: inline-flex; flex: 0 0 auto; }
+  .date-range-compact select {
+    height: 32px; min-width: 86px; padding: 0 23px 0 10px;
+    border: 1px solid rgba(11,61,111,.16); border-radius: 8px;
+    background: #f8fbfe; color: #315674; font: inherit; font-size: 11px; font-weight: 700;
+  }
+}
+@media (max-width: 1100px) {
+  .topbar:has(.admin-nav):has(.topbar__date-controls) {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto auto !important;
+  }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .topbar__left { grid-column: 1; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .topbar__actions { grid-column: 2; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .admin-nav {
+    grid-column: 1 / -1; grid-row: 2; overflow-x: auto; justify-self: stretch !important; max-width: 100%;
+  }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .topbar__date-controls {
+    grid-column: 1 / -1; grid-row: 3; justify-self: stretch !important;
+    width: 100%; justify-content: center !important; overflow-x: auto;
+  }
+}
+
+/* v404: privileged dashboard uses one compact range selector, no right-hand second row */
+.date-range-compact--always { display: inline-flex !important; flex: 0 0 auto; }
+.date-range-compact--always select {
+  min-width: 82px; height: 32px; border: 1px solid rgba(11,61,111,.16);
+  border-radius: 8px; background: #f8fbfe; color: #315674;
+  font: inherit; font-size: 11px; font-weight: 700; padding: 0 23px 0 9px;
+}
+/* Native date inputs include a calendar affordance; avoid the redundant 104px text slot. */
+.topbar__date-controls .date-picker--range { padding: 0 4px; gap: 3px; }
+.topbar__date-controls .date-picker--range input[type="date"] {
+  width: 112px; min-width: 112px; max-width: 112px;
+  font-size: 11px; padding: 0; color-scheme: light;
+}
+.topbar__date-controls .date-picker--range input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0 0 0 2px; padding: 0; width: 13px; height: 13px;
+}
+@media (min-width: 1281px) {
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) {
+    height: 72px !important; min-height: 72px !important;
+    padding-top: 0 !important; padding-bottom: 0 !important;
+    grid-template-columns: minmax(160px,1fr) minmax(0,auto) auto minmax(160px,1fr) !important;
+    grid-template-rows: 1fr !important; column-gap: 10px !important;
+  }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .topbar__left { grid-column: 1; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .admin-nav { grid-column: 2; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .topbar__date-controls { grid-column: 3; grid-row: 1; width:auto; max-width:none; justify-self:center !important; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .topbar__actions { grid-column: 4; grid-row: 1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .date-range-presets { display: none !important; }
+}
+@media (max-width: 1280px) {
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) {
+    height:auto !important; min-height:80px !important; grid-template-columns: minmax(0,1fr) auto !important;
+    grid-template-rows:auto auto !important; gap:6px !important; padding-top:6px !important; padding-bottom:6px !important;
+  }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .topbar__left { grid-column:1;grid-row:1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .topbar__actions { grid-column:2;grid-row:1; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .admin-nav { grid-column:1;grid-row:2; justify-self:start !important; max-width:100%;overflow-x:auto; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .topbar__date-controls { grid-column:2;grid-row:2;justify-self:end !important;width:auto; }
+}
+@media (max-width: 860px) {
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) { grid-template-rows:auto auto auto !important; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .admin-nav { grid-column:1/-1;grid-row:2; }
+  .topbar:has(.admin-nav):has(.topbar__date-controls--privileged) .topbar__date-controls { grid-column:1/-1;grid-row:3;justify-self:start !important; max-width:100%;overflow-x:auto; }
+}
+
+/* v405: reliable compact date inputs. WebKit's native date editor reserves room for locale + calendar button;
+   use content-sized controls rather than the previous forced 112px. */
+.topbar__date-controls .date-picker--range input[type="date"] {
+  width: 104px !important; min-width: 0 !important; max-width: 104px !important;
+  box-sizing: border-box; font-size: 10px; letter-spacing: -.2px;
+}
+.topbar__date-controls .date-picker--range { padding-left: 2px !important; padding-right: 2px !important; }
+.health-expand-chevron { display: block; transition: transform .18s ease; }
+.health-expand-chevron--open { transform: rotate(180deg); }
+.health-expand-button { display:inline-flex;align-items:center;justify-content:center; }
+.trusted-device-opt-in { display:flex; align-items:flex-start; gap:8px; color:#49627e; font-size:11px; line-height:1.4; margin: 3px 0 10px; cursor:pointer; }
+.trusted-device-opt-in input { flex:0 0 auto; margin: 1px 0 0; accent-color:#38b98b; }
+
+
+/* PowerGuard 406: keep meter card controls, including the magnifier, in view.
+   The title/status line can be long, especially in translated interfaces.
+   Previously .meter-card__header-actions used flex:0 0 auto and the card
+   overflow:hidden clipped its trailing buttons at some widths. */
+.meter-card__header {
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 8px;
+}
+.meter-card__header > :first-child {
+  min-width: 0;
+  flex: 1 1 290px;
+}
+.meter-card__header-actions {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+.meter-card__header-actions .meter-view-toggle {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 850px) {
+  .meter-card__header { padding: 14px 14px 10px; }
+  .meter-card__header-actions { width: 100%; justify-content: flex-start; margin-left: 0; }
+}
+
+/* v407: turn navigation and individual meter chart tabs into native selectors
+   before they collide with date controls or the meter title/actions. */
+.admin-nav-select, .meter-view-select { display: none; }
+@media (max-width: 1550px) {
+  .topbar .admin-nav { display: none !important; }
+  .topbar .admin-nav-select { display: inline-flex; align-items: center; min-width: 0; max-width: 210px; }
+  .topbar .admin-nav-select select, .meter-card .meter-view-select select {
+    width: 100%; min-width: 0; height: 32px; padding: 0 27px 0 10px;
+    border: 1px solid #d5e4ef; border-radius: 9px;
+    background-color: #f8fbfe; color: #285471; font: inherit;
+    font-size: 11px; font-weight: 650; cursor: pointer;
+  }
+  .meter-card .meter-view-toggle { display: none !important; }
+  .meter-card .meter-view-select { display: inline-flex; align-items: center; flex: 0 1 180px; min-width: 112px; max-width: 180px; }
+  /* Keep all control buttons beside the view selector instead of clipping them. */
+  .meter-card__header-actions { flex-wrap: wrap; }
+}
+/* Keep the selector in the same grid slot occupied by the former nav. */
+@media (min-width: 1281px) and (max-width: 1550px) {
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) .admin-nav-select {
+    grid-column: 2; grid-row: 1; justify-self: center;
+  }
+}
+@media (max-width: 1280px) {
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) .admin-nav-select {
+    grid-column: 1; grid-row: 2; justify-self: start;
+  }
+}
+@media (max-width: 860px) {
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) .admin-nav-select {
+    grid-column: 1 / -1; grid-row: 2; justify-self: start;
+  }
+}
+
+
+/* v408: enforce compact navigation at narrow viewport sizes.
+   Kept in global and component styles to defeat previous legacy layout overrides. */
+@media screen and (max-width: 1550px) {
+  .topbar nav.admin-nav { display: none !important; visibility: hidden !important; }
+  .topbar label.admin-nav-select { display: inline-flex !important; visibility: visible !important; min-width: 150px; max-width: 225px; align-items: center; }
+  .topbar label.admin-nav-select > select { display: block !important; width: 100%; max-width: 100%; }
+  .meter-card .meter-card__header-actions .meter-view-toggle { display: none !important; visibility: hidden !important; }
+  .meter-card .meter-card__header-actions label.meter-view-select { display: inline-flex !important; visibility: visible !important; align-items: center; min-width: 130px; max-width: 195px; }
+  .meter-card .meter-card__header-actions label.meter-view-select > select { display: block !important; width: 100%; }
+  .meter-card .meter-card__header-actions { min-width: 0 !important; max-width: 100%; flex-wrap: wrap; }
+}
+@media screen and (max-width: 1050px) {
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) label.admin-nav-select {
+    grid-column: 1 / -1 !important; grid-row: 2 !important; justify-self: start !important;
+  }
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) .topbar__date-controls {
+    grid-column: 1 / -1 !important; grid-row: 3 !important; justify-self: start !important;
+    max-width: 100%; overflow-x: auto;
+  }
+}
+
+/* Extra per-meter OBIS/transformer settings (scrollable on narrow screens) */
+.edge-config-table { min-width: 1190px; }
+
+/* Raw telemetry JSON diagnostics */
+.measurement-json-view { white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; max-height: min(72vh, 880px); margin: 16px 0 0; padding: 18px; border: 1px solid #dbe4ee; border-radius: 12px; background: #f7f9fc; color: #18334f; font: 12px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+
+/* 301 p11: Expanded network charts fill the free space below the panels.
+   Keep 2x2 panels balanced; no blank area under the chart grid.
+   preserveAspectRatio=none is enabled only for expanded network SVGs in HTML,
+   so both axes and plotting lines use the available height. */
+@media (min-width: 901px) {
+  .meter-card--expanded.meter-card--network .network-charts {
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+    align-content: stretch !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 6px 14px 8px !important;
+    overflow: hidden !important;
+  }
+  .meter-card--expanded.meter-card--network .network-chart-card {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  .meter-card--expanded.meter-card--network .network-chart-card > header {
+    flex: 0 0 auto !important;
+  }
+  .meter-card--expanded.meter-card--network .network-chart-card .network-mini-chart {
+    display: block !important;
+    flex: 1 1 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+  }
+  .meter-card--expanded.meter-card--network .network-legend {
+    grid-column: 1 / -1 !important;
+    min-height: 0 !important;
+  }
+}
+
+/* 301 p13: compact history-cleanup administration, without an unnecessary page scrollbar. */
+@media (min-width: 901px) {
+  .configuration-dashboard--history-cleanup {
+    width: min(1500px, calc(100% - 28px)) !important;
+    padding-top: 10px !important;
+    padding-bottom: 0 !important;
+    height: calc(100dvh - 84px);
+    max-height: calc(100dvh - 84px);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .configuration-dashboard--history-cleanup .measurement-data-panel {
+    height: 100% !important;
+    max-height: 100% !important;
+    margin: 0 auto !important;
+    box-sizing: border-box;
+  }
+}
+.measurement-delete-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 36px; padding: 8px;
+  border: 1px solid #edd0d0; border-radius: 9px;
+  color: #b42332; background: #fff8f8; cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.measurement-delete-button svg { width: 18px; height: 18px; }
+.measurement-delete-button:hover:not(:disabled) { background: #fce9ea; border-color: #ce8087; }
+.measurement-delete-button:disabled { opacity: .4; cursor: not-allowed; }
+.measurement-obis-filter {
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid #cbdce7; border-radius: 8px; padding: 5px 9px;
+  background: white; flex: 0 1 250px; min-width: 150px;
+}
+.measurement-obis-filter svg { height: 15px; width: 15px; flex: 0 0 15px; color: #71839a; }
+.measurement-obis-filter input { width: 100%; min-width: 0; font: inherit; font-size: 12px; border: none; background: transparent; outline: none; }
+.quarter-info-symbol { font-size: 12px; opacity: .65; }
+.quarter-elapsed-average { display: block; margin-top: 2px; font-size: 10px; line-height: 1.3; color: #64748b; }
+@media (max-width: 700px) { .measurement-obis-card__header { flex-wrap: wrap; } .measurement-obis-filter { flex: 1 1 100%; } }
+
+
+/* p14: clearly visible OBIS search in Measurement data page toolbar */
+.configuration-dashboard--measurement-data .measurement-data-header .measurement-obis-filter {
+  flex: 0 1 260px;
+  min-width: 190px;
+  min-height: 36px;
+  box-sizing: border-box;
+  background: #fff;
+  border-color: #bdd1e2;
+  box-shadow: 0 1px 3px rgba(20,62,97,.07);
+}
+.configuration-dashboard--measurement-data .measurement-data-header .measurement-obis-filter:focus-within {
+  border-color: #32a3a1;
+  box-shadow: 0 0 0 3px rgba(28,167,158,.13);
+}
+/* JSON view uses the rest of the existing fixed-height panel, no large blank area */
+.configuration-dashboard--measurement-data .measurement-data-panel--json {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 0;
+}
+.configuration-dashboard--measurement-data .measurement-data-panel--json .measurement-json-view {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: auto;
+  margin: 3px 0 0;
+}
+.measurement-icon-action {
+  display: inline-grid; place-items: center;
+  width: 38px; height: 38px;
+  flex: 0 0 38px; padding: 0;
+  border-radius: 10px; border: 1px solid #cbdce8;
+  color: #175078; background: #f8fcff;
+  box-shadow: 0 1px 3px rgba(25,62,95,.06);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.measurement-icon-action:hover:not(:disabled) {
+  background: #e8f7f5; border-color: #79c5bb; transform: translateY(-1px);
+}
+.measurement-icon-action:focus-visible { outline: 2px solid #16a695; outline-offset: 2px; }
+.measurement-icon-action:disabled { opacity: .45; cursor: not-allowed; }
+.measurement-icon-action svg { width: 18px; height: 18px; }
+@media (max-width: 900px) {
+  .configuration-dashboard--measurement-data .measurement-data-header .measurement-obis-filter { flex: 1 1 220px; }
+}
+
+/* p15: compact, single-row Measurement data selectors on desktop */
+@media (min-width: 901px) {
+  .configuration-dashboard--measurement-data .measurement-data-header {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .configuration-dashboard--measurement-data .measurement-data-header > div:first-child {
+    flex: 0 0 auto;
+  }
+  .configuration-dashboard--measurement-data .measurement-data-selectors {
+    display: flex;
+    width: auto;
+    min-width: 0;
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+    gap: 7px;
+  }
+  .configuration-dashboard--measurement-data .measurement-data-header .measurement-obis-filter {
+    flex: 0 1 190px;
+    min-width: 145px;
+    width: 190px;
+    min-height: 34px;
+  }
+  .configuration-dashboard--measurement-data .measurement-data-selectors .edge-selector {
+    flex: 0 1 195px;
+    min-width: 130px;
+    width: 195px;
+  }
+  .configuration-dashboard--measurement-data .measurement-data-selectors .edge-selector select {
+    min-width: 0;
+    width: 100%;
+  }
+  .configuration-dashboard--measurement-data .measurement-data-selectors .measurement-refresh-button {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* v301 p16: provisional average over elapsed part of current quarter. */
+.power-bar-projection {
+  fill: rgba(0, 177, 117, .055);
+  stroke: #059669;
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  pointer-events: auto;
+}
+
+/* p19: informational quarter label does not imply clickability */
+.quarter-info-symbol,
+.quarter-info-symbol:hover,
+.quarter-info-symbol:active { cursor: default !important; }
+
+/* Admin-only device auto-login configuration (not on the public login form). */
+.device-auto-login-config { display:flex; gap:12px; flex-wrap:wrap; align-items:center; padding:12px 14px; margin:10px 0 16px; background:#f5faf9; border:1px solid #d8e9e5; border-radius:12px; }
+.device-auto-login-config__description { display:flex; flex:1 1 290px; flex-direction:column; gap:4px; color:#173755; font-size:12px; }
+.device-auto-login-config__description span { color:#597087; font-size:11px; }
+.device-auto-login-config select { min-width:180px; max-width:260px; padding:9px; border:1px solid #cad8e4; border-radius:8px; background:white; }
+.device-auto-login-config__message { flex-basis:100%; color:#235f51; font-size:12px; }
+
+.device-auto-login-config__label { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; color: #173755; font-size: 12px; }
+.device-auto-login-config__label input[type="checkbox"] { width: 16px; height: 16px; accent-color: #36b487; cursor: pointer; }
+.device-auto-login-config__label input:disabled { cursor: default; }
+
+/* p33: dashboard threshold editor */
+.pg-alarm-settings-button { flex: 0 0 auto; }
+.pg-alarm-backdrop { position:fixed; inset:0; z-index:1200; background:rgba(16,37,61,.48); display:flex; align-items:center; justify-content:center; padding:18px; }
+.pg-alarm-modal { width:min(520px,100%); max-height:95vh; overflow:auto; padding:22px; border-radius:18px; background:#fff; box-shadow:0 22px 75px #14263e40; color:#15314d; }
+.pg-alarm-modal__head { display:flex; justify-content:space-between; align-items:start; margin-bottom:18px; }
+.pg-alarm-modal__head h2 { margin:0 0 4px; font-size:20px; }
+.pg-alarm-modal__head p { margin:0; color:#60738b; }
+.pg-alarm-fieldset { border:1px solid #dce6f0; border-radius:12px; margin:12px 0; display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:14px; }
+.pg-alarm-fieldset legend { padding:0 6px; font-weight:650; }
+.pg-alarm-fieldset label { display:flex; flex-direction:column; gap:6px; font-size:13px; }
+.pg-alarm-fieldset input { width:100%; padding:10px; border:1px solid #ccd9e7; border-radius:8px; }
+.pg-alarm-hint { font-size:12px; color:#63758a; }
+.pg-alarm-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+
+/* v301 p34: keep full Y tick labels inside the 34-unit SVG gutter.
+   Avoid oversized/stretched four-digit labels on the full-height power chart. */
+.power-chart .axis-label--y {
+  text-anchor: start !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  font-variant-numeric: tabular-nums;
+}
+.power-chart .axis-unit { font-size: 10px !important; }
+
+/* v301 p38: date presets depend on available header width, not user role.
+   No navigation (USER / ADVANCED_USER): restore full quick-range buttons on wide displays.
+   On narrower screens retain the compact selector; ADMIN/SERVICE keep their existing
+   crowded-toolbar layout, except at genuinely very wide desktop sizes. */
+@media (min-width: 1280px) {
+  .topbar:not(:has(.admin-nav)):has(.topbar__date-controls) .date-range-presets {
+    display: inline-flex !important;
+  }
+  .topbar:not(:has(.admin-nav)):has(.topbar__date-controls) .date-range-compact {
+    display: none !important;
+  }
+}
+@media (max-width: 1279px) {
+  .topbar:not(:has(.admin-nav)):has(.topbar__date-controls) .date-range-presets {
+    display: none !important;
+  }
+  .topbar:not(:has(.admin-nav)):has(.topbar__date-controls) .date-range-compact {
+    display: inline-flex !important;
+  }
+}
+@media (min-width: 2200px) {
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .date-range-presets {
+    display: inline-flex !important;
+  }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .date-range-compact {
+    display: none !important;
+  }
+}
+@media (min-width: 1280px) and (max-width: 2199px) {
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .date-range-presets {
+    display: none !important;
+  }
+  .topbar:has(.admin-nav):has(.topbar__date-controls) .date-range-compact {
+    display: inline-flex !important;
+  }
+}
+
+/* p40 — responsive meter card header and readable view selector.
+   Container width, rather than window width, handles two-up and expanded cards. */
+.meter-card {
+  container-type: inline-size;
+}
+.meter-card__header > :first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+}
+.meter-card__header > :first-child .meter-last-reading {
+  margin: 0;
+}
+.meter-card .meter-view-select select {
+  font-family: Arial, 'Segoe UI', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-stretch: normal;
+  font-style: normal;
+  letter-spacing: normal;
+  line-height: 1.3;
+  text-rendering: optimizeLegibility;
+}
+@container (max-width: 860px) {
+  .meter-card__header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: start !important;
+    gap: 5px 10px !important;
+  }
+  .meter-card__header > :first-child {
+    display: contents;
+  }
+  .meter-card__title-row {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-content: start;
+  }
+  .meter-card__title-row h2 {
+    min-width: 0;
+    overflow-wrap: normal;
+  }
+  .meter-card__header .meter-last-reading {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: auto;
+    display: block;
+    margin: 0 !important;
+    font-size: 10px;
+    line-height: 1.35;
+    white-space: normal;
+  }
+  .meter-card__header .meter-last-reading > span { display: none; }
+  .meter-card__header-actions {
+    grid-column: 2;
+    grid-row: 1;
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    align-items: flex-start;
+    margin-left: 0 !important;
+    gap: 5px;
+  }
+  .meter-card .meter-view-select {
+    min-width: 105px !important;
+    width: 140px;
+    max-width: 155px !important;
+    flex: 0 1 140px;
+  }
+}
+@container (max-width: 530px) {
+  .meter-card__header {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .meter-card__header-actions { gap: 4px; }
+  .meter-card .meter-view-select {
+    min-width: 90px !important;
+    width: 110px;
+    max-width: 125px !important;
+  }
+  .meter-card .meter-view-select select { font-size: 11px !important; }
+}
+@container (max-width: 385px) {
+  .meter-card__header { grid-template-columns: minmax(0, 1fr); }
+  .meter-card__header-actions {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start !important;
+  }
+  .meter-card__header .meter-last-reading { grid-row: 3; }
+}
+
+/* p41 — zoom / mobile safety: never let flexbox collapse a chart to zero.
+   Browser zoom reduces the CSS viewport; allow vertical document scrolling
+   instead of squeezing the entire dashboard into one screen. */
+@media (max-width: 1280px), (max-height: 720px) {
+  :host:has(.dashboard--single-row),
+  :host:has(.dashboard--single-row) .shell {
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow: visible !important;
+  }
+  .dashboard--single-row {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  .dashboard--single-row .meter-grid--one,
+  .dashboard--single-row .meter-grid--two,
+  .meter-grid--one,
+  .meter-grid--two {
+    height: auto !important;
+    min-height: 0 !important;
+    align-items: start !important;
+  }
+  .meter-grid--one > .meter-card:not(.meter-card--expanded),
+  .meter-grid--two > .meter-card:not(.meter-card--expanded),
+  .dashboard--single-row .meter-card:not(.meter-card--expanded) {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .chart-wrap,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .chart-wrap,
+  .dashboard--single-row .meter-card:not(.meter-card--expanded) .chart-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 240px !important;
+    overflow: visible !important;
+  }
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .power-chart,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .power-chart,
+  .dashboard--single-row .meter-card:not(.meter-card--expanded) .power-chart {
+    display: block !important;
+    flex: 0 0 auto !important;
+    height: 250px !important;
+    min-height: 250px !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+  }
+  .meter-card--expanded .chart-wrap { min-height: 240px !important; }
+  .meter-card--expanded .power-chart { min-height: 240px !important; }
+}
+@media (max-width: 900px) {
+  .meter-grid--one,
+  .meter-grid--two,
+  .meter-grid--three,
+  .meter-grid--four {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .meter-card__header { padding: 12px 12px 8px !important; }
+  .chart-wrap { min-width: 0; padding-left: 6px !important; padding-right: 6px !important; }
+}
+@media (max-width: 540px) {
+  .meter-card { border-radius: 13px; }
+  .meter-card__live-strip { padding-left: 9px !important; padding-right: 9px !important; }
+  .chart-local-legend { flex-wrap: wrap; row-gap: 4px; }
+  .chart-local-legend button { font-size: 11px !important; }
+  .meter-grid--one > .meter-card:not(.meter-card--expanded) .power-chart,
+  .meter-grid--two > .meter-card:not(.meter-card--expanded) .power-chart {
+    height: 230px !important;
+    min-height: 230px !important;
+  }
+}
+
+/* p42 — keep the complete meter toolbar together.
+   Earlier responsive rules permitted .meter-card__header-actions to wrap,
+   moving the final expand button onto its own line on enlarged cards. */
+.meter-card__header-actions {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  gap: 6px;
+}
+.meter-card__header-actions > * {
+  flex-shrink: 0 !important;
+}
+.meter-card__header-actions .meter-view-select {
+  flex-shrink: 1 !important;
+}
+.meter-card__header > :first-child {
+  min-width: 0;
+}
+
+/* On two-column cards the timestamp goes below the title while every
+   control stays on the first row, aligned against the right edge. */
+@container (max-width: 860px) {
+  .meter-card__header-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: max-content !important;
+    margin-left: auto !important;
+    justify-self: end !important;
+    flex-wrap: nowrap !important;
+  }
+}
+/* At genuine phone widths move the entire toolbar, not individual icons. */
+@container (max-width: 385px) {
+  .meter-card__header {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .meter-card__header-actions {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: end !important;
+  }
+  .meter-card__header .meter-last-reading {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+  }
+}
+
+
+/* p43 — user-controlled dashboard arrangement. Defaults to responsive auto.
+   Explicit two-column mode still becomes one column on phones to prevent
+   controls and chart axes from being clipped. */
+.dashboard-layout-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  margin: 0 2px 8px;
+}
+.dashboard-layout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 29px;
+  padding: 0 8px;
+  border: 1px solid #d5e2ec;
+  background: #f7fafc;
+  color: #476680;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 650;
+}
+.dashboard-layout-button svg {
+  height: 15px;
+  width: 15px;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  fill: none;
+}
+.dashboard-layout-button.active {
+  background: #e8f8f3;
+  border-color: #9ddcca;
+  color: #087e67;
+}
+.dashboard-layout-button:focus-visible { outline: 2px solid #10a987; outline-offset: 2px; }
+@media (min-width: 1081px) {
+  .dashboard--layout-one .meter-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (min-width: 901px) {
+  .dashboard--layout-two .meter-grid--two,
+  .dashboard--layout-two .meter-grid--three,
+  .dashboard--layout-two .meter-grid--four { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+/* A stacked dashboard must scroll; never squeeze two full-width cards into
+   the fixed single-viewport dashboard used by the side-by-side view. */
+:host:has(.dashboard--layout-one),
+:host:has(.dashboard--layout-one) .shell {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow: visible !important;
+}
+.dashboard--layout-one,
+.dashboard--layout-one.dashboard--single-row {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+.dashboard--layout-one .meter-grid { height: auto !important; min-height: 0 !important; align-items: start !important; }
+.dashboard--layout-one .meter-card:not(.meter-card--expanded) {
+  height: auto !important;
+  min-height: 0 !important;
+}
+.dashboard--layout-one .meter-card:not(.meter-card--expanded) .chart-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+}
+.dashboard--layout-one .meter-card:not(.meter-card--expanded) .power-chart {
+  display: block !important;
+  height: clamp(350px, 38dvh, 450px) !important;
+  min-height: 350px !important;
+  flex: 0 0 auto !important;
+  max-height: 450px !important;
+}
+@media (max-width: 900px) {
+  .dashboard--layout-two .meter-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .dashboard--layout-one .meter-card:not(.meter-card--expanded) .power-chart,
+  .dashboard--layout-two .meter-card:not(.meter-card--expanded) .power-chart {
+    height: 280px !important;
+    min-height: 250px !important;
+    max-height: none !important;
+  }
+}
+@media (max-width: 540px) {
+  .dashboard-layout-toolbar { margin-bottom: 6px; }
+  .dashboard--layout-one .meter-card:not(.meter-card--expanded) .power-chart,
+  .dashboard--layout-two .meter-card:not(.meter-card--expanded) .power-chart {
+    height: 230px !important;
+    min-height: 230px !important;
+  }
+}
+
+/* p45 — single header row for navigation, date filters and layout selection.
+   At narrow widths the presets and layout buttons turn into compact selectors.
+   No dedicated dashboard toolbar is rendered, so no extra vertical space. */
+.topbar .dashboard-layout-toolbar--header {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin: 0 4px 0 0;
+  min-width: 0;
+  white-space: nowrap;
+}
+.dashboard-layout-compact { display: none; }
+.dashboard-layout-compact select {
+  height: 30px;
+  max-width: 110px;
+  padding: 0 23px 0 8px;
+  border: 1px solid #d5e2ec;
+  border-radius: 8px;
+  background: #f7fafc;
+  color: #234969;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+}
+/* When navigation tabs consume the header width, display both controls compactly. */
+@media (max-width: 1800px) {
+  .topbar:has(.admin-nav) .dashboard-layout-toolbar--header .dashboard-layout-button { display: none; }
+  .topbar:has(.admin-nav) .dashboard-layout-compact { display: inline-flex; }
+}
+@media (max-width: 1260px) {
+  .topbar .dashboard-layout-toolbar--header .dashboard-layout-button { display: none; }
+  .topbar .dashboard-layout-compact { display: inline-flex; }
+}
+/* Reduce crowding sooner for pages with the full admin navigation. */
+@media (max-width: 2199px) {
+  .topbar:has(.admin-nav) .date-range-presets { display: none !important; }
+  .topbar:has(.admin-nav) .date-range-compact { display: inline-flex !important; }
+}
+@media (max-width: 1279px) {
+  .topbar:not(:has(.admin-nav)) .date-range-presets { display: none !important; }
+  .topbar:not(:has(.admin-nav)) .date-range-compact { display: inline-flex !important; }
+}
+/* Avoid the old dashboard toolbar gap now that layout controls live in the header. */
+.dashboard--single-row { padding-top: 0 !important; }
+@media (max-width: 900px) {
+  .topbar .dashboard-layout-toolbar--header { margin: 0 2px; }
+  .dashboard-layout-compact select { max-width: 95px; }
+}
+
+/* p46 — one-line header at all widths. The older p403/p408 grid media
+   queries placed the date controls in row 2/3 and left the layout buttons
+   without a grid position; use a single flex formatting context instead. */
+.topbar,
+.topbar:has(.admin-nav):has(.topbar__date-controls),
+.topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  padding: 0 12px !important;
+  gap: clamp(4px, .55vw, 12px) !important;
+  overflow: visible !important;
+}
+.topbar > * {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  min-width: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+.topbar .topbar__left { flex: 0 1 auto !important; gap: 6px !important; }
+.topbar .brand { flex-shrink: 0; }
+.topbar .admin-nav,
+.topbar .admin-nav-select { flex: 0 1 auto !important; }
+.topbar .topbar__date-controls {
+  flex: 0 1 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
+  justify-content: center !important;
+  gap: 3px !important;
+}
+.topbar .topbar__date-controls > * { flex-shrink: 0; }
+.topbar .dashboard-layout-toolbar--header { flex: 0 0 auto !important; }
+.topbar .topbar__actions {
+  flex: 0 0 auto !important;
+  grid-column: auto !important;
+  margin-left: auto !important;
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+}
+/* A long admin menu must become a selector BEFORE it collides with the date
+   controls. The role-dependent quick-range selector is already available. */
+@media (max-width: 1800px) {
+  .topbar nav.admin-nav { display: none !important; }
+  .topbar label.admin-nav-select {
+    display: inline-flex !important;
+    flex: 0 1 130px !important;
+    width: 130px !important;
+    min-width: 95px !important;
+    max-width: 130px !important;
+  }
+  .topbar:has(.admin-nav) .date-range-presets { display: none !important; }
+  .topbar:has(.admin-nav) .date-range-compact { display: inline-flex !important; }
+}
+@media (max-width: 1450px) {
+  .topbar .date-range-presets { display: none !important; }
+  .topbar .date-range-compact { display: inline-flex !important; }
+  .topbar .dashboard-layout-toolbar--header .dashboard-layout-button { display: none !important; }
+  .topbar .dashboard-layout-toolbar--header .dashboard-layout-compact { display: inline-flex !important; }
+}
+@media (max-width: 960px) {
+  .topbar { height: 62px !important; min-height: 62px !important; padding-inline: 6px !important; }
+  .topbar .brand__name { font-size: 17px !important; }
+  .topbar .brand__mark { width: 30px !important; height: 30px !important; }
+  .topbar .site-context--single { display: none !important; }
+  .topbar .topbar__date-controls .date-picker--range { padding: 0 1px !important; }
+  .topbar .topbar__date-controls .date-picker--range span { display: none; }
+  .topbar .topbar__actions { gap: 2px !important; }
+  .topbar label.admin-nav-select { flex-basis: 95px !important; width: 95px !important; min-width: 75px !important; }
+}
+@media (max-width: 680px) {
+  .topbar .brand__name { display: none !important; }
+  .topbar .topbar__date-controls .date-picker--range input { max-width: 100px !important; }
+  .topbar .date-navigation__arrow { width: 24px !important; min-width: 24px !important; }
+  .topbar .dashboard-layout-compact select { max-width: 69px !important; padding-left: 3px !important; }
+}
+
+/* p47: Keep the meter layout picker on the dashboard only (template guard).
+   Accounts without the administrative navigation get a more centered set of
+   date/range controls. Do not move the right-hand account actions. */
+@media (min-width: 1100px) {
+  .topbar:not(:has(.admin-nav)) .topbar__date-controls {
+    margin-left: clamp(36px, 8vw, 150px) !important;
+  }
+}
+
+
+/* PowerGuard p48 - simplified header and automatic meter layout */
+.admin-nav-overflow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-nav-overflow > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #d6e5ee;
+  background: #f7fbfd;
+  color: #5f7893;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+.admin-nav-overflow > summary::-webkit-details-marker { display: none; }
+.admin-nav-overflow > summary::marker { content: ''; }
+.admin-nav-overflow[open] > summary,
+.admin-nav-overflow > summary.active,
+.admin-nav-overflow > summary:hover,
+.admin-nav-overflow > summary:focus-visible {
+  background: #ffffff;
+  color: #0b6f91;
+  box-shadow: 0 2px 8px rgba(14, 62, 99, .10);
+}
+
+.admin-nav-overflow__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  border-radius: 14px;
+  border: 1px solid #d6e5ee;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(14, 62, 99, .16);
+  z-index: 30;
+}
+
+.admin-nav-overflow__menu button {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.meter-grid--many {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 1080px) {
+  .meter-grid--many {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* p49: Today is a range action; no separate calendar icon in the header.
+   Preserve wider preset buttons for USER / ADVANCED_USER when the viewport fits. */
+.topbar .date-range-compact select {
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+  background-color: #f8fbfe !important;
+  color: #264b6b !important;
+  border: 1px solid #d7e5ef !important;
+  border-radius: 9px !important;
+  min-width: 82px !important;
+  padding: 0 22px 0 9px !important;
+}
+.topbar .date-range-presets__today {
+  min-width: 34px;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+
+/* p50: compact navigation icons after date controls, never before the range. */
+.topbar .admin-nav {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  max-width: none !important;
+  min-width: 0 !important;
+  width: auto !important;
+  overflow: visible !important;
+  background: transparent;
+  padding: 2px;
+}
+.topbar .admin-nav > button {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  padding: 6px !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.topbar .admin-nav > button svg { display: block; width: 19px; height: 19px; }
+.topbar .admin-nav-overflow > summary { min-width: 34px; width: 34px; height: 34px; padding: 0; }
+/* Place compact nav selector at the right too on narrow screens. */
+.topbar .admin-nav-select { order: 4; }
+.topbar .topbar__left { order: 0; }
+.topbar .topbar__date-controls { order: 1; }
+.topbar .admin-nav { order: 3; }
+.topbar .topbar__actions { order: 5; }
+/* Two meters: deliberately stack vertically. Three+ meters: two columns. */
+.dashboard .meter-grid--two { grid-template-columns: minmax(0,1fr) !important; }
+.dashboard .meter-grid--three,
+.dashboard .meter-grid--four,
+.dashboard .meter-grid--many { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+.dashboard .meter-grid--two > .meter-card:not(.meter-card--expanded) {
+  min-height: 420px !important;
+  height: auto !important;
+}
+.dashboard .meter-grid--two > .meter-card:not(.meter-card--expanded) .power-chart,
+.dashboard .meter-grid--two > .meter-card:not(.meter-card--expanded) .chart-wrap {
+  min-height: 265px !important;
+  height: 265px !important;
+  max-height: none !important;
+}
+@media (max-width: 1000px) {
+ .dashboard .meter-grid--three, .dashboard .meter-grid--four, .dashboard .meter-grid--many {
+   grid-template-columns: minmax(0,1fr) !important;
+ }
+}
+.date-range-presets__today { display:inline-flex !important;align-items:center;justify-content:center;min-width:32px !important; padding:5px !important; }
+.date-range-presets__today svg { width:16px;height:16px;display:block; }
+
+
+/* p51: one coherent, unboxed icon language on the right of the header. */
+.topbar .topbar__actions {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: clamp(5px, .8vw, 14px) !important;
+  margin-left: auto !important;
+}
+.topbar .topbar__actions .admin-nav {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: clamp(3px, .45vw, 10px) !important;
+  padding: 0 14px 0 0 !important;
+  margin: 0 6px 0 0 !important;
+  border: 0 !important;
+  border-right: 1px solid #dbe7ef !important;
+  background: transparent !important;
+  flex: 0 0 auto !important;
+}
+.topbar .topbar__actions .admin-nav > button,
+.topbar .topbar__actions .admin-nav-overflow > summary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #607d9a !important;
+  border-radius: 10px !important;
+  width: 34px !important;
+  height: 36px !important;
+  padding: 6px !important;
+  cursor: pointer;
+}
+.topbar .topbar__actions .admin-nav > button.active,
+.topbar .topbar__actions .admin-nav-overflow > summary.active {
+  color: #0d9a82 !important;
+}
+.topbar .topbar__actions .admin-nav > button:hover,
+.topbar .topbar__actions .admin-nav-overflow > summary:hover,
+.topbar .topbar__actions .admin-nav > button:focus-visible,
+.topbar .topbar__actions .admin-nav-overflow > summary:focus-visible {
+  background: #f1f7fb !important;
+}
+.topbar .topbar__actions .admin-nav-overflow__menu {
+  z-index: 100 !important;
+}
+.topbar .topbar__actions .admin-nav-overflow__menu button {
+  color: #294665 !important;
+  background: transparent !important;
+  border: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 34px;
+  padding: 8px 10px !important;
+  text-align: left;
+  justify-content: flex-start !important;
+}
+.topbar .topbar__actions .admin-nav-overflow__menu button:hover,
+.topbar .topbar__actions .admin-nav-overflow__menu button.active {
+  background: #edf8f6 !important;
+}
+.topbar .topbar__actions > .admin-nav-select {
+  display: none !important;
+  order: 0;
+}
+@media (min-width: 1250px) {
+  .topbar .topbar__actions .admin-nav { display: inline-flex !important; }
+  .topbar .topbar__actions > .admin-nav-select { display: none !important; }
+}
+@media (max-width: 1249px) {
+  .topbar .topbar__actions .admin-nav { display: none !important; }
+  .topbar .topbar__actions > .admin-nav-select { display: inline-flex !important; max-width: 130px; margin-right: 8px; }
+}
+
+/* p52: center the date navigation and place page navigation BEFORE account icons. */
+@media (min-width: 1330px) {
+  .topbar,
+  .topbar:has(.admin-nav):has(.topbar__date-controls),
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 12px !important;
+  }
+  .topbar > .topbar__left {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+  }
+  .topbar > .topbar__date-controls {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: center !important;
+    margin: 0 !important;
+  }
+  .topbar > .topbar__actions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    margin: 0 !important;
+  }
+  /* Other pages have no date group: leave the account controls on the right. */
+  .topbar:not(:has(> .topbar__date-controls)) > .topbar__actions {
+    grid-column: 3 !important;
+  }
+}
+/* All viewport sizes: navigation icons -> More -> gap -> account actions. */
+.topbar .topbar__actions > .admin-nav,
+.topbar .topbar__actions > .admin-nav-select {
+  order: -1 !important;
+}
+.topbar .topbar__actions > .admin-nav {
+  padding-right: 18px !important;
+  margin-right: 12px !important;
+}
+.topbar .topbar__actions > .admin-nav-select {
+  margin-right: 12px !important;
+}
+@media (max-width: 1329px) {
+  .topbar > .topbar__date-controls {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .topbar > .topbar__actions {
+    margin-left: 0 !important;
+  }
+}
+
+/* p53 — scrolling dashboard instead of vertically compressing chart SVGs.
+   Earlier desktop rules used height:100dvh + overflow:hidden on the host,
+   dashboard and meter grid. That combination caused clipped axis labels
+   after expanding communication diagnostics. */
+:host:has(.dashboard) {
+  display: block !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+:host:has(.dashboard) .shell {
+  min-height: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+:host:has(.dashboard) .topbar {
+  position: sticky !important;
+  top: 0;
+  z-index: 100 !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+:host:has(.dashboard) .topbar .brand__mark {
+  width: 39px !important;
+  height: 39px !important;
+}
+:host:has(.dashboard) .dashboard,
+:host:has(.dashboard) .dashboard--single-row {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  padding-top: 10px !important;
+  padding-bottom: 18px !important;
+  overflow: visible !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid,
+:host:has(.dashboard) .dashboard .meter-grid--one,
+:host:has(.dashboard) .dashboard .meter-grid--two {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  align-items: start !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card:not(.meter-card--expanded) {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card:not(.meter-card--expanded) .chart-wrap {
+  flex: 0 0 auto !important;
+  display: block !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card:not(.meter-card--expanded) .power-chart {
+  display: block !important;
+  width: 100% !important;
+  height: 320px !important;
+  min-height: 320px !important;
+  max-height: none !important;
+  flex: none !important;
+  aspect-ratio: auto !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card:not(.meter-card--expanded) .communication-diagnostics {
+  flex: 0 0 auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+/* For narrow screens, keep the axis legible without making charts enormous. */
+@media (max-width: 720px) {
+  :host:has(.dashboard) .dashboard .meter-grid > .meter-card:not(.meter-card--expanded) .power-chart {
+    height: 285px !important;
+    min-height: 285px !important;
+  }
+  :host:has(.dashboard) .topbar {
+    height: 58px !important;
+    min-height: 58px !important;
+  }
+}
+
+/* p54: same compact, sticky header height on all application pages. */
+:host .topbar,
+:host:has(.dashboard) .topbar {
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  position: sticky !important;
+  top: 0;
+  z-index: 100 !important;
+  box-sizing: border-box !important;
+}
+:host .topbar .brand__mark { width: 39px !important; height: 39px !important; }
+/* Keep axis labels visible; viewBox and display height are now in sync. */
+:host .power-chart .axis-label--x,
+:host .power-chart .axis-label--y {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+:host .power-chart .axis-unit { font-size: 11px !important; font-weight: 600 !important; }
+
+/* p55 - Network tab: never squeeze four SVG charts into zero-height rows.
+   p53 made meter cards content-height, but older .dashboard--single-row
+   flex:1 / min-height:0 rules still collapse this chart grid. */
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) .network-charts {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: auto auto auto !important;
+  align-items: stretch !important;
+  flex: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  gap: 10px !important;
+  padding: 8px 14px 12px !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) .network-chart-card {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) .network-chart-card > header {
+  flex: none !important;
+  min-height: 24px !important;
+  padding: 6px 9px 2px !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) .network-mini-chart {
+  display: block !important;
+  flex: none !important;
+  width: 100% !important;
+  height: 145px !important;
+  min-height: 145px !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+}
+:host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) .network-legend {
+  grid-column: 1 / -1 !important;
+  flex: none !important;
+}
+@media (max-width: 780px) {
+  :host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) .network-charts {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+  }
+  :host:has(.dashboard) .dashboard .meter-grid > .meter-card--network:not(.meter-card--expanded) .network-mini-chart {
+    height: 132px !important;
+    min-height: 132px !important;
+  }
+}

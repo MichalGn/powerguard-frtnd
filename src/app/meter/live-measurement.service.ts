@@ -12,6 +12,8 @@ export interface LiveMeasurementMessage {
   status: 'ONLINE' | 'WARNING' | 'OFFLINE';
   measuredAt: string;
   currentPowerKw: number | null;
+  activePowerSource?: string | null;
+  activePowerQuality?: string | null;
   currentQuarterPowerKw: number | null;
   activeEnergyImportKwh?: number | null;
   activeEnergyExportKwh?: number | null;

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 import { md5 } from './md5';
 
-export type UserRole = 'ADMIN' | 'INSTALATOR' | 'USER';
+export type UserRole = 'ADMIN' | 'SERVICE' | 'ADVANCED_USER' | 'USER';
 
 export interface UserView {
   id: number;
@@ -55,6 +55,30 @@ export class AuthService {
       username,
       passwordMd5: md5(plainPassword),
     });
+  }
+
+  provisionTrustedDevice(userId: number): Observable<{deviceToken: string}> {
+    return this.http.post<{deviceToken: string}>(`${this.authUrl}/trusted-device/provision`, {userId}, {headers:this.authHeaders()});
+  }
+
+  exchangeTrustedDevice(deviceToken: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.authUrl}/trusted-device/exchange`, {deviceToken});
+  }
+  revokeTrustedDevice(deviceToken: string): Observable<void> {
+    return this.http.post<void>(`${this.authUrl}/trusted-device/revoke`, {deviceToken}, {headers:this.authHeaders()});
+  }
+
+  getInstallationAutoLogin(): Observable<{enabled:boolean}> {
+    return this.http.get<{enabled:boolean}>(`${this.authUrl}/installation-auto-login`);
+  }
+  exchangeInstallationAutoLogin(): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.authUrl}/installation-auto-login/exchange`, {});
+  }
+  getInstallationAutoLoginConfiguration(): Observable<{userId:number}> {
+    return this.http.get<{userId:number}>(`${this.authUrl}/installation-auto-login/configuration`, {headers:this.authHeaders()});
+  }
+  configureInstallationAutoLogin(userId: number | null): Observable<{enabled:boolean;userId:number}> {
+    return this.http.put<{enabled:boolean;userId:number}>(`${this.authUrl}/installation-auto-login`, {userId}, {headers:this.authHeaders()});
   }
 
   logout(): Observable<void> {

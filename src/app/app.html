@@ -1,4 +1,48 @@
+@if (!authenticated) {
+  <div class="pg-login-page">
+    <form class="pg-login-card" (ngSubmit)="submitLogin()">
+      <img src="powerguard-mark.png" alt="" width="66" height="66" />
+      <h1>PowerGuard</h1>
+      <label class="login-field"><span>{{ t('username') }}</span>
+        <input name="loginUsername" autocomplete="username" [(ngModel)]="loginUsername" [disabled]="loginBusy" required autofocus />
+      </label>
+      <label class="login-field"><span>{{ t('password') }}</span>
+        <input name="loginPassword" type="password" autocomplete="current-password" [(ngModel)]="loginPassword" [disabled]="loginBusy" required />
+      </label>
+
+      @if (loginError) { <p class="login-error">{{ loginError }}</p> }
+      <button type="submit" class="button button--primary" [disabled]="loginBusy || !loginUsername.trim() || !loginPassword">{{ loginBusy ? t('signingIn') : t('login') }}</button>
+    </form>
+
+</div>
+} @else {
 <div class="shell" (pointerdown)="unlockAlarmAudio()">
+    @if (alarmEditorMeter; as alarmMeter) {
+    <div class="pg-alarm-backdrop" (click)="closeDashboardAlarms()">
+      <section class="pg-alarm-modal" role="dialog" aria-modal="true" [attr.aria-label]="language === 'pl' ? 'Progi alarmowe' : 'Alarm thresholds'" (click)="$event.stopPropagation()">
+        <div class="pg-alarm-modal__head">
+          <div><h2>{{ language === 'pl' ? 'Progi alarmowe' : 'Alarm thresholds' }}</h2><p>{{ alarmMeter.name }}</p></div>
+          <button type="button" class="meter-zoom-button" (click)="closeDashboardAlarms()" [disabled]="alarmEditorBusy" aria-label="Close">×</button>
+        </div>
+        <fieldset class="pg-alarm-fieldset" [disabled]="alarmEditorBusy">
+          <legend>{{ language === 'pl' ? 'Moc chwilowa (kW)' : 'Instantaneous power (kW)' }}</legend>
+          <label>{{ language === 'pl' ? 'ZAŁ.' : 'ON' }}<input type="number" step="any" min="0" [(ngModel)]="alarmInstantOn"></label>
+          <label>{{ language === 'pl' ? 'WYŁ.' : 'OFF' }}<input type="number" step="any" min="0" [(ngModel)]="alarmInstantOff"></label>
+        </fieldset>
+        <fieldset class="pg-alarm-fieldset" [disabled]="alarmEditorBusy">
+          <legend>{{ language === 'pl' ? 'Moc 15-minutowa (kW)' : '15-minute power (kW)' }}</legend>
+          <label>{{ language === 'pl' ? 'ZAŁ.' : 'ON' }}<input type="number" step="any" min="0" [(ngModel)]="alarmQuarterOn"></label>
+          <label>{{ language === 'pl' ? 'WYŁ.' : 'OFF' }}<input type="number" step="any" min="0" [(ngModel)]="alarmQuarterOff"></label>
+        </fieldset>
+        <p class="pg-alarm-hint">{{ language === 'pl' ? 'Zostaw oba pola danej pary puste, aby wyłączyć próg. WYŁ. musi być mniejszy niż ZAŁ.' : 'Leave both fields of a pair empty to disable the threshold. OFF must be below ON.' }}</p>
+        @if (alarmEditorError) { <p class="login-error">{{ alarmEditorError }}</p> }
+        <div class="pg-alarm-actions">
+          <button type="button" class="button" (click)="closeDashboardAlarms()" [disabled]="alarmEditorBusy">{{ t('cancel') }}</button>
+          <button type="button" class="button button--primary" (click)="saveDashboardAlarms()" [disabled]="alarmEditorBusy">{{ t('save') }}</button>
+        </div>
+      </section>
+    </div>
+  }
   <header class="topbar">
     <div class="topbar__left">
       <a class="brand" href="/" aria-label="PowerGuard home" [attr.title]="'PowerGuard Frontend ' + frontendVersion">
@@ -8,11 +52,11 @@
         </span>
       </a>
 
-      @if (!authenticated && publicDashboardClients.length === 1) {
+      @if (publicDashboardClients.length === 1) {
         <div class="site-context site-context--single" [attr.title]="publicDashboardClients[0].clientId">
           {{ publicDashboardClients[0].name }}
         </div>
-      } @else if (!authenticated && publicDashboardClients.length > 1) {
+      } @else if (publicDashboardClients.length > 1) {
         <label class="site-context site-context--selector">
           <span class="sr-only">{{ t('client') }}</span>
           <select [ngModel]="selectedClientId" (ngModelChange)="selectClient($event)" [attr.aria-label]="t('selectClient')">
@@ -23,11 +67,11 @@
         </label>
       }
 
-      @if (!authenticated && !hideDuplicateSingleSiteContext && publicDashboardSitesForSelectedClient.length === 1) {
+      @if (!hideDuplicateSingleSiteContext && publicDashboardSitesForSelectedClient.length === 1) {
         <div class="site-context site-context--single" [attr.title]="publicDashboardSitesForSelectedClient[0].siteId">
           {{ publicDashboardSitesForSelectedClient[0].name }}
         </div>
-      } @else if (!authenticated && publicDashboardSitesForSelectedClient.length > 1) {
+      } @else if (publicDashboardSitesForSelectedClient.length > 1) {
         <label class="site-context site-context--selector">
           <span class="sr-only">{{ t('site') }}</span>
           <select [ngModel]="selectedSiteId" (ngModelChange)="selectSite($event)" [attr.aria-label]="t('selectSite')">
@@ -40,59 +84,102 @@
 
     </div>
 
-    @if (authenticated) {
-      <nav class="admin-nav" aria-label="Application navigation">
-        <button type="button" [class.active]="adminView === 'health'" (click)="setAdminView('health')">{{ t('health') }}</button>
-        @if (authenticatedRole === 'ADMIN') {
-          <button type="button" [class.active]="adminView === 'sites'" (click)="setAdminView('sites')">{{ t('sites') }}</button>
-        }
-        <button type="button" [class.active]="adminView === 'configuration'" (click)="setAdminView('configuration')">{{ t('meterConfiguration') }}</button>
-        @if (authenticatedRole === 'ADMIN' || authenticatedRole === 'INSTALATOR') {
-          <button type="button" [class.active]="adminView === 'settings'" (click)="setAdminView('settings')">{{ t('settings') }}</button>
-        }
-        @if (authenticatedRole === 'ADMIN') {
-          <button type="button" [class.active]="adminView === 'edgeConfiguration'" (click)="setAdminView('edgeConfiguration')">{{ t('edgeConfiguration') }}</button>
-          @if (rawMeasurementTabVisible()) {
-            <button type="button" [class.active]="adminView === 'measurementData'" (click)="setAdminView('measurementData')">{{ t('measurementData') }}</button>
-          }
-        }
-      </nav>
-    }
 
-    @if (!authenticated) {
-    <div class="topbar__date-controls" aria-label="Date range navigation">
+    @if (adminView === 'dashboard') {
+    <div class="topbar__date-controls" [class.topbar__date-controls--privileged]="authenticatedRole !== 'USER'" aria-label="Date range navigation">
       <button type="button" class="date-navigation__arrow" (click)="changeSelectedDay(-1)" [attr.title]="t('previousDay')">‹</button>
 
       <label class="date-picker date-picker--range">
-        <span>{{ language === 'pl' ? 'Od' : 'From' }}</span>
+        <span>{{ t('from') }}</span>
         <input type="date" [(ngModel)]="selectedDateFrom" (change)="onDateChanged()" [max]="todayInputMax()" />
       </label>
       <span class="date-range-separator">–</span>
       <label class="date-picker date-picker--range">
-        <span>{{ language === 'pl' ? 'Do' : 'To' }}</span>
+        <span>{{ t('to') }}</span>
         <input type="date" [(ngModel)]="selectedDateTo" (change)="onDateChanged()" [max]="todayInputMax()" />
       </label>
 
       <button type="button" class="date-navigation__arrow" (click)="changeSelectedDay(1)" [disabled]="isNextDayDisabled()" [attr.title]="t('nextDay')">›</button>
       <div class="date-range-presets">
+        <button type="button" class="date-range-presets__today" (click)="selectToday()" [attr.title]="language === 'pl' ? 'Dzisiaj' : 'Today'" [attr.aria-label]="language === 'pl' ? 'Dzisiaj' : 'Today'"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg></button>
         <button type="button" [class.active]="selectedQuickRangeMinutes === 60" (click)="setRangeMinutes(60)">1h</button>
         <button type="button" [class.active]="selectedQuickRangeMinutes === 120" (click)="setRangeMinutes(120)">2h</button>
         <button type="button" [class.active]="selectedQuickRangeMinutes === 240" (click)="setRangeMinutes(240)">4h</button>
-        <button type="button" [class.active]="selectedQuickRangeMinutes === 1440" (click)="setRangeMinutes(1440)">1d</button>
-        <button type="button" (click)="setRangeDays(3)">3d</button>
+        <button type="button" [class.active]="selectedQuickRangeMinutes === 480" (click)="setRangeMinutes(480)">8h</button>
+        <button type="button" [class.active]="selectedQuickRangeMinutes === 1440" (click)="setRangeMinutes(1440)">24h</button>
+        <button type="button" class="date-range-presets__long" (click)="setRangeDays(3)">3d</button>
         <button type="button" (click)="setRangeDays(7)">7d</button>
         <button type="button" (click)="setRangeDays(30)">30d</button>
       </div>
-      <button type="button" class="today-button" (click)="selectToday()" [attr.title]="t('today')">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7 2h2v2h6V2h2v2h1.5A2.5 2.5 0 0 1 21 6.5v12A2.5 2.5 0 0 1 18.5 21h-13A2.5 2.5 0 0 1 3 18.5v-12A2.5 2.5 0 0 1 5.5 4H7V2Zm11.5 7h-13v9.5c0 .28.22.5.5.5h12c.28 0 .5-.22.5-.5V9ZM12 11a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"></path>
-        </svg>
-      </button>
+      <label class="date-range-compact">
+        <span class="sr-only">{{ t('timeRange') }}</span>
+        <select [value]="selectedRangePreset" (change)="selectRangePreset($event)" [attr.aria-label]="t('timeRange')">
+          <option value="custom">{{ language === 'pl' ? 'Własny' : 'Custom' }}</option>
+          <option value="today">{{ language === 'pl' ? 'Dzisiaj' : 'Today' }}</option>
+          <option value="60">1h</option><option value="120">2h</option>
+          <option value="240">4h</option><option value="480">8h</option>
+          <option value="1440">24h</option><option value="3d">3d</option>
+          <option value="7d">7d</option><option value="30d">30d</option>
+        </select>
+      </label>
+
     </div>
     }
 
+
+
+
+
+
     <div class="topbar__actions">
-      @if (authenticated && (authenticatedRole === 'ADMIN' || authenticatedRole === 'INSTALATOR')) {
+    @if (authenticated && (authenticatedRole === 'ADMIN' || authenticatedRole === 'SERVICE')) {
+      <nav class="admin-nav" aria-label="Application navigation">
+        <button type="button" [class.active]="adminView === 'health'" (click)="setAdminView('health')" [attr.title]="t('health')" [attr.aria-label]="t('health')"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></button>
+        @if (authenticatedRole === 'ADMIN') {
+          <button type="button" [class.active]="adminView === 'sites'" (click)="setAdminView('sites')" [attr.title]="t('sites')" [attr.aria-label]="t('sites')"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="13" rx="1"/><path d="M8 8V4h8v4M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg></button>
+        }
+        <button type="button" [class.active]="adminView === 'configuration'" (click)="setAdminView('configuration')" [attr.title]="t('meterConfiguration')" [attr.aria-label]="t('meterConfiguration')"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>
+        <details class="admin-nav-overflow">
+          <summary title="Więcej / More" aria-label="Więcej / More" [class.active]="adminView === 'settings' || adminView === 'historyCleanup' || adminView === 'edgeConfiguration' || adminView === 'jsonData' || adminView === 'measurementData'">…</summary>
+          <div class="admin-nav-overflow__menu">
+            <button type="button" [class.active]="adminView === 'settings'" (click)="setAdminView('settings')">{{ t('settings') }}</button>
+            @if (authenticatedRole === 'ADMIN') {
+              <button type="button" [class.active]="adminView === 'historyCleanup'" (click)="setAdminView('historyCleanup')">{{ language === 'pl' ? 'Administracja danymi' : 'Data administration' }}</button>
+              <button type="button" [class.active]="adminView === 'edgeConfiguration'" (click)="setAdminView('edgeConfiguration')">{{ t('edgeConfiguration') }}</button>
+              @if (rawMeasurementTabVisible()) {
+                <button type="button" [class.active]="adminView === 'jsonData'" (click)="setAdminView('jsonData')">{{ jsonDataLabel() }}</button>
+                <button type="button" [class.active]="adminView === 'measurementData'" (click)="setAdminView('measurementData')">{{ t('measurementData') }}</button>
+              }
+            }
+            @if (authenticatedRole === 'SERVICE') {
+              <button type="button" [class.active]="adminView === 'measurementData'" (click)="setAdminView('measurementData')">{{ t('measurementData') }}</button>
+            }
+          </div>
+        </details>
+      </nav>
+      <label class="admin-nav-select">
+        <span class="sr-only">{{ language === 'pl' ? 'Wybierz stronę' : 'Select page' }}</span>
+        <select [value]="adminView" (change)="setAdminView($any($event.target).value)" [attr.aria-label]="language === 'pl' ? 'Wybierz stronę' : 'Select page'">
+          <option value="dashboard">{{ t('dashboard') }}</option>
+          <option value="health">{{ t('health') }}</option>
+          @if (authenticatedRole === 'ADMIN') { <option value="sites">{{ t('sites') }}</option> }
+          @if (authenticatedRole === 'ADMIN' || authenticatedRole === 'SERVICE') {
+          <option value="configuration">{{ t('meterConfiguration') }}</option>
+          }
+          @if (authenticatedRole === 'ADMIN' || authenticatedRole === 'SERVICE') { <option value="settings">{{ t('settings') }}</option> }
+          @if (authenticatedRole === 'ADMIN') {
+            <option value="historyCleanup">{{ language === 'pl' ? 'Administracja danymi' : 'Data administration' }}</option>
+            <option value="edgeConfiguration">{{ t('edgeConfiguration') }}</option>
+            @if (rawMeasurementTabVisible()) { <option value="jsonData">{{ jsonDataLabel() }}</option> }
+            @if (rawMeasurementTabVisible()) { <option value="measurementData">{{ t('measurementData') }}</option> }
+          }
+          @if (authenticatedRole === 'SERVICE') { <option value="measurementData">{{ t('measurementData') }}</option> }
+        </select>
+      </label>
+    }
+
+
+      @if (authenticated && (authenticatedRole === 'ADMIN' || authenticatedRole === 'SERVICE')) {
         <button
           class="header-icon-button"
           type="button"
@@ -276,7 +363,7 @@
           </svg>
         </button>
       } @else {
-        <button
+      <button
           class="login-button login-button--logout"
           type="button"
           (click)="logout()"
@@ -293,7 +380,7 @@
     </div>
   </header>
 
-  @if (!authenticated) {
+  @if (adminView === 'dashboard') {
   <main class="dashboard" [class.dashboard--single-row]="visibleMeters.length <= 2">
 
     <section
@@ -302,6 +389,7 @@
       [class.meter-grid--two]="visibleMeters.length === 2"
       [class.meter-grid--three]="visibleMeters.length === 3"
       [class.meter-grid--four]="visibleMeters.length === 4"
+      [class.meter-grid--many]="visibleMeters.length >= 5"
     >
       @for (meter of visibleMeters; track meter.id) {
         <article class="meter-card"
@@ -322,19 +410,38 @@
                   [class.status-dot--offline]="meterHeaderStatus(meter) === 'OFFLINE'"
                 ></span>
                 <span class="status-text" [class.status-text--alarm]="meterHeaderStatus(meter) === 'ALARM'">{{ statusLabel(meterHeaderStatus(meter)) }}</span>
-                <span class="meter-last-reading"
-                  [attr.title]="lastReadingTitle(meter.lastReadingAt)">
-                  <span aria-hidden="true">•</span>
-                  {{ lastReadingLabel() }}: {{ lastReadingDisplay(meter.lastReadingAt) }}
-                </span>
               </div>
+              <span class="meter-last-reading"
+                [attr.title]="lastReadingTitle(meter.lastReadingAt)">
+                <span aria-hidden="true">•</span>
+                {{ lastReadingLabel() }}: {{ lastReadingDisplay(meter.lastReadingAt) }}
+              </span>
             </div>
             <div class="meter-card__header-actions">
+              @if (authenticatedRole !== 'USER') {
+                <button type="button" class="meter-zoom-button pg-alarm-settings-button"
+                  (click)="openDashboardAlarms(meter)"
+                  [attr.title]="language === 'pl' ? 'Progi alarmowe' : 'Alarm thresholds'"
+                  [attr.aria-label]="language === 'pl' ? 'Progi alarmowe' : 'Alarm thresholds'">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.5" fill="white"/><circle cx="15" cy="17" r="2.5" fill="white"/>
+                  </svg>
+                </button>
+              }
+
               <div class="meter-view-toggle" role="group" [attr.aria-label]="t('networkParameters')">
                 <button type="button" [class.active]="meter.chartView === 'power'" (click)="setMeterChartView(meter, 'power')">{{ language === 'pl' ? 'Moce' : 'Powers' }}</button>
                 <button type="button" [class.active]="meter.chartView === 'network'" (click)="setMeterChartView(meter, 'network')">{{ t('networkParameters') }}</button>
                 <button type="button" [class.active]="meter.chartView === 'alarms'" (click)="setMeterChartView(meter, 'alarms')">{{ t('alarmHistory') }}</button>
               </div>
+              <label class="meter-view-select">
+                <span class="sr-only">{{ language === 'pl' ? 'Widok licznika' : 'Meter view' }}</span>
+                <select [value]="meter.chartView" (change)="setMeterChartView(meter, $any($event.target).value)" [attr.aria-label]="language === 'pl' ? 'Widok licznika' : 'Meter view'">
+                  <option value="power">{{ language === 'pl' ? 'Moce' : 'Powers' }}</option>
+                  <option value="network">{{ t('networkParameters') }}</option>
+                  <option value="alarms">{{ t('alarmHistory') }}</option>
+                </select>
+              </label>
               <details class="meter-export-menu">
                 <summary
                   class="meter-zoom-button meter-export-button"
@@ -423,8 +530,11 @@
             <div class="live-metric"
                  [class.live-metric--alarm]="hasActiveAlarmType(meter, 'QUARTER_HOUR_POWER')"
                  [class.live-metric--alarm-unack]="hasUnacknowledgedAlarmType(meter, 'QUARTER_HOUR_POWER')">
-              <span>{{ t('current15Min') }}</span>
-              <strong>{{ formatPower(meter.currentQuarterPowerKw) }} <small>kW</small></strong>
+              <span [attr.title]="language === 'pl' ? 'Średnia od początku bieżącego kwadransa. Jest prognozą średniej na koniec 15 minut przy utrzymaniu dotychczasowego poboru; początek kwadransa może być oszacowany.' : 'Average since quarter start. Provisional final 15-minute average if the current rate continues; the baseline may be estimated.'">{{ language === 'pl' ? 'Średnia od początku kwadransa (prognoza)' : 'Current-quarter average (projection)' }} <span class="quarter-info-symbol" aria-hidden="true">ⓘ</span></span>
+              <strong>{{ formatElapsedQuarterAverage(meter) }} <small>kW</small></strong>
+              @if (isSelectedToday() && meter.currentQuarterPowerKw != null) {
+                <span class="quarter-elapsed-average" [attr.title]="language === 'pl' ? 'Pobrana energia od początku kwadransa × 4, czyli narastająca moc 15-minutowa.' : 'Energy consumed since the quarter started × 4, the accumulated 15-minute-equivalent demand.'">{{ language === 'pl' ? 'Narastająca moc 15-min:' : 'Accumulated 15-min demand:' }} {{ formatPower(meter.currentQuarterPowerKw) }} kW</span>
+              }
               @if (activeAlarmOfType(meter, 'QUARTER_HOUR_POWER'); as alarm) {
                 <div class="live-metric__alarm-info">
                   <span class="live-metric__alarm-text">
@@ -455,7 +565,6 @@
                 </div>
                 <div class="quarter-timer__details">
                   <span>{{ t('quarterEnergy') }} <strong>{{ formatEnergySoFar(meter) }} / {{ formatQuarterEnergyBudget(meter) }} kWh</strong></span>
-                  <span>{{ t('quarterBudget') }} <strong>{{ formatQuarterLimit(meter) }} kW</strong></span>
                 </div>
               </div>
             }
@@ -503,7 +612,7 @@
 
               @for (tick of meter.yTicks; track tick.value) {
                 <line class="grid-line" x1="34" x2="1180" [attr.y1]="tick.y" [attr.y2]="tick.y"></line>
-                <text class="axis-label axis-label--y" x="24" [attr.y]="tick.y + 4">{{ tick.value }}</text>
+                <text class="axis-label axis-label--y" x="6" [attr.y]="tick.y + 3">{{ tick.value }}</text>
               }
 
               <text class="axis-unit" x="4" y="18">kW</text>
@@ -522,6 +631,14 @@
                 >
                   <title>{{ t('average15Min') }} · {{ bar.intervalLabel }} · {{ bar.value.toFixed(1) }} kW</title>
                 </rect>
+                @if (bar.current && bar.projectedHeight != null && bar.projectedY != null) {
+                  <rect class="power-bar-projection"
+                    [attr.x]="bar.x" [attr.y]="bar.projectedY"
+                    [attr.width]="bar.width" [attr.height]="bar.projectedHeight"
+                    rx="1">
+                    <title>{{ language === 'pl' ? 'Prognozowana średnia na koniec kwadransa, gdy dotychczasowa średnia się utrzyma' : 'Projected final quarter average if the current average persists' }} · {{ bar.projectedValue?.toFixed(1) }} kW</title>
+                  </rect>
+                }
               }
               }
 
@@ -564,19 +681,19 @@
             <div class="network-charts">
               <section class="network-chart-card">
                 <header><div><strong>{{ t('powerChart') }}</strong><span>{{ meter.powerRange }} kW</span></div><div class="network-live-values"><b>{{ formatNetworkValue(meter.currentPowerKw, 2) }} kW</b></div></header>
-                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'power')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.powerRange, 'kW'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@for (segment of meter.powerSegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--power"></polyline>}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'power') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
+                <svg viewBox="0 0 720 94" [attr.preserveAspectRatio]="isMeterExpanded(meter) ? 'none' : 'xMidYMid meet'" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'power')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.powerRange, 'kW'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@for (segment of meter.powerSegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--power"></polyline>}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'power') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <section class="network-chart-card">
                 <header><div><strong>{{ t('voltage') }}</strong><span>{{ meter.voltageRange }} V</span></div><div class="network-live-values">@if (hasPhaseData(meter,'voltage',1)) {<b>L1 {{ formatNetworkValue(meter.voltageL1V) }} V</b>} @if (hasPhaseData(meter,'voltage',2)) {<b>L2 {{ formatNetworkValue(meter.voltageL2V) }} V</b>} @if (hasPhaseData(meter,'voltage',3)) {<b>L3 {{ formatNetworkValue(meter.voltageL3V) }} V</b>} @if (noVoltageData(meter)) {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
-                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'voltage')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.voltageRange, 'V'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@if (hasPhaseData(meter,'voltage',1)) {@for (segment of meter.voltageL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'voltage',2)) {@for (segment of meter.voltageL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'voltage',3)) {@for (segment of meter.voltageL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'voltage') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
+                <svg viewBox="0 0 720 94" [attr.preserveAspectRatio]="isMeterExpanded(meter) ? 'none' : 'xMidYMid meet'" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'voltage')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.voltageRange, 'V'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@if (hasPhaseData(meter,'voltage',1)) {@for (segment of meter.voltageL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'voltage',2)) {@for (segment of meter.voltageL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'voltage',3)) {@for (segment of meter.voltageL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'voltage') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <section class="network-chart-card">
                 <header><div><strong>{{ t('current') }}</strong><span>{{ meter.currentRange }} A</span></div><div class="network-live-values">@if (hasPhaseData(meter,'current',1)) {<b>L1 {{ formatNetworkValue(meter.currentL1A, 2) }} A</b>} @if (hasPhaseData(meter,'current',2)) {<b>L2 {{ formatNetworkValue(meter.currentL2A, 2) }} A</b>} @if (hasPhaseData(meter,'current',3)) {<b>L3 {{ formatNetworkValue(meter.currentL3A, 2) }} A</b>} @if (noCurrentData(meter)) {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
-                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'current')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.currentRange, 'A'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@if (hasPhaseData(meter,'current',1)) {@for (segment of meter.currentL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'current',2)) {@for (segment of meter.currentL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'current',3)) {@for (segment of meter.currentL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'current') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
+                <svg viewBox="0 0 720 94" [attr.preserveAspectRatio]="isMeterExpanded(meter) ? 'none' : 'xMidYMid meet'" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'current')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.currentRange, 'A'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@if (hasPhaseData(meter,'current',1)) {@for (segment of meter.currentL1Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l1"></polyline>}} @if (hasPhaseData(meter,'current',2)) {@for (segment of meter.currentL2Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l2"></polyline>}} @if (hasPhaseData(meter,'current',3)) {@for (segment of meter.currentL3Segments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--l3"></polyline>}}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'current') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <section class="network-chart-card">
                 <header><div><strong>{{ t('frequency') }}</strong><span>{{ meter.frequencyRange }} Hz</span></div><div class="network-live-values">@if (!noFrequencyData(meter)) {<b>{{ formatNetworkValue(meter.frequencyHz, 2) }} Hz</b>} @else {<b>{{ language === 'pl' ? 'Brak danych z licznika' : 'No meter data' }}</b>}</div></header>
-                <svg viewBox="0 0 720 94" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'frequency')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.frequencyRange, 'Hz'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@for (segment of meter.frequencySegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--frequency"></polyline>}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'frequency') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
+                <svg viewBox="0 0 720 94" [attr.preserveAspectRatio]="isMeterExpanded(meter) ? 'none' : 'xMidYMid meet'" class="network-mini-chart" (mousemove)="onNetworkHover($event, meter, 'frequency')" (mouseleave)="meter.networkHover = undefined">@for (tick of networkYAxisTicks(meter.frequencyRange, 'Hz'); track $index) {<line x1="43" x2="710" [attr.y1]="tick.y" [attr.y2]="tick.y" class="network-grid-line"></line><text x="40" [attr.y]="tick.y + 2.5" text-anchor="end" class="network-y-axis-label">{{tick.label}}</text>}<line x1="43" x2="710" y1="72" y2="72" class="network-grid-line"></line>@for (segment of meter.frequencySegments; track $index) {<polyline [attr.points]="segment" class="network-line network-line--frequency"></polyline>}@for (tick of networkXAxisTicks(meter); track $index) {<line class="x-tick" [attr.x1]="tick.x" [attr.x2]="tick.x" y1="72" y2="77"></line><text class="network-axis-label" [attr.x]="tick.x + ($first ? 14 : ($last ? -14 : 0))" y="89" text-anchor="middle">{{ tick.label }}</text>}@if (meter.networkHover?.chart === 'frequency') {<g class="network-hover-tooltip" [attr.transform]="'translate(' + meter.networkHover!.x + ',6)'"><rect x="-86" y="0" width="172" height="13" rx="3"></rect><text text-anchor="middle" x="0" y="9">{{ meter.networkHover!.text }}</text></g>}</svg>
               </section>
               <div class="network-legend">@if (hasPhaseData(meter,'voltage',1) || hasPhaseData(meter,'current',1)) {<span><i class="network-dot network-dot--l1"></i>L1</span>} @if (hasPhaseData(meter,'voltage',2) || hasPhaseData(meter,'current',2)) {<span><i class="network-dot network-dot--l2"></i>L2</span>} @if (hasPhaseData(meter,'voltage',3) || hasPhaseData(meter,'current',3)) {<span><i class="network-dot network-dot--l3"></i>L3</span>}</div>
             </div>
@@ -707,8 +824,8 @@
       }
     </section>
   </main>
-  } @else {
-    <main class="configuration-dashboard" [class.configuration-dashboard--measurement-data]="adminView === 'measurementData'">
+  } @else if (authenticatedRole !== 'USER') {
+    <main class="configuration-dashboard" [class.configuration-dashboard--measurement-data]="adminView === 'measurementData' || adminView === 'jsonData'" [class.configuration-dashboard--history-cleanup]="adminView === 'historyCleanup'">
       @if (adminView === 'health') {
         <section class="edge-health-panel">
           <div class="edge-health-panel__header">
@@ -778,7 +895,9 @@
                       <td>
                         <button type="button" class="health-expand-button" (click)="toggleEdgeDetails(edge)"
                           [attr.title]="t('details')" [attr.aria-label]="t('details')">
-                          {{ edgeIsExpanded(edge) ? '⌃' : '⌄' }}
+                          <svg class="health-expand-chevron" [class.health-expand-chevron--open]="edgeIsExpanded(edge)" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
                         </button>
                       </td>
                       <td class="edge-health-actions">
@@ -1115,6 +1234,9 @@
                         <th>{{ t('serialPort') }}</th>
                         <th [attr.title]="t('meterAddressHint')">{{ t('meterAddress') }}</th>
                         <th>{{ t('pollDelay') }}</th>
+                        <th title="Power reading method">Power calculation</th>
+                        <th title="Current transformer multiplier: primary / secondary">CT ratio</th>
+                        <th title="Voltage transformer multiplier: primary / secondary">VT ratio</th>
                         <th>{{ t('enabled') }}</th>
                         <th>{{ t('actions') }}</th>
                       </tr>
@@ -1135,6 +1257,16 @@
                           </td>
                           <td><input class="table-input" [name]="'edgeMeterAddress' + $index" [(ngModel)]="meter.address" /></td>
                           <td><input class="table-input table-input--small" [name]="'edgeMeterPoll' + $index" type="number" min="0" [(ngModel)]="meter.pollDelaySeconds" /></td>
+                          <td><select class="table-input" [name]="'edgePowerReadingMode' + $index" [(ngModel)]="meter.powerReadingMode">
+                            <option value="UNCONFIGURED">Select…</option>
+                            <option value="DIRECT">OBIS 16.7.0</option>
+                            <option value="IMPORT_EXPORT">OBIS 1.7.0 − 2.7.0</option>
+                            <option value="VOLTAGE_CURRENT_PF">U × I × PF (estimated)</option>
+                          </select></td>
+                          <td><input class="table-input table-input--small" [name]="'edgeMeterCtRatio' + $index" type="number" min="0.000001" step="any"
+                            [ngModel]="edgeTransformerRatio(meter, 'ct')" (ngModelChange)="updateEdgeTransformerRatio(meter, 'ct', $event)" /></td>
+                          <td><input class="table-input table-input--small" [name]="'edgeMeterVtRatio' + $index" type="number" min="0.000001" step="any"
+                            [ngModel]="edgeTransformerRatio(meter, 'vt')" (ngModelChange)="updateEdgeTransformerRatio(meter, 'vt', $event)" /></td>
                           <td class="table-check"><input [name]="'edgeMeterEnabled' + $index" type="checkbox" [(ngModel)]="meter.enabled" /></td>
                           <td class="edge-action-cell">
                             <span class="edge-icon-tooltip" [attr.data-tooltip]="t('deleteEdgeMeter')">
@@ -1168,6 +1300,64 @@
             </form>
           }
         </section>
+      } @else if (adminView === 'historyCleanup' && authenticatedRole === 'ADMIN') {
+        <section class="measurement-data-panel">
+          <h2>{{ language === 'pl' ? 'Usuwanie danych historycznych' : 'Delete historical measurements' }}</h2>
+          <div class="measurement-data-selectors">
+            <label>{{ language === 'pl' ? 'Licznik' : 'Meter' }}
+              <select [(ngModel)]="cleanupMeterId">
+                <option [ngValue]="null">—</option>
+                @for (meter of meters; track meter.meterId) {
+                  <option [ngValue]="meter.meterId">{{ meter.name }} (#{{ meter.meterId }})</option>
+                }
+              </select>
+            </label>
+            <label>{{ language === 'pl' ? 'Od' : 'From' }} <input type="date" [(ngModel)]="cleanupFrom"></label>
+            <label>{{ language === 'pl' ? 'Do' : 'To' }} <input type="date" [(ngModel)]="cleanupTo"></label>
+            <label>{{ language === 'pl' ? 'Wpisz DELETE' : 'Type DELETE' }} <input [(ngModel)]="cleanupConfirmation" autocomplete="off"></label>
+            <button type="button" class="measurement-delete-button" [disabled]="cleanupBusy || !cleanupMeterId || !cleanupFrom || !cleanupTo || cleanupConfirmation !== 'DELETE'" (click)="deleteHistoricalMeasurements()" [attr.title]="language === 'pl' ? 'Usuń wybrane pomiary' : 'Delete selected readings'" [attr.aria-label]="language === 'pl' ? 'Usuń wybrane pomiary' : 'Delete selected readings'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/></svg>
+            </button>
+          </div>
+          @if (cleanupMessage) { <p>{{ cleanupMessage }}</p> }
+        </section>
+      } @else if (adminView === 'jsonData') {
+        <section class="measurement-data-panel measurement-data-panel--json">
+          <div class="measurement-data-header">
+            <h2>{{ jsonDataLabel() }}</h2>
+            <div class="measurement-data-selectors">
+              <label class="edge-selector">
+                <select [(ngModel)]="selectedEdgeConfigKey" (change)="onEdgeConfigSelectionChanged()">
+                  @for (edge of edgeHealth; track edge.clientId + ':' + edge.siteId + ':' + edge.edgeId) {
+                    <option [value]="edgeKey(edge)">{{ edge.clientId }} / {{ edge.siteId }} / {{ edge.edgeId }}</option>
+                  }
+                </select>
+              </label>
+              <label class="edge-selector">
+                <select [(ngModel)]="selectedRawMeterKey" (change)="loadRawMeasurementData(false)">
+                  @for (meterKey of rawMeterKeys(); track meterKey) {
+                    <option [value]="meterKey">{{ meterKey }}</option>
+                  }
+                </select>
+              </label>
+              <button type="button" class="measurement-icon-action" (click)="loadRawMeasurementData(true)" [disabled]="rawMeasurementDataBusy" [attr.title]="t('refresh')" [attr.aria-label]="t('refresh')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M6.1 9a7 7 0 0 1 11.7-2.6L20 11M17.9 15a7 7 0 0 1-11.7 2.6L4 13"/></svg>
+              </button>
+              <button type="button" class="measurement-icon-action" (click)="copyTelemetryJson()" [disabled]="!selectedRawMeasurement()" [attr.title]="language === 'pl' ? 'Kopiuj JSON' : 'Copy JSON'" [attr.aria-label]="language === 'pl' ? 'Kopiuj JSON' : 'Copy JSON'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              </button>
+            </div>
+          </div>
+          @if (!edgeConfiguration?.includeRawObis) {
+            <p class="configuration-empty">{{ t('rawObisEnableHint') }}</p>
+          } @else if (rawMeasurementDataError) {
+            <p class="login-error">{{ rawMeasurementDataError }}</p>
+          } @else if (selectedRawMeasurement()) {
+            <pre class="measurement-json-view">{{ selectedTelemetryJson() }}</pre>
+          } @else {
+            <p class="configuration-empty">{{ language === 'pl' ? 'Brak odebranej telemetrii JSON dla wybranego licznika.' : 'No JSON telemetry received for the selected meter.' }}</p>
+          }
+        </section>
       } @else if (adminView === 'measurementData') {
         <section class="measurement-data-panel">
           <div class="measurement-data-header">
@@ -1175,6 +1365,10 @@
               <h2>{{ t('measurementData') }}</h2>
             </div>
             <div class="measurement-data-selectors">
+              <label class="measurement-obis-filter">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+                    <input [(ngModel)]="obisFilter" [placeholder]="language === 'pl' ? 'Filtruj OBIS (np. .7.0)' : 'Filter OBIS (e.g. .7.0)'" [attr.aria-label]="language === 'pl' ? 'Filtruj rejestry OBIS' : 'Filter OBIS registers'" />
+                  </label>
               <label class="edge-selector">
                 <select [(ngModel)]="selectedEdgeConfigKey" (change)="onEdgeConfigSelectionChanged()">
                   @for (edge of edgeHealth; track edge.clientId + ':' + edge.siteId + ':' + edge.edgeId) {
@@ -1235,7 +1429,7 @@
               <section class="measurement-obis-card">
                 <div class="measurement-obis-card__header">
                   <h3>{{ t('obisValues') }}</h3>
-                  <span>{{ rawFinishedAt(rawData) }}</span>
+                  <span>{{ filteredRawObisRows(rawData).length }} / {{ rawObisRows(rawData).length }} · {{ rawFinishedAt(rawData) }}</span>
                 </div>
                 <div class="measurement-obis-table-wrap">
                   <table class="measurement-obis-table">
@@ -1248,7 +1442,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @for (row of rawObisRows(rawData); track row.code + ':' + $index) {
+                      @for (row of filteredRawObisRows(rawData); track row.code + ':' + $index) {
                         <tr>
                           <td><strong>{{ row.code }}</strong></td>
                           <td>{{ row.value || '—' }}</td>
@@ -1419,12 +1613,12 @@
                           <td [attr.data-label]="t('actions')">
                             <div class="meters-table__actions">
                               <button type="button" class="table-action table-action--icon"
-                                (click)="moveMeterUp(meter)" [disabled]="metersBusy || !canMoveMeterUp(meter)"
+                                (click)="moveMeterUp(meter)" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy || !canMoveMeterUp(meter)"
                                 [attr.aria-label]="t('moveUp')" [attr.title]="t('moveUp')">
                                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg>
                               </button>
                               <button type="button" class="table-action table-action--icon"
-                                (click)="moveMeterDown(meter)" [disabled]="metersBusy || !canMoveMeterDown(meter)"
+                                (click)="moveMeterDown(meter)" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy || !canMoveMeterDown(meter)"
                                 [attr.aria-label]="t('moveDown')" [attr.title]="t('moveDown')">
                                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 10 6 6 6-6"/></svg>
                               </button>
@@ -1436,7 +1630,7 @@
                                 </svg>
                               </button>
                               <button type="button" class="table-action table-action--icon table-action--danger"
-                                (click)="deleteMeter(meter)" [disabled]="metersBusy"
+                                (click)="deleteMeter(meter)" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy"
                                 [attr.aria-label]="t('deleteMeter')" [attr.title]="t('deleteMeter')">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                   <path d="M8 4h8l1 2h4v2H3V6h4l1-2Zm1 6h2v8H9v-8Zm4 0h2v8h-2v-8Zm-6 0h2v8H7v-8Zm-1 10h12l1-11H5l1 11Z" fill="currentColor"/>
@@ -1454,10 +1648,10 @@
             </div>
 
             <form class="meter-editor">
-              <h3>{{ editingMeterId === null ? t('addMeter') : t('editMeter') }}</h3>
+              <h3>{{ authenticatedRole === 'ADVANCED_USER' ? (language === 'pl' ? 'Progi alarmowe' : 'Alarm thresholds') : (editingMeterId === null ? t('addMeter') : t('editMeter')) }}</h3>
               <label class="login-field">
                 <span>{{ t('client') }}</span>
-                <select name="meterClientId" [(ngModel)]="meterClientId" (change)="onMeterClientChanged()" [disabled]="metersBusy">
+                <select name="meterClientId" [(ngModel)]="meterClientId" (change)="onMeterClientChanged()" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy">
                   @for (client of (authenticatedRole === 'ADMIN' ? adminClients : clients); track client.clientId) {
                     <option [value]="client.clientId">{{ client.name }}</option>
                   }
@@ -1465,7 +1659,7 @@
               </label>
               <label class="login-field">
                 <span [attr.title]="t('siteIdHint')">{{ t('site') }}</span>
-                <select name="meterSiteId" [(ngModel)]="meterSiteId" (change)="onMeterSiteChanged()" [disabled]="metersBusy">
+                <select name="meterSiteId" [(ngModel)]="meterSiteId" (change)="onMeterSiteChanged()" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy">
                   @for (site of meterEditorSites(); track site.id) {
                     <option [value]="site.siteId">{{ site.name }}</option>
                   }
@@ -1473,7 +1667,7 @@
               </label>
               <label class="login-field">
                 <span [attr.title]="t('edgeIdHint')">{{ t('edgeId') }}</span>
-                <select name="meterEdgeId" [(ngModel)]="meterEdgeId" (change)="onMeterEdgeChanged()" [disabled]="metersBusy || meterEditorEdgeIds().length === 0">
+                <select name="meterEdgeId" [(ngModel)]="meterEdgeId" (change)="onMeterEdgeChanged()" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy || meterEditorEdgeIds().length === 0">
                   @for (edgeId of meterEditorEdgeIds(); track edgeId) {
                     <option [value]="edgeId">{{ edgeId }}</option>
                   }
@@ -1484,7 +1678,7 @@
               </label>
               <label class="login-field">
                 <span [attr.title]="t('uniqueNameHint')">{{ t('uniqueName') }}</span>
-                <select name="meterUniqueName" [(ngModel)]="meterUniqueName" [disabled]="metersBusy || meterEditorMeterIds().length === 0">
+                <select name="meterUniqueName" [(ngModel)]="meterUniqueName" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy || meterEditorMeterIds().length === 0">
                   @for (meterId of meterEditorMeterIds(); track meterId) {
                     <option [value]="meterId">{{ meterId }}</option>
                   }
@@ -1495,7 +1689,7 @@
               </label>
               <label class="login-field">
                 <span>{{ t('meterName') }}</span>
-                <input name="meterName" type="text" [(ngModel)]="meterName" [disabled]="metersBusy" />
+                <input name="meterName" type="text" [(ngModel)]="meterName" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy" />
               </label>
               <div class="alarm-config-grid">
                 <fieldset class="alarm-config-group">
@@ -1515,7 +1709,7 @@
               </div>
               <p class="dialog-hint">{{ t('hysteresisHint') }}</p>
               <label class="toggle-field meter-enabled-field">
-                <input name="meterEnabled" type="checkbox" [(ngModel)]="meterEnabled" [disabled]="metersBusy" />
+                <input name="meterEnabled" type="checkbox" [(ngModel)]="meterEnabled" [disabled]="authenticatedRole === 'ADVANCED_USER' || metersBusy" />
                 <span>{{ t('enabled') }}</span>
               </label>
               @if (metersError) {
@@ -1523,7 +1717,7 @@
               }
               <div class="login-dialog__actions meter-editor__actions">
                 <button type="button" class="button button--secondary" (click)="startAddMeter()" [disabled]="metersBusy">{{ t('cancel') }}</button>
-                <button type="button" class="button button--primary" (click)="createMeterFromEditor()" [disabled]="!canCreateMeterFromEditor()">
+                <button type="button" class="button button--primary" (click)="createMeterFromEditor()" [disabled]="authenticatedRole === 'ADVANCED_USER' || !canCreateMeterFromEditor()">
                   {{ t('create') }}
                 </button>
                 <button type="button" class="button button--primary" (click)="updateMeterFromEditor()" [disabled]="metersBusy || editingMeterId === null">
@@ -1673,6 +1867,8 @@
           </div>
 
           <p class="dialog-hint">{{ t('optionalPasswordHint') }}</p>
+
+
           <div class="login-dialog__actions">
             <button type="button" class="button button--secondary" (click)="closeProfile()" [disabled]="profileBusy">
               {{ t('cancel') }}
@@ -1694,6 +1890,26 @@
           <button type="button" class="dialog-close" (click)="closeUsers()" [attr.aria-label]="t('close')">×</button>
         </div>
 
+        @if (authenticatedRole === 'ADMIN' || authenticatedRole === 'SERVICE') {
+          <div class="device-auto-login-config">
+            <label class="login-field" style="flex: 1">
+              <span>{{ language === 'pl' ? 'Automatyczne logowanie na wszystkich urządzeniach' : 'Automatic login on all devices' }}</span>
+              <select [(ngModel)]="autoLoginDefaultUserId" [disabled]="autoLoginConfigurationBusy">
+                <option [ngValue]="0">{{ language === 'pl' ? 'Wyłączone' : 'Disabled' }}</option>
+                @for (candidate of users; track candidate.id) {
+                  @if (candidate.enabled) {
+                    <option [ngValue]="candidate.id">{{ candidate.username }}</option>
+                  }
+                }
+              </select>
+            </label>
+            <button type="button" class="button button--primary" (click)="saveInstallationAutoLogin()"
+                    [disabled]="autoLoginConfigurationBusy || autoLoginDefaultUserId === autoLoginConfiguredUserId">
+              {{ t('save') }}
+            </button>
+            @if (autoLoginConfigurationError) { <span role="alert">{{ autoLoginConfigurationError }}</span> }
+          </div>
+        }
         <div class="users-layout">
           <div class="users-list-wrap">
             <div class="users-table-wrap">
@@ -1807,10 +2023,11 @@
             <div class="dialog-grid">
               <label class="login-field">
                 <span>{{ t('role') }}</span>
-                <select name="managedRole" [(ngModel)]="managedRole" [disabled]="usersBusy || authenticatedRole === 'INSTALATOR'">
+                <select name="managedRole" [(ngModel)]="managedRole" [disabled]="usersBusy || authenticatedRole === 'SERVICE'">
                   <option value="USER">{{ t('user') }}</option>
+                  <option value="ADVANCED_USER">{{ roleLabel('ADVANCED_USER') }}</option>
                   @if (authenticatedRole === 'ADMIN') {
-                    <option value="INSTALATOR">{{ roleLabel('INSTALATOR') }}</option>
+                    <option value="SERVICE">{{ roleLabel('SERVICE') }}</option>
                     <option value="ADMIN">{{ t('admin') }}</option>
                   }
                 </select>
@@ -1891,3 +2108,5 @@
   }
 
 </div>
+
+}

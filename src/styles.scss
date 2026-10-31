@@ -23,3 +23,25 @@ body:has(.meter-card--expanded) {
   height: 100%;
   overflow: hidden !important;
 }
+
+
+/* v408: enforce compact navigation at narrow viewport sizes.
+   Kept in global and component styles to defeat previous legacy layout overrides. */
+@media screen and (max-width: 1550px) {
+  .topbar nav.admin-nav { display: none !important; visibility: hidden !important; }
+  .topbar label.admin-nav-select { display: inline-flex !important; visibility: visible !important; min-width: 150px; max-width: 225px; align-items: center; }
+  .topbar label.admin-nav-select > select { display: block !important; width: 100%; max-width: 100%; }
+  .meter-card .meter-card__header-actions .meter-view-toggle { display: none !important; visibility: hidden !important; }
+  .meter-card .meter-card__header-actions label.meter-view-select { display: inline-flex !important; visibility: visible !important; align-items: center; min-width: 130px; max-width: 195px; }
+  .meter-card .meter-card__header-actions label.meter-view-select > select { display: block !important; width: 100%; }
+  .meter-card .meter-card__header-actions { min-width: 0 !important; max-width: 100%; flex-wrap: wrap; }
+}
+@media screen and (max-width: 1050px) {
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) label.admin-nav-select {
+    grid-column: 1 / -1 !important; grid-row: 2 !important; justify-self: start !important;
+  }
+  .topbar:has(.admin-nav-select):has(.topbar__date-controls--privileged) .topbar__date-controls {
+    grid-column: 1 / -1 !important; grid-row: 3 !important; justify-self: start !important;
+    max-width: 100%; overflow-x: auto;
+  }
+}

@@ -194,7 +194,7 @@
   "confirmDeleteEdgeHealth": "Usunąć ten Edge w stanie OFFLINE z listy zdrowia? Pojawi się ponownie automatycznie, jeśli znów się połączy.",
   "edgeHealthDeleted": "Edge usunięty.",
   "deleteEdgeHealthFailed": "Nie udało się usunąć Edge.",
-  "settings": "Ustawienia",
+  "settings": "Użytkownik Końcowy",
   "settingsIntro": "Globalne informacje o użytkowniku końcowym i instalacji PowerGuard.",
   "customerInformation": "Informacje o użytkowniku końcowym",
   "companyName": "Nazwa firmy",
@@ -257,5 +257,12 @@
   "clientRequiredFields": "Client ID i nazwa klienta są wymagane.",
   "clientSaveFailed": "Nie udało się zapisać klienta.",
   "confirmDeleteClient": "Usunąć klienta?",
-  "disabled": "Nieaktywny"
+  "disabled": "Nieaktywny",
+  "dashboard": "Pulpit",
+  "from": "Od",
+  "to": "Do",
+  "timeRange": "Zakres czasu",
+  "customRange": "Własny zakres",
+  "advancedUser": "Użytkownik zaawansowany",
+  "automaticLogin": "Automatyczne logowanie"
 }

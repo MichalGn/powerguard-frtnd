@@ -194,7 +194,7 @@
   "confirmDeleteEdgeHealth": "Remove this offline Edge from the health list? It will appear again automatically if it reconnects.",
   "edgeHealthDeleted": "Edge removed.",
   "deleteEdgeHealthFailed": "Could not remove Edge.",
-  "settings": "Settings",
+  "settings": "End User",
   "settingsIntro": "Global information about the PowerGuard end user and installation.",
   "customerInformation": "End-user information",
   "companyName": "Company name",
@@ -257,5 +257,12 @@
   "clientRequiredFields": "Client ID and client name are required.",
   "clientSaveFailed": "Could not save client.",
   "confirmDeleteClient": "Delete client?",
-  "disabled": "Disabled"
+  "disabled": "Disabled",
+  "dashboard": "Dashboard",
+  "from": "From",
+  "to": "To",
+  "timeRange": "Time range",
+  "customRange": "Custom range",
+  "advancedUser": "Advanced user",
+  "automaticLogin": "Automatic login"
 }

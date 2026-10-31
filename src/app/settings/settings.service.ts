@@ -19,7 +19,7 @@ export class SettingsService {
   private readonly url = `${environment.apiUrl}settings`;
 
   get(): Observable<ApplicationSettingsView> {
-    return this.http.get<ApplicationSettingsView>(this.url);
+    return this.http.get<ApplicationSettingsView>(this.url, { headers: this.authHeaders() });
   }
 
   update(value: ApplicationSettingsView): Observable<ApplicationSettingsView> {

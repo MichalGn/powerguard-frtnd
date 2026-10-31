@@ -19,6 +19,9 @@ interface BarPoint {
   label: string;
   intervalLabel: string;
   current: boolean;
+  projectedValue?: number;
+  projectedY?: number;
+  projectedHeight?: number;
   showLabel: boolean;
 }
 
@@ -161,7 +164,7 @@ export class App implements OnDestroy {
   private lastAudibleAlarmVolume = this.loadLastAudibleAlarmVolume();
   selectedDateFrom = this.toDateInputValue(new Date());
   selectedDateTo = this.toDateInputValue(new Date());
-  selectedQuickRangeMinutes: 60 | 120 | 240 | 1440 | null = null;
+  selectedQuickRangeMinutes: 60 | 120 | 240 | 480 | 1440 | null = null;
   selectedClientId = localStorage.getItem('powerguard-client-id') || '';
   selectedSiteId = localStorage.getItem('powerguard-site-id') || '';
   readonly timeZoneOptions = this.buildTimeZoneOptions();
@@ -182,7 +185,8 @@ export class App implements OnDestroy {
   loginPassword = '';
   loginBusy = false;
   loginError = '';
-  authenticated = !!localStorage.getItem('powerguard-token');
+  authenticated = false; // A stored token is not authenticated until /users/me succeeds.
+  private sessionValidated = false;
   authenticatedUsername = localStorage.getItem('powerguard-username') || '';
   authenticatedUserId = Number(localStorage.getItem('powerguard-user-id') || 0);
   authenticatedRole: UserRole = this.readStoredUserRole();
@@ -200,10 +204,74 @@ export class App implements OnDestroy {
   profilePassword = '';
   profilePasswordConfirm = '';
 
+  alarmEditorMeter: MeterConfigurationView | null = null;
+  alarmEditorBusy = false;
+  alarmEditorError = '';
+  alarmInstantOn: number | null = null;
+  alarmInstantOff: number | null = null;
+  alarmQuarterOn: number | null = null;
+  alarmQuarterOff: number | null = null;
+
+  openDashboardAlarms(meter: MeterCard): void {
+    if (this.authenticatedRole === 'USER') return;
+    const config = this.configuredMeters.find(m => m.id === meter.meterId && m.clientId === meter.clientId && m.siteId === meter.siteId);
+    if (!config) {
+      this.toast.showError(this.language === 'pl' ? 'Nie znaleziono konfiguracji licznika. Odśwież stronę.' : 'Meter configuration is not available. Refresh the page.');
+      this.loadConfiguredMeters();
+      return;
+    }
+    this.alarmEditorMeter = config;
+    this.alarmInstantOn = config.instantaneousAlarmOnKw;
+    this.alarmInstantOff = config.instantaneousAlarmOffKw;
+    this.alarmQuarterOn = config.quarterHourAlarmOnKw;
+    this.alarmQuarterOff = config.quarterHourAlarmOffKw;
+    this.alarmEditorError = '';
+  }
+
+  closeDashboardAlarms(): void {
+    if (!this.alarmEditorBusy) this.alarmEditorMeter = null;
+  }
+
+  saveDashboardAlarms(): void {
+    const meter = this.alarmEditorMeter;
+    if (!meter || this.alarmEditorBusy || this.authenticatedRole === 'USER') return;
+    const input = {
+      instantaneousAlarmOnKw: this.normalizedAlarm(this.alarmInstantOn),
+      instantaneousAlarmOffKw: this.normalizedAlarm(this.alarmInstantOff),
+      quarterHourAlarmOnKw: this.normalizedAlarm(this.alarmQuarterOn),
+      quarterHourAlarmOffKw: this.normalizedAlarm(this.alarmQuarterOff)
+    };
+    if (!this.validHysteresis(input.instantaneousAlarmOnKw, input.instantaneousAlarmOffKw)
+      || !this.validHysteresis(input.quarterHourAlarmOnKw, input.quarterHourAlarmOffKw)) {
+      this.alarmEditorError = this.t('hysteresisHint');
+      return;
+    }
+    this.alarmEditorBusy = true;
+    this.alarmEditorError = '';
+    this.meterService.updateAlarmThresholds(meter.id, input).subscribe({
+      next: () => {
+        this.alarmEditorBusy = false;
+        this.alarmEditorMeter = null;
+        this.toast.showSuccess(this.t('meterSaved'));
+        this.loadConfiguredMeters();
+        this.loadPublicMeters();
+      },
+      error: error => {
+        this.alarmEditorBusy = false;
+        this.alarmEditorError = error?.error?.message || this.t('meterSaveFailed');
+        this.toast.showError(this.alarmEditorError);
+        if (error?.status === 401) this.clearAuthentication();
+      }
+    });
+  }
+
   usersOpen = false;
   usersBusy = false;
   usersError = '';
   users: UserView[] = [];
+  deviceAutoLoginEnabled = false;
+  deviceAutoLoginBusy = false;
+  deviceAutoLoginMessage = '';
   editingUserId: number | null = null;
   managedUsername = '';
   managedFirstname = '';
@@ -260,10 +328,21 @@ export class App implements OnDestroy {
   meterFilterText = '';
   meterSortField: 'displayOrder' | 'siteId' | 'edgeId' | 'uniqueKey' | 'name' | 'instantaneousAlarmOnKw' | 'quarterHourAlarmOnKw' | 'enabled' = 'displayOrder';
   meterSortDirection: 'asc' | 'desc' = 'asc';
-  adminView: 'health' | 'sites' | 'edgeConfiguration' | 'measurementData' | 'configuration' | 'settings' = 'configuration';
+  adminView: 'dashboard' | 'health' | 'sites' | 'edgeConfiguration' | 'jsonData' | 'measurementData' | 'historyCleanup' | 'configuration' | 'settings' = 'dashboard';
   edgeHealth: EdgeHealthView[] = [];
   expandedEdgeKey: string | null = null;
   expandedMeterId: string | null = null;
+  dashboardLayout: 'auto' | 'one' | 'two' = 'auto';
+
+  private readDashboardLayout(): 'auto' | 'one' | 'two' {
+    return 'auto';
+  }
+
+  setDashboardLayout(_layout: 'auto' | 'one' | 'two'): void {
+    this.dashboardLayout = 'auto';
+    localStorage.removeItem('powerguard-dashboard-layout');
+  }
+
   selectedEdgeConfigKey = '';
   edgeConfiguration: EdgeConfigurationView | null = null;
   edgeConfigurationBusy = false;
@@ -276,35 +355,97 @@ export class App implements OnDestroy {
 
   now = new Date();
   // Live values come from the backend WebSocket. REST latest is initial/fallback data.
-  private readonly timerId = window.setInterval(() => this.refreshMeasurements(), 30000);
+  private readonly timerId = window.setInterval(() => { if (this.sessionValidated) this.refreshMeasurements(); }, 30000);
   private readonly historyTimerId = window.setInterval(() => {
-    if (this.rangeIncludesToday()) this.meters.forEach(meter => this.loadRange(meter, true));
+    if (this.sessionValidated && this.rangeIncludesToday()) this.meters.forEach(meter => this.loadRange(meter, true));
   }, 60000);
   private readonly clockTimerId = window.setInterval(() => this.tickClock(), 1000);
-  private readonly alarmTimerId = window.setInterval(() => this.refreshAllActiveAlarms(), 4000);
+  private readonly alarmTimerId = window.setInterval(() => { if (this.sessionValidated) this.refreshAllActiveAlarms(); }, 4000);
   private readonly healthTimerId = window.setInterval(() => { if (this.authenticated) this.loadEdgeHealth(); }, 10000);
   private readonly rawMeasurementTimerId = window.setInterval(() => {
-    if (this.authenticated && this.adminView === 'measurementData') this.loadRawMeasurementData(false);
+    if (this.authenticated && (this.adminView === 'measurementData' || this.adminView === 'jsonData')) this.loadRawMeasurementData(false);
   }, 3000);
 
   constructor() {
     console.info(`PowerGuard Frontend ${this.frontendVersion}`);
     this.liveSubscription = this.liveMeasurements.messages$.subscribe(message => this.applyLiveMessage(message));
-    this.liveMeasurements.start();
-    this.loadPublicClients();
-    this.loadPublicSites();
-    this.loadPublicMeters();
-    this.loadApplicationSettings();
+    // WebSocket disabled until per-session site authorization is implemented.
+    // 30-second authenticated REST refresh remains operational.
+    // Load private tenant data only after /users/me validates the stored credential.
     this.loadBackendVersion();
-    if (this.authenticated) {
-      this.authService.me().subscribe({
-        next: user => { this.applyAuthenticatedUser(user); this.loadPublicClients(); this.loadPublicSites(); this.loadPublicMeters(); this.loadConfiguredMeters(); this.loadEdgeHealth(); if (user.role === 'ADMIN') { this.loadAdminClients(); this.loadAdminSites(); } },
-        error: () => this.clearAuthentication(),
+    // Installation policy takes precedence over a previous browser session.
+    // A temporary account-switch bypass is kept in sessionStorage, not localStorage.
+    if (sessionStorage.getItem('powerguard-manual-account-switch') === '1') {
+      this.clearAuthentication();
+    } else {
+      this.authService.getInstallationAutoLogin().subscribe({
+        next: status => {
+          if (status.enabled) {
+            this.clearAuthentication();
+            this.authService.exchangeInstallationAutoLogin().subscribe({
+              next: response => {
+                if (!response.authenticated || !response.token) return;
+                localStorage.setItem('powerguard-token', response.token);
+                this.installationDefaultSession = true;
+                this.applyAuthenticatedUser(response);
+                this.adminView = 'dashboard';
+                this.activateDashboardSession(response.role);
+              },
+              error: () => this.clearAuthentication(),
+            });
+          } else {
+            this.restoreExistingSession();
+          }
+        },
+        error: () => this.restoreExistingSession(),
       });
     }
   }
 
+  private restoreExistingSession(): void {
+    // Ignore deprecated per-browser auto-login credentials.
+    localStorage.removeItem('powerguard-device-token');
+    localStorage.removeItem('powerguard-auto-user');
+    if (!localStorage.getItem('powerguard-token')) return;
+    this.authService.me().subscribe({
+      next: user => { this.applyAuthenticatedUser(user); this.activateDashboardSession(user.role); },
+      error: () => this.clearAuthentication(),
+    });
+  }
+
+  private installationDefaultSession = false;
+  autoLoginDefaultUserId = 0;
+  autoLoginConfiguredUserId = 0;
+  autoLoginConfigurationBusy = false;
+  autoLoginConfigurationError = '';
+
+  saveInstallationAutoLogin(): void {
+    if ((this.authenticatedRole !== 'ADMIN' && this.authenticatedRole !== 'SERVICE') || this.autoLoginConfigurationBusy) return;
+    this.autoLoginConfigurationBusy = true;
+    this.autoLoginConfigurationError = '';
+    this.authService.configureInstallationAutoLogin(this.autoLoginDefaultUserId || null).subscribe({
+      next: result => {
+        this.autoLoginConfiguredUserId = result.userId;
+        this.autoLoginConfigurationBusy = false;
+        this.toast.showSuccess(this.language === 'pl' ? 'Zapisano automatyczne logowanie.' : 'Automatic login saved.');
+      },
+      error: err => {
+        this.autoLoginConfigurationBusy = false;
+        this.autoLoginConfigurationError = err?.error?.message || 'Failed to save automatic login.';
+      },
+    });
+  }
+
+  /** Temporarily switch accounts without changing installation-wide default. */
+  switchAccount(): void {
+    sessionStorage.setItem('powerguard-manual-account-switch', '1');
+    this.authService.logout().subscribe({error: () => undefined});
+    this.clearAuthentication();
+    this.openLogin();
+  }
+
   t(key: string): string {
+    if (key === 'quarterEnergy') return this.language === 'pl' ? 'Energia w kwadransie' : '15-minute energy';
     return this.i18n.t(key);
   }
 
@@ -471,6 +612,7 @@ export class App implements OnDestroy {
   }
 
   onDateChanged(): void {
+    this.selectedRangePreset = 'custom';
     this.selectedQuickRangeMinutes = null;
     if (this.selectedDateFrom > this.selectedDateTo) this.selectedDateTo = this.selectedDateFrom;
     const today = this.todayInputMax();
@@ -488,7 +630,23 @@ export class App implements OnDestroy {
     });
   }
 
-  setRangeMinutes(minutes: 60 | 120 | 240 | 1440): void {
+  selectedRangePreset = 'custom';
+
+  selectRangePreset(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'today') {
+      this.selectToday();
+    } else if (value === '3d' || value === '7d' || value === '30d') {
+      this.setRangeDays(Number(value.slice(0, -1)));
+    } else if (value !== 'custom') {
+      const minutes = Number(value);
+      if ([60, 120, 240, 480, 1440].includes(minutes)) {
+        this.setRangeMinutes(minutes as 60 | 120 | 240 | 480 | 1440);
+      }
+    }
+  }
+
+  setRangeMinutes(minutes: 60 | 120 | 240 | 480 | 1440): void {
     const now = new Date();
     const from = new Date(now.getTime() - minutes * 60_000);
 
@@ -499,14 +657,26 @@ export class App implements OnDestroy {
 
     this.onDateChanged();
     this.selectedQuickRangeMinutes = minutes;
+    this.selectedRangePreset = String(minutes);
     this.updateRollingQuickRange();
   }
 
   private updateRollingQuickRange(nowMs = Date.now()): void {
     if (this.selectedQuickRangeMinutes == null) return;
 
-    const end = nowMs;
-    const start = Math.max(this.rangeStartMs(), end - this.selectedQuickRangeMinutes * 60_000);
+    // Roll in discrete 15-minute steps, never continuously with each second.
+    // At 11:58 end=12:00; at exactly 12:00 end=12:15.
+    const quarterMs = 15 * 60_000;
+    const end = (Math.floor(nowMs / quarterMs) + 1) * quarterMs;
+    const start = end - this.selectedQuickRangeMinutes * 60_000;
+
+    const fromDate = this.toDateInputValue(new Date(start));
+    const toDate = this.toDateInputValue(new Date(nowMs));
+    if (fromDate !== this.selectedDateFrom || toDate !== this.selectedDateTo) {
+      this.selectedDateFrom = fromDate;
+      this.selectedDateTo = toDate;
+      this.meters.forEach(meter => this.loadRange(meter, true));
+    }
 
     this.meters.forEach(meter => {
       meter.chartZoomStartMs = start;
@@ -519,6 +689,7 @@ export class App implements OnDestroy {
 
   setRangeDays(days: number): void {
     this.selectedQuickRangeMinutes = null;
+    this.selectedRangePreset = `${days}d`;
     const to = new Date(); to.setHours(12, 0, 0, 0);
     const from = new Date(to); from.setDate(from.getDate() - Math.max(1, days) + 1);
     this.selectedDateFrom = this.toDateInputValue(from);
@@ -548,11 +719,18 @@ export class App implements OnDestroy {
   }
 
   selectToday(): void {
+    // Always reset the rolling (1h/2h/...) chart window, even when both
+    // calendar dates already say today. Otherwise the old zoom persists.
     const today = this.todayInputMax();
-    if (this.selectedDateFrom === today && this.selectedDateTo === today) return;
+    this.selectedRangePreset = 'today';
+    this.selectedQuickRangeMinutes = null;
     this.selectedDateFrom = today;
     this.selectedDateTo = today;
-    this.onDateChanged();
+    this.meters.forEach(meter => {
+      meter.chartZoomStartMs = null;
+      meter.chartZoomEndMs = null;
+      this.loadRange(meter);
+    });
   }
 
   todayInputMax(): string {
@@ -603,14 +781,11 @@ export class App implements OnDestroy {
         if (token) {
           localStorage.setItem('powerguard-token', String(token));
         }
+        this.installationDefaultSession = false;
         this.applyAuthenticatedUser(response);
-        this.authenticated = true;
-        this.loadPublicClients();
-        this.loadPublicSites();
-        this.loadPublicMeters();
-        this.loadConfiguredMeters();
-        this.loadEdgeHealth();
-        if (response.role === 'ADMIN') { this.loadAdminClients(); this.loadAdminSites(); }
+        this.adminView = 'dashboard';
+        this.activateDashboardSession(response.role);
+        // A manual login never changes the installation-wide default user.
         this.loginBusy = false;
         this.loginPassword = '';
         this.loginOpen = false;
@@ -624,18 +799,102 @@ export class App implements OnDestroy {
     });
   }
 
-  logout(): void {
-    this.authService.logout().subscribe({ error: () => undefined });
-    this.clearAuthentication();
+  private replaceAutomaticLoginAccountAfterManualLogin(): void {
+    const previousToken = localStorage.getItem('powerguard-device-token');
+    if (!previousToken || !this.authenticatedUserId) return;
+    const username = this.authenticatedUsername;
+    const userId = this.authenticatedUserId;
+    // Fail closed: never keep silently restoring the previous user after
+    // another account has explicitly logged in.
+    localStorage.removeItem('powerguard-device-token');
+    localStorage.removeItem('powerguard-auto-user');
+    this.deviceAutoLoginEnabled = false;
+    this.authService.provisionTrustedDevice(userId).subscribe({
+      next: data => {
+        if (this.authenticated && this.authenticatedUserId === userId &&
+            this.authenticatedUsername === username) {
+          localStorage.setItem('powerguard-device-token', data.deviceToken);
+          localStorage.setItem('powerguard-auto-user', username);
+          this.deviceAutoLoginEnabled = true;
+        } else {
+          this.authService.revokeTrustedDevice(data.deviceToken).subscribe({ error: () => undefined });
+        }
+        this.authService.revokeTrustedDevice(previousToken).subscribe({ error: () => undefined });
+      },
+      error: () => {
+        this.authService.revokeTrustedDevice(previousToken).subscribe({ error: () => undefined });
+        this.toast.showError(this.language === 'pl'
+          ? 'Nie udało się przenieść automatycznego logowania na ostatnie konto.'
+          : 'Could not update automatic login to the last signed-in account.');
+      },
+    });
+  }
+
+  private activateDashboardSession(role: UserRole): void {
+    this.sessionValidated = true;
+    this.authenticated = true;
+    this.loadApplicationSettings();
     this.loadPublicClients();
     this.loadPublicSites();
     this.loadPublicMeters();
+    if (role !== 'USER') this.loadConfiguredMeters();
+    this.loadEdgeHealth();
+    if (role === 'ADMIN' || role === 'SERVICE') { this.loadAdminClients(); this.loadAdminSites(); }
+  }
+
+  private restoreTrustedDevice(): void {
+    const secret = localStorage.getItem('powerguard-device-token');
+    if (!secret) return;
+    this.authService.exchangeTrustedDevice(secret).subscribe({
+      next: response => {
+        if (!response.authenticated || !response.token) { localStorage.removeItem('powerguard-device-token'); localStorage.removeItem('powerguard-auto-user'); return; }
+        localStorage.setItem('powerguard-token', response.token);
+        this.applyAuthenticatedUser(response);
+        this.adminView = 'dashboard';
+        this.activateDashboardSession(response.role);
+      },
+      error: () => { localStorage.removeItem('powerguard-device-token'); localStorage.removeItem('powerguard-auto-user'); },
+    });
+  }
+
+  logout(): void {
+    const wasDefault = this.installationDefaultSession;
+    this.authService.logout().subscribe({error: () => undefined});
+    this.clearAuthentication();
+    this.installationDefaultSession = false;
+    this.adminView = 'dashboard';
+    // Logout from the default account opens the login form to switch accounts.
+    // Logout from a manually authenticated account returns to the configured default.
+    if (wasDefault) {
+      sessionStorage.setItem('powerguard-manual-account-switch', '1');
+      this.openLogin();
+      return;
+    }
+    sessionStorage.removeItem('powerguard-manual-account-switch');
+    this.authService.getInstallationAutoLogin().subscribe({
+      next: status => {
+        if (!status.enabled) { this.openLogin(); return; }
+        this.authService.exchangeInstallationAutoLogin().subscribe({
+          next: response => {
+            if (!response.authenticated || !response.token) { this.openLogin(); return; }
+            localStorage.setItem('powerguard-token', response.token);
+            this.installationDefaultSession = true;
+            this.applyAuthenticatedUser(response);
+            this.activateDashboardSession(response.role);
+          },
+          error: () => this.openLogin(),
+        });
+      },
+      error: () => this.openLogin(),
+    });
   }
 
   openProfile(): void {
     this.profileError = '';
     this.profilePassword = '';
     this.profilePasswordConfirm = '';
+    this.deviceAutoLoginMessage = '';
+    this.deviceAutoLoginEnabled = !!localStorage.getItem('powerguard-device-token');
     this.profileBusy = true;
     this.authService.me().subscribe({
       next: user => {
@@ -703,11 +962,63 @@ export class App implements OnDestroy {
   }
 
   openUsers(): void {
-    if (this.authenticatedRole !== 'ADMIN' && this.authenticatedRole !== 'INSTALATOR') return;
+    if (this.authenticatedRole !== 'ADMIN' && this.authenticatedRole !== 'SERVICE') return;
     this.usersOpen = true;
+    this.deviceAutoLoginMessage = '';
+    this.deviceAutoLoginEnabled = false;
     this.resetManagedUserEditor();
+    if (this.authenticatedRole === 'ADMIN' || this.authenticatedRole === 'SERVICE') {
+      this.authService.getInstallationAutoLoginConfiguration().subscribe({
+        next: config => { this.autoLoginDefaultUserId = config.userId; this.autoLoginConfiguredUserId = config.userId; },
+        error: () => { this.autoLoginConfigurationError = 'Failed to read automatic login configuration.'; },
+      });
+    }
     this.loadUsers();
     this.loadAssignableSites();
+  }
+
+  configureAutomaticLoginForThisBrowser(enabled: boolean): void {
+    if (!this.authenticated || !this.authenticatedUserId || this.deviceAutoLoginBusy) return;
+    this.deviceAutoLoginMessage = '';
+    const existing = localStorage.getItem('powerguard-device-token');
+    this.deviceAutoLoginBusy = true;
+    if (!enabled) {
+      if (!existing) {
+        localStorage.removeItem('powerguard-auto-user');
+        this.deviceAutoLoginEnabled = false;
+        this.deviceAutoLoginBusy = false;
+        return;
+      }
+      this.authService.revokeTrustedDevice(existing).subscribe({
+        next: () => {
+          localStorage.removeItem('powerguard-device-token');
+          localStorage.removeItem('powerguard-auto-user');
+          this.deviceAutoLoginEnabled = false;
+          this.deviceAutoLoginBusy = false;
+          this.deviceAutoLoginMessage = this.language === 'pl' ? 'Automatyczne logowanie wyłączone.' : 'Automatic login disabled.';
+        },
+        error: () => {
+          this.deviceAutoLoginBusy = false;
+          this.deviceAutoLoginMessage = this.language === 'pl' ? 'Nie udało się wyłączyć automatycznego logowania.' : 'Unable to disable automatic login.';
+        },
+      });
+      return;
+    }
+    // Provision a credential exclusively for the currently authenticated user.
+    this.authService.provisionTrustedDevice(this.authenticatedUserId).subscribe({
+      next: data => {
+        localStorage.setItem('powerguard-device-token', data.deviceToken);
+        localStorage.setItem('powerguard-auto-user', this.authenticatedUsername);
+        this.deviceAutoLoginEnabled = true;
+        this.deviceAutoLoginBusy = false;
+        this.deviceAutoLoginMessage = this.language === 'pl' ? 'Automatyczne logowanie włączone na tej przeglądarce.' : 'Automatic login enabled on this browser.';
+        if (existing) this.authService.revokeTrustedDevice(existing).subscribe({ error: () => undefined });
+      },
+      error: () => {
+        this.deviceAutoLoginBusy = false;
+        this.deviceAutoLoginMessage = this.language === 'pl' ? 'Nie udało się włączyć automatycznego logowania.' : 'Unable to enable automatic login.';
+      },
+    });
   }
 
   closeUsers(): void {
@@ -776,7 +1087,7 @@ export class App implements OnDestroy {
             this.clearAuthentication();
             return;
           }
-          if (user.role !== 'ADMIN' && user.role !== 'INSTALATOR') {
+          if (user.role !== 'ADMIN' && user.role !== 'SERVICE') {
             this.usersOpen = false;
             return;
           }
@@ -1262,7 +1573,7 @@ export class App implements OnDestroy {
   }
 
   private loadConfiguredMeters(): void {
-    if (!this.authenticated) return;
+    if (!this.authenticated || this.authenticatedRole === 'USER') return;
     this.metersBusy = true;
     this.meterService.listAll().subscribe({
       next: meters => {
@@ -1281,8 +1592,10 @@ export class App implements OnDestroy {
   }
 
   private loadPublicMeters(): void {
+    if (!this.sessionValidated) return;
     this.meterService.listPublic().subscribe({
       next: configured => {
+        if (!this.sessionValidated) return;
         this.meters = configured.map(meter => this.createMeter(meter));
         this.ensureSelectedClientAndSite();
         this.refreshMeasurements();
@@ -1295,9 +1608,11 @@ export class App implements OnDestroy {
   }
 
   private refreshMeasurements(): void {
+    if (!this.sessionValidated) return;
     this.meters.forEach(meter => {
       this.meterService.latestMeasurement(meter.meterId).subscribe({
         next: snapshot => {
+          if (!this.sessionValidated) return;
           if (snapshot) this.applySnapshot(meter, snapshot);
           else this.markMeterOffline(meter);
         },
@@ -1374,7 +1689,7 @@ export class App implements OnDestroy {
     meter.currentL3A = this.numberOrNull(message.currentL3A);
     meter.frequencyHz = this.numberOrNull(message.frequencyHz);
     if (this.rangeIncludesToday()) {
-      meter.dayMeasurements.push({ id: -Date.now(), meterId: meter.meterId, measuredAt: message.measuredAt, activePowerKw: message.currentPowerKw, activeEnergyImportKwh: message.activeEnergyImportKwh, activeEnergyExportKwh: message.activeEnergyExportKwh, currentQuarterPowerKw: messageIsCurrentQuarter ? message.currentQuarterPowerKw : null, voltageL1V: message.voltageL1V, voltageL2V: message.voltageL2V, voltageL3V: message.voltageL3V, currentL1A: message.currentL1A, currentL2A: message.currentL2A, currentL3A: message.currentL3A, frequencyHz: message.frequencyHz });
+      meter.dayMeasurements.push({ id: -Date.now(), meterId: meter.meterId, measuredAt: message.measuredAt, activePowerKw: message.currentPowerKw, activePowerSource: message.activePowerSource, activePowerQuality: message.activePowerQuality, activeEnergyImportKwh: message.activeEnergyImportKwh, activeEnergyExportKwh: message.activeEnergyExportKwh, currentQuarterPowerKw: messageIsCurrentQuarter ? message.currentQuarterPowerKw : null, voltageL1V: message.voltageL1V, voltageL2V: message.voltageL2V, voltageL3V: message.voltageL3V, currentL1A: message.currentL1A, currentL2A: message.currentL2A, currentL3A: message.currentL3A, frequencyHz: message.frequencyHz });
       // Do not trim by an arbitrary item count: at ~10 s cadence 1500 samples are only ~4 h,
       // which used to delete the morning part of today's chart after the first live WebSocket sample.
       // Keep all points belonging to the currently selected date range instead.
@@ -1516,11 +1831,10 @@ export class App implements OnDestroy {
 
   roleLabel(role: UserRole): string {
     if (role === 'ADMIN') return this.t('admin');
-    if (role === 'INSTALATOR') {
-      const translated = this.t('installer');
-      return translated === 'installer' ? (this.language === 'pl' ? 'Instalator' : 'Installer') : translated;
+    if (role === 'SERVICE') {
+      return this.language === 'pl' ? 'Serwis' : 'Service';
     }
-    return this.t('user');
+    return role === 'ADVANCED_USER' ? (this.language === 'pl' ? 'Użytkownik zaawansowany' : 'Advanced user') : this.t('user');
   }
 
   userSiteNames(user: UserView): string {
@@ -1542,11 +1856,11 @@ export class App implements OnDestroy {
 
   private readStoredUserRole(): UserRole {
     const role = localStorage.getItem('powerguard-role');
-    return role === 'ADMIN' || role === 'INSTALATOR' ? role : 'USER';
+    return role === 'ADMIN' || role === 'SERVICE' || role === 'ADVANCED_USER' ? role : 'USER';
   }
 
   private canEditSettings(): boolean {
-    return this.authenticatedRole === 'ADMIN' || this.authenticatedRole === 'INSTALATOR';
+    return this.authenticatedRole === 'ADMIN' || this.authenticatedRole === 'SERVICE';
   }
 
   private loadUsers(): void {
@@ -1554,6 +1868,7 @@ export class App implements OnDestroy {
     this.authService.listUsers().subscribe({
       next: users => {
         this.users = users;
+        this.deviceAutoLoginEnabled = !!localStorage.getItem('powerguard-device-token');
         this.usersBusy = false;
       },
       error: error => {
@@ -1584,7 +1899,7 @@ export class App implements OnDestroy {
   }
 
   managedUserCanChooseRole(role: UserRole): boolean {
-    return this.authenticatedRole === 'ADMIN' || role === 'USER';
+    return this.authenticatedRole === 'ADMIN' || role === 'USER' || role === 'ADVANCED_USER';
   }
 
   private resetManagedUserEditor(): void {
@@ -1614,14 +1929,17 @@ export class App implements OnDestroy {
     this.authenticatedLastname = user.lastname || '';
     localStorage.setItem('powerguard-firstname', this.authenticatedFirstname);
     localStorage.setItem('powerguard-lastname', this.authenticatedLastname);
-    if (user.role === 'ADMIN' || user.role === 'INSTALATOR' || user.role === 'USER') {
+    if (user.role === 'ADMIN' || user.role === 'SERVICE' || user.role === 'ADVANCED_USER' || user.role === 'USER') {
       this.authenticatedRole = user.role;
       localStorage.setItem('powerguard-role', user.role);
-      if (user.role !== 'ADMIN' && (this.adminView === 'edgeConfiguration' || this.adminView === 'measurementData' || this.adminView === 'sites')) {
-        this.adminView = 'health';
+      if (user.role !== 'ADMIN' && (this.adminView === 'edgeConfiguration' || this.adminView === 'jsonData' || this.adminView === 'historyCleanup' || (this.adminView === 'measurementData' && user.role !== 'SERVICE') || this.adminView === 'sites')) {
+        this.adminView = 'dashboard';
+      }
+      if ((user.role === 'ADVANCED_USER' || user.role === 'USER') && this.adminView !== 'dashboard') {
+        this.adminView = 'dashboard';
       }
       if (this.adminView === 'settings' && !this.canEditSettings()) {
-        this.adminView = 'health';
+        this.adminView = 'dashboard';
       }
     }
   }
@@ -1630,7 +1948,12 @@ export class App implements OnDestroy {
     ['powerguard-token', 'powerguard-user-id', 'powerguard-username',
       'powerguard-firstname', 'powerguard-lastname', 'powerguard-role']
       .forEach(key => localStorage.removeItem(key));
+    this.sessionValidated = false;
     this.authenticated = false;
+    this.meters = [];
+    this.rangeLoadSequence.clear();
+    this.stopAlarmSound();
+    this.adminView = 'dashboard';
     this.authenticatedUserId = 0;
     this.authenticatedUsername = '';
     this.authenticatedFirstname = '';
@@ -1653,7 +1976,7 @@ export class App implements OnDestroy {
     const now = new Date();
     this.now = now;
 
-    // 1h / 2h / 4h are rolling live windows. The right edge follows the current time
+    // 1h / 2h / 4h / 8h / 1d are rolling live windows. The right edge advances by quarter
     // automatically, so the dashboard can be left open as a continuously moving view.
     if (this.selectedQuickRangeMinutes != null) {
       this.updateRollingQuickRange(now.getTime());
@@ -1788,9 +2111,28 @@ export class App implements OnDestroy {
   }
 
 
+  private meterQuarterProgressAtReading(meter: MeterCard): number {
+    if (!meter.lastReadingAt) return 0;
+    const at = new Date(meter.lastReadingAt);
+    if (!Number.isFinite(at.getTime())) return 0;
+    if (this.currentQuarterIndex(at) !== this.currentQuarterIndex(this.now)) return 0;
+    return this.currentQuarterProgress(at);
+  }
+
+  formatElapsedQuarterAverage(meter: MeterCard): string {
+    if (meter.currentQuarterPowerKw == null) return '—';
+    // currentQuarterPowerKw = imported kWh since quarter start * 4.
+    // Divide by elapsed fraction of 15 minutes to obtain the so-far average.
+    // Suppress the first 30 seconds: a tiny denominator amplifies measurement noise.
+    const progress = this.meterQuarterProgressAtReading(meter);
+    if (progress < (30 / 900)) return '—';
+    return (meter.currentQuarterPowerKw / progress).toFixed(1);
+  }
+
   projectedQuarterPowerKw(meter: MeterCard): number | null {
     if (meter.currentQuarterPowerKw == null) return null;
-    const progress = Math.max(this.currentQuarterProgress(this.now), 0.03);
+    const progress = this.meterQuarterProgressAtReading(meter);
+    if (progress < 30 / 900) return null;
     return meter.currentQuarterPowerKw / progress;
   }
 
@@ -1798,8 +2140,10 @@ export class App implements OnDestroy {
     const projected = this.projectedQuarterPowerKw(meter);
     if (projected == null || meter.limitKw == null || meter.limitKw <= 0) return 'quarter-tank--green';
     const ratio = projected / meter.limitKw;
-    if (ratio > 1) return 'quarter-tank--red';
-    if (ratio >= 0.8) return 'quarter-tank--yellow';
+    // Color is based on projected quarter-average power, never on the kWh fill percentage.
+    // Match the projected dashed bar: red at the alarm threshold, yellow from 90%.
+    if (ratio >= 1) return 'quarter-tank--red';
+    if (ratio >= 0.9) return 'quarter-tank--yellow';
     return 'quarter-tank--green';
   }
 
@@ -2100,7 +2444,7 @@ export class App implements OnDestroy {
 
   private loadRangeMeasurementFallback(meter: MeterCard, sequence: number, preserveExistingOnEmpty: boolean): void {
     const days = this.selectedRangeDayCount();
-    const isCurrentRequest = () => this.rangeLoadSequence.get(meter.meterId) === sequence;
+    const isCurrentRequest = () => this.sessionValidated && this.rangeLoadSequence.get(meter.meterId) === sequence;
     const keepExisting = () => preserveExistingOnEmpty && meter.dayMeasurements.length > 0;
 
     // For short ranges, recover the complete chart from day endpoints if the sampled
@@ -2167,9 +2511,10 @@ export class App implements OnDestroy {
   }
 
   private loadRange(meter: MeterCard, preserveExistingOnEmpty = false): void {
+    if (!this.sessionValidated) return;
     const sequence = (this.rangeLoadSequence.get(meter.meterId) ?? 0) + 1;
     this.rangeLoadSequence.set(meter.meterId, sequence);
-    const isCurrentRequest = () => this.rangeLoadSequence.get(meter.meterId) === sequence;
+    const isCurrentRequest = () => this.sessionValidated && this.rangeLoadSequence.get(meter.meterId) === sequence;
 
     this.meterService.rangeMeasurements(meter.meterId, this.selectedDateFrom, this.selectedDateTo).subscribe({
       next: readings => {
@@ -2213,9 +2558,11 @@ export class App implements OnDestroy {
   }
 
   private refreshAlarmStatus(meter: MeterCard): void {
+    if (!this.sessionValidated) return;
     const previousActiveIds = new Set(meter.activeAlarms.map(a => a.id));
     this.meterService.activeAlarms(meter.meterId).subscribe({
       next: alarms => {
+        if (!this.sessionValidated) return;
         meter.activeAlarms = alarms;
         if (meter.currentPowerKw != null) meter.status = alarms.length ? 'WARNING' : 'ONLINE';
         this.syncActiveAlarmsIntoHistory(meter, alarms);
@@ -2229,6 +2576,7 @@ export class App implements OnDestroy {
   }
 
   private refreshAllActiveAlarms(): void {
+    if (!this.sessionValidated) return;
     this.meters.forEach(m => this.refreshAlarmStatus(m));
   }
 
@@ -2440,26 +2788,30 @@ export class App implements OnDestroy {
     );
   }
 
-  setAdminView(view: 'health' | 'sites' | 'edgeConfiguration' | 'measurementData' | 'configuration' | 'settings'): void {
-    if ((view === 'edgeConfiguration' || view === 'measurementData' || view === 'sites') && this.authenticatedRole !== 'ADMIN') {
-      this.adminView = 'health';
+  setAdminView(view: 'dashboard' | 'health' | 'sites' | 'edgeConfiguration' | 'jsonData' | 'measurementData' | 'historyCleanup' | 'configuration' | 'settings'): void {
+    if ((this.authenticatedRole === 'USER' || this.authenticatedRole === 'ADVANCED_USER') && view !== 'dashboard') { this.adminView = 'dashboard'; return; }
+    if ((view === 'edgeConfiguration' || view === 'jsonData' || view === 'historyCleanup') && this.authenticatedRole !== 'ADMIN') {
+      this.adminView = 'dashboard';
       return;
     }
-    if (view === 'measurementData' && !this.rawMeasurementTabVisible()) {
+    if (view === 'measurementData' && this.authenticatedRole !== 'ADMIN' && this.authenticatedRole !== 'SERVICE') { this.adminView = 'dashboard'; return; }
+    if (view === 'configuration' && this.authenticatedRole === 'ADVANCED_USER') { this.adminView = 'dashboard'; return; }
+    if (view === 'sites' && this.authenticatedRole !== 'ADMIN') { this.adminView = 'dashboard'; return; }
+    if ((view === 'measurementData' || view === 'jsonData') && !this.rawMeasurementTabVisible()) {
       this.adminView = 'edgeConfiguration';
       return;
     }
     if (view === 'settings' && !this.canEditSettings()) {
-      this.adminView = 'health';
+      this.adminView = 'dashboard';
       return;
     }
 
     this.adminView = view;
-    if (view === 'health' || view === 'edgeConfiguration' || view === 'measurementData') this.loadEdgeHealth();
+    if (view === 'health' || view === 'edgeConfiguration' || (view === 'measurementData' || view === 'jsonData')) this.loadEdgeHealth();
     if (view === 'sites') { this.loadAdminClients(); this.loadAdminSites(); }
     if (view === 'settings') this.copySettingsToEditor();
-    if ((view === 'edgeConfiguration' || view === 'measurementData') && this.selectedEdgeConfigKey) this.loadSelectedEdgeConfiguration();
-    if (view === 'measurementData') this.loadRawMeasurementData(true);
+    if ((view === 'edgeConfiguration' || (view === 'measurementData' || view === 'jsonData')) && this.selectedEdgeConfigKey && this.authenticatedRole === 'ADMIN') this.loadSelectedEdgeConfiguration();
+    if ((view === 'measurementData' || view === 'jsonData')) this.loadRawMeasurementData(true);
   }
 
   private loadEdgeHealth(): void {
@@ -2572,10 +2924,16 @@ export class App implements OnDestroy {
         this.edgeConfiguration = {
           ...config,
           mqttTargets: (config.mqttTargets || []).map(target => ({ ...target, password: '' })),
-          meters: (config.meters || []).map(meter => ({ ...meter }))
+          meters: (config.meters || []).map(meter => ({
+            meterType: 'UNCONFIGURED',
+            ctPrimaryA: 1, ctSecondaryA: 1, vtPrimaryV: 1, vtSecondaryV: 1,
+            ...meter,
+            powerReadingMode: meter.powerReadingMode && ['DIRECT', 'IMPORT_EXPORT', 'VOLTAGE_CURRENT_PF'].includes(meter.powerReadingMode) ? meter.powerReadingMode : (meter.meterType === '1F' ? 'DIRECT' : meter.meterType === '3F' ? 'IMPORT_EXPORT' : 'UNCONFIGURED'),
+            readingReference: 'SECONDARY' // Compatibility for older Edge versions; current Edge always scales.
+          }))
         };
         this.edgeConfigurationBusy = false;
-        if (!this.edgeConfiguration.includeRawObis && this.adminView === 'measurementData') {
+        if (!this.edgeConfiguration.includeRawObis && (this.adminView === 'measurementData' || this.adminView === 'jsonData')) {
           this.adminView = 'edgeConfiguration';
         }
         if (this.edgeConfiguration.includeRawObis) {
@@ -2583,7 +2941,7 @@ export class App implements OnDestroy {
           if (!this.selectedRawMeterKey || !configuredKeys.includes(this.selectedRawMeterKey)) {
             this.selectedRawMeterKey = configuredKeys[0] || '';
           }
-          if (this.adminView === 'measurementData') this.loadRawMeasurementData(true);
+          if ((this.adminView === 'measurementData' || this.adminView === 'jsonData')) this.loadRawMeasurementData(true);
         }
       },
       error: () => {
@@ -2594,12 +2952,26 @@ export class App implements OnDestroy {
     });
   }
 
+  jsonDataLabel(): string { return this.language === 'pl' ? 'Dane JSON' : 'JSON data'; }
+
+  selectedTelemetryJson(): string {
+    const snapshot = this.selectedRawMeasurement();
+    return snapshot ? JSON.stringify(snapshot.telemetry ?? snapshot, null, 2) : '';
+  }
+
+  async copyTelemetryJson(): Promise<void> {
+    const json = this.selectedTelemetryJson();
+    if (!json) return;
+    try { await navigator.clipboard.writeText(json); }
+    catch (error) { console.error('Cannot copy telemetry JSON', error); }
+  }
+
   rawMeasurementTabVisible(): boolean {
-    return this.authenticatedRole === 'ADMIN' && !!this.edgeConfiguration?.includeRawObis;
+    return this.authenticatedRole === 'SERVICE' || (this.authenticatedRole === 'ADMIN' && !!this.edgeConfiguration?.includeRawObis);
   }
 
   loadRawMeasurementData(showBusy = true): void {
-    if (this.authenticatedRole !== 'ADMIN' || !this.edgeConfiguration?.includeRawObis) {
+    if (!this.rawMeasurementTabVisible()) {
       this.rawMeasurementData = [];
       return;
     }
@@ -2640,6 +3012,15 @@ export class App implements OnDestroy {
 
   selectedRawMeterConfig(): EdgeMeterConfig | null {
     return this.edgeConfiguration?.meters?.find(m => m.uniqueName === this.selectedRawMeterKey) || null;
+  }
+
+  obisFilter = '';
+
+  filteredRawObisRows(snapshot: EdgeRawMeasurementView | null): RawObisRow[] {
+    const rows = this.rawObisRows(snapshot);
+    const filter = this.obisFilter.trim().toLowerCase();
+    if (!filter) return rows;
+    return rows.filter(row => [row.code, row.value, row.unit, row.raw].some(value => value.toLowerCase().includes(filter)));
   }
 
   rawObisRows(snapshot: EdgeRawMeasurementView | null): RawObisRow[] {
@@ -2715,7 +3096,41 @@ export class App implements OnDestroy {
       serialPortName: ports.find(p => !this.edgeConfiguration!.meters.some(m => m.serialPortName === p)) || '',
       uniqueName: `meter-${this.edgeConfiguration.meters.length + 1}`,
       address: '',
-      pollDelaySeconds: 1
+      pollDelaySeconds: 1,
+      meterType: 'UNCONFIGURED', powerReadingMode: 'UNCONFIGURED',
+      readingReference: 'SECONDARY',
+      ctPrimaryA: 1,
+      ctSecondaryA: 1,
+      vtPrimaryV: 1,
+      vtSecondaryV: 1
+    });
+  }
+
+  edgeTransformerRatio(meter: EdgeMeterConfig, kind: 'ct' | 'vt'): number {
+    const primary = kind === 'ct' ? meter.ctPrimaryA : meter.vtPrimaryV;
+    const secondary = kind === 'ct' ? meter.ctSecondaryA : meter.vtSecondaryV;
+    return Number(primary ?? 1) / Number(secondary ?? 1);
+  }
+
+  updateEdgeTransformerRatio(meter: EdgeMeterConfig, kind: 'ct' | 'vt', value: number): void {
+    const ratio = Number(value);
+    if (!Number.isFinite(ratio) || ratio <= 0) return;
+    // Preserve the existing secondary transformer rating (e.g., 5 A / 100 V).
+    if (kind === 'ct') {
+      const secondary = Number(meter.ctSecondaryA ?? 1);
+      if (!(secondary > 0)) return;
+      meter.ctPrimaryA = ratio * secondary;
+    } else {
+      const secondary = Number(meter.vtSecondaryV ?? 1);
+      if (!(secondary > 0)) return;
+      meter.vtPrimaryV = ratio * secondary;
+    }
+  }
+
+  edgeMeterRatiosValid(meter: EdgeMeterConfig): boolean {
+    return ['ctPrimaryA', 'ctSecondaryA', 'vtPrimaryV', 'vtSecondaryV'].every(key => {
+      const v = Number((meter as any)[key] ?? 1);
+      return Number.isFinite(v) && v > 0;
     });
   }
 
@@ -2756,6 +3171,14 @@ export class App implements OnDestroy {
     const edge = this.selectedEdgeHealth();
     const config = this.edgeConfiguration;
     if (!edge || !config || this.edgeConfigurationBusy) return;
+    if (config.meters.some(meter => !['DIRECT', 'IMPORT_EXPORT', 'VOLTAGE_CURRENT_PF'].includes(meter.powerReadingMode || ''))) {
+      this.edgeConfigurationError = 'Select a power calculation method for every meter.';
+      return;
+    }
+    if (config.meters.some(meter => !this.edgeMeterRatiosValid(meter))) {
+      this.edgeConfigurationError = 'CT/VT transformer ratios must be positive numbers.';
+      return;
+    }
     this.edgeConfigurationBusy = true;
     this.edgeConfigurationError = '';
     const payload: EdgeConfigurationView = {
@@ -2772,6 +3195,10 @@ export class App implements OnDestroy {
       }),
       meters: config.meters.map(meter => ({
         ...meter,
+        // Keep the legacy meterType in Edge JSON for compatibility, but
+        // derive it from the explicitly selected calculation method.
+        meterType: meter.powerReadingMode === 'DIRECT' ? '1F' : '3F',
+        readingReference: 'SECONDARY', // Legacy Edge compatibility; current Edge ignores this setting.
         serialPortName: meter.serialPortName.trim(),
         uniqueName: meter.uniqueName.trim(),
         address: meter.address?.trim() || ''
@@ -2927,16 +3354,12 @@ export class App implements OnDestroy {
 
   powerChartViewHeight(meter: MeterCard): number {
     if (meter.chartView !== 'power') return 285;
-
-    // One-row dashboards may use all available vertical space.  When
-    // communication diagnostics are visible, keep a little room for them at
-    // the bottom but still make the plot much taller than the compact 285px
-    // geometry used by multi-row layouts.
-    const wideDesktop = typeof window !== 'undefined' && window.innerWidth > 1080;
-    if (this.isMeterExpanded(meter)) return meter.detailsCollapsed ? 750 : 650;
-    if (this.visibleMeters.length === 1 && wideDesktop) return meter.detailsCollapsed ? 800 : 700;
-    if (this.visibleMeters.length === 2 && wideDesktop) return meter.detailsCollapsed ? 850 : 650;
-    return meter.detailsCollapsed ? 500 : 285;
+    // The SVG viewBox must match its CSS-rendered height. Previously the
+    // chart was rendered at 320px but retained 650-850 viewBox units,
+    // flattening axis ticks and all text vertically (preserveAspectRatio=none).
+    const narrow = typeof window !== 'undefined' && window.innerWidth <= 720;
+    if (this.isMeterExpanded(meter)) return narrow ? 285 : 320;
+    return narrow ? 285 : 320;
   }
 
   powerChartViewBox(meter: MeterCard): string {
@@ -2960,64 +3383,129 @@ export class App implements OnDestroy {
 
   isMeterExpanded(meter: MeterCard): boolean { return this.expandedMeterId === meter.id; }
 
-  private meterExportRows(meter: MeterCard): { headers: string[]; rows: string[][] } | null {
+  // The two export header rows deliberately distinguish stored measurements from
+  // additional OBIS registers. Missing registers remain blank, never zero.
+  private meterExportRows(meter: MeterCard): { headers: string[]; obis: string[]; rows: string[][] } | null {
     const readings = [...meter.dayMeasurements]
       .filter(r => !!r.measuredAt)
       .sort((a, b) => new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime());
-
     if (!readings.length) {
       this.toast.showError(this.language === 'pl' ? 'Brak danych do eksportu dla wybranego okresu.' : 'No data to export for the selected period.');
       return null;
     }
 
     const pl = this.language === 'pl';
-    const headers = pl
-      ? ['Czas', 'Czas licznika', 'Stan licznika pobór [kWh]', 'Stan licznika oddawanie [kWh]', 'Moc chwilowa [kW]', 'Moc 15-min [kW]', 'Napięcie L1 [V]', 'Napięcie L2 [V]', 'Napięcie L3 [V]', 'Prąd L1 [A]', 'Prąd L2 [A]', 'Prąd L3 [A]', 'Częstotliwość [Hz]']
-      : ['Timestamp', 'Meter timestamp', 'Import meter reading [kWh]', 'Export meter reading [kWh]', 'Instantaneous power [kW]', '15-min power [kW]', 'Voltage L1 [V]', 'Voltage L2 [V]', 'Voltage L3 [V]', 'Current L1 [A]', 'Current L2 [A]', 'Current L3 [A]', 'Frequency [Hz]'];
+    type ExportColumn = { pl: string; en: string; obis: string; read: (r: MeasurementView) => string };
+    const num = (v: number | null | undefined) => this.csvNumber(v);
+    const unavailable = (_r: MeasurementView) => '';
+    const columns: ExportColumn[] = [
+      { pl: 'Czas', en: 'Timestamp', obis: '-', read: r => this.csvDate(r.measuredAt) },
+      { pl: 'Czas licznika', en: 'Meter timestamp', obis: '0.9.1 / 0.9.2', read: r => this.csvDate(r.meterMeasuredAt) },
+      { pl: 'Stan licznika pobór (+A) [kWh]', en: 'Import active energy (+A) [kWh]', obis: '1.8.0', read: r => num(r.activeEnergyImportKwh) },
+      { pl: 'Stan licznika oddawanie (-A) [kWh]', en: 'Export active energy (-A) [kWh]', obis: '2.8.0', read: r => num(r.activeEnergyExportKwh) },
+      { pl: 'Moc czynna bieżąca [kW]', en: 'Current active power [kW]', obis: '16.7.0 / 1.7.0-2.7.0', read: r => num(r.activePowerKw) },
+      { pl: 'Źródło mocy', en: 'Power source', obis: 'SOURCE (OBIS)', read: r => r.activePowerSource || '' },
+      { pl: 'Jakość mocy', en: 'Power quality', obis: 'QUALITY (MEASURED / DERIVED / ESTIMATED)', read: r => r.activePowerQuality || '' },
+      { pl: 'Bieżąca moc 15-min [kW]', en: 'Current 15-min power [kW]', obis: 'wyliczona / calculated (1.8.0)', read: r => num(r.currentQuarterPowerKw) },
+    ];
 
-    const rows = readings.map(r => [
-      this.csvDate(r.measuredAt),
-      this.csvDate(r.meterMeasuredAt),
-      this.csvNumber(r.activeEnergyImportKwh),
-      this.csvNumber(r.activeEnergyExportKwh),
-      this.csvNumber(r.activePowerKw),
-      this.csvNumber(r.currentQuarterPowerKw),
-      this.csvNumber(r.voltageL1V), this.csvNumber(r.voltageL2V), this.csvNumber(r.voltageL3V),
-      this.csvNumber(r.currentL1A), this.csvNumber(r.currentL2A), this.csvNumber(r.currentL3A),
-      this.csvNumber(r.frequencyHz)
-    ]);
+    // OBIS table supplied by the user: one column per register. The values
+    // of the uncollected registers require changes in Edge + backend + DB.
+    const groups = [
+      { label: '+A', pl: 'energia czynna pobrana', en: 'import active', prefix: 1 },
+      { label: '-A', pl: 'energia czynna oddana', en: 'export active', prefix: 2 },
+      { label: '+Ri', pl: 'bierna indukcyjna pobrana', en: 'reactive inductive import', prefix: 5 },
+      { label: '+Rc', pl: 'bierna pojemnościowa pobrana', en: 'reactive capacitive import', prefix: 6 },
+      { label: '-Ri', pl: 'bierna indukcyjna oddana', en: 'reactive inductive export', prefix: 7 },
+      { label: '-Rc', pl: 'bierna pojemnościowa oddana', en: 'reactive capacitive export', prefix: 8 }
+    ];
+    const electricalColumns: ExportColumn[] = [
+      { pl: 'Napięcie L1 [V]', en: 'Voltage L1 [V]', obis: '32.7.0', read: r => num(r.voltageL1V) },
+      { pl: 'Napięcie L2 [V]', en: 'Voltage L2 [V]', obis: '52.7.0', read: r => num(r.voltageL2V) },
+      { pl: 'Napięcie L3 [V]', en: 'Voltage L3 [V]', obis: '72.7.0', read: r => num(r.voltageL3V) },
+      { pl: 'Prąd L1 [A]', en: 'Current L1 [A]', obis: '31.7.0', read: r => num(r.currentL1A) },
+      { pl: 'Prąd L2 [A]', en: 'Current L2 [A]', obis: '51.7.0', read: r => num(r.currentL2A) },
+      { pl: 'Prąd L3 [A]', en: 'Current L3 [A]', obis: '71.7.0', read: r => num(r.currentL3A) },
+      { pl: 'Częstotliwość [Hz]', en: 'Frequency [Hz]', obis: '14.7.0', read: r => num(r.frequencyHz) }
+    ];
+    const types = [
+      { suffix: '2.0', pl: 'Pmax skumulowana', en: 'accumulated max demand', unit: 'kW' },
+      { suffix: '4.0', pl: 'czas Pmax / Pśr bieżąca', en: 'max demand time / current demand', unit: 'min' },
+      { suffix: '5.0', pl: 'ostatnia moc Pśr', en: 'last demand', unit: 'kW' },
+      { suffix: '6.0', pl: 'Pmax', en: 'maximum demand', unit: 'kW' },
+      { suffix: '8.T', pl: 'energia taryfowa', en: 'tariff energy', unit: 'kWh' },
+      { suffix: '8.0', pl: 'energia całkowita', en: 'total energy', unit: 'kWh' }
+    ];
+    // 1.8.0 and 2.8.0 are already shown in the original export fields.
+    // We still include them in the full OBIS matrix for faithful table layout.
+    for (const type of types) {
+      for (const group of groups) {
+        const obis = `${group.prefix}.${type.suffix}`;
+        const unit = group.prefix >= 5 && type.suffix.startsWith('8.') ? 'kvarh' : type.unit;
+        columns.push({
+          pl: `${type.pl} (${group.label}) [${unit}]`,
+          en: `${type.en} (${group.label}) [${unit}]`,
+          obis,
+          read: obis === '1.8.0' ? r => num(r.activeEnergyImportKwh)
+            : obis === '2.8.0' ? r => num(r.activeEnergyExportKwh) : unavailable
+        });
+      }
+    }
 
-    return { headers, rows };
+    // Keep electrical quality measurements at the end in both CSV and XLS.
+    columns.push(...electricalColumns);
+
+    return {
+      headers: columns.map(c => pl ? c.pl : c.en),
+      obis: columns.map(c => c.obis),
+      rows: readings.map(r => columns.map(c => c.read(r)))
+    };
+  }
+
+  cleanupMeterId: number | null = null;
+  cleanupFrom = '';
+  cleanupTo = '';
+  cleanupConfirmation = '';
+  cleanupBusy = false;
+  cleanupMessage = '';
+
+  deleteHistoricalMeasurements(): void {
+    if (this.authenticatedRole !== 'ADMIN' || this.cleanupBusy || !this.cleanupMeterId ||
+        this.cleanupConfirmation !== 'DELETE' || !this.cleanupFrom || !this.cleanupTo) return;
+    if (!window.confirm(`Permanently delete readings for meter ${this.cleanupMeterId} from ${this.cleanupFrom} to ${this.cleanupTo}?`)) return;
+    this.cleanupBusy = true;
+    this.cleanupMessage = '';
+    this.meterService.deleteMeasurementHistory(this.cleanupMeterId, this.cleanupFrom, this.cleanupTo).subscribe({
+      next: result => { this.cleanupBusy = false; this.cleanupConfirmation = ''; this.cleanupMessage = `Deleted ${result.deleted} readings.`; },
+      error: error => { this.cleanupBusy = false; this.cleanupMessage = error?.error?.message || 'Deletion failed.'; }
+    });
   }
 
   exportMeterCsv(meter: MeterCard): void {
     const data = this.meterExportRows(meter);
     if (!data) return;
-
     const escape = (value: string): string => `"${String(value ?? '').replace(/"/g, '""')}"`;
-    const content = [data.headers, ...data.rows]
-      .map(row => row.map(v => escape(String(v ?? ''))).join(';'))
-      .join('\r\n');
-
+    const content = [data.headers, data.obis, ...data.rows]
+      .map(row => row.map(v => escape(v)).join(';')).join('\r\n');
     this.downloadMeterExport(meter, new Blob(['\uFEFF', content], { type: 'text/csv;charset=utf-8' }), 'csv');
   }
 
   exportMeterXls(meter: MeterCard): void {
     const data = this.meterExportRows(meter);
     if (!data) return;
-
+    // Excel opens this legacy .xls export as HTML, and may ignore UTF-8 metadata.
+    // Encode all non-ASCII characters as numeric HTML entities to avoid mojibake
+    // (e.g. U+2212 rendering as âˆ’ or U+2014 as â€”).
     const escapeHtml = (value: string): string => String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+      .replace(/[^\x00-\x7F]/g, char => `&#${char.codePointAt(0)};`);
     const headerCells = data.headers.map(v => `<th>${escapeHtml(v)}</th>`).join('');
+    const obisCells = data.obis.map(v => `<th class="obis-code" style="mso-number-format:&#34;\\@&#34;">${escapeHtml(v)}</th>`).join('');
     const bodyRows = data.rows.map(row => `<tr>${row.map(v => `<td>${escapeHtml(v)}</td>`).join('')}</tr>`).join('');
-    const workbook = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><table><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></body></html>`;
-
-    // HTML-table based .xls: opens directly in Excel and needs no extra frontend dependency.
-    this.downloadMeterExport(meter, new Blob(['\uFEFF', workbook], { type: 'application/vnd.ms-excel;charset=utf-8' }), 'xls');
+    const workbook = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>th{background:#dceaf7;border:1px solid #c3d3e2;padding:5px;white-space:nowrap}th.obis-code{background:#edf4fa;font-weight:600;text-align:center;mso-number-format:"\\@"}td{border:1px solid #e3e8ee;padding:3px}table{border-collapse:collapse}</style></head><body><table><thead><tr>${headerCells}</tr><tr>${obisCells}</tr></thead><tbody>${bodyRows}</tbody></table></body></html>`;
+    // Excel-compatible HTML .xls (not a native binary Excel workbook).
+    this.downloadMeterExport(meter, new Blob([workbook], { type: 'application/vnd.ms-excel;charset=utf-8' }), 'xls');
   }
 
   private downloadMeterExport(meter: MeterCard, blob: Blob, extension: 'csv' | 'xls'): void {
@@ -3273,13 +3761,34 @@ export class App implements OnDestroy {
       const previous = buckets.get(bucket);
       if (!previous || at >= previous.at) buckets.set(bucket, { value:Number(r.currentQuarterPowerKw), at });
     });
+    const quarterMs = 900_000;
+    const currentBucket = Math.floor(this.now.getTime() / quarterMs) * quarterMs;
+    const showCurrent = this.selectedQuickRangeMinutes != null && this.rangeIncludesToday()
+      && currentBucket >= start && currentBucket + quarterMs <= end;
+    if (showCurrent) {
+      // At the new boundary show an empty current-quarter bar immediately;
+      // it grows from live accumulated energy as measurements arrive.
+      const liveValue = meter.currentQuarterPowerKw;
+      buckets.set(currentBucket, {
+        value: liveValue != null && Number.isFinite(liveValue) ? Math.max(0, liveValue) : 0,
+        at: this.now.getTime()
+      });
+    }
     const bucketWidth = Math.max(1.2, ((15*60*1000)/span) * (right-left) - 0.5);
     return [...buckets.entries()].sort((a,b)=>a[0]-b[0]).map(([bucket,v]) => {
       const x = left + ((bucket-start)/span)*(right-left);
-      const h = Math.max(0,(v.value/maxKw)*(bottom-top));
+      const isCurrent = showCurrent && bucket === currentBucket;
+      const h = Math.max(isCurrent ? 1.5 : 0, (v.value/maxKw)*(bottom-top));
       const d = new Date(bucket), d2 = new Date(bucket+900000);
       const label=(x:Date)=>`${String(x.getDate()).padStart(2,'0')}.${String(x.getMonth()+1).padStart(2,'0')} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`;
-      return { x, y:bottom-h, width:bucketWidth, height:h, value:v.value, label:label(d), intervalLabel:`${label(d)}–${String(d2.getHours()).padStart(2,'0')}:${String(d2.getMinutes()).padStart(2,'0')}`, current:this.isSelectedToday() && (d.getHours()*4+Math.floor(d.getMinutes()/15)===currentIndex), showLabel:false };
+      const current = isCurrent || (this.selectedQuickRangeMinutes == null && this.isSelectedToday() && bucket === currentBucket);
+    // This dashed outline is a provisional elapsed-time average, not accumulated demand.
+    // Hide early noise and avoid drawing beyond the plot if the projection exceeds its scale.
+    const progress = this.meterQuarterProgressAtReading(meter);
+    const projectedValue = current && meter.currentQuarterPowerKw != null && progress >= (30 / 900)
+      ? Math.max(0, meter.currentQuarterPowerKw / progress) : undefined;
+    const projectedHeight = projectedValue === undefined ? undefined : Math.min(bottom-top, projectedValue / maxKw * (bottom-top));
+    return { x, y:bottom-h, width:bucketWidth, height:h, value:v.value, label:label(d), intervalLabel:`${label(d)}–${String(d2.getHours()).padStart(2,'0')}:${String(d2.getMinutes()).padStart(2,'0')}`, current, projectedValue, projectedY: projectedHeight === undefined ? undefined : bottom-projectedHeight, projectedHeight, showLabel:false };
     });
   }
 

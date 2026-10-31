@@ -89,6 +89,8 @@ export interface MeasurementView {
   measuredAt: string;
   meterMeasuredAt?: string | null;
   activePowerKw: number | null;
+  activePowerSource?: string | null;
+  activePowerQuality?: string | null;
   activeEnergyImportKwh?: number | null;
   activeEnergyExportKwh?: number | null;
   currentQuarterPowerKw: number | null;
@@ -184,6 +186,19 @@ export interface EdgeMeterConfig {
   uniqueName: string;
   address: string;
   pollDelaySeconds: number;
+  meterType?: '1F' | '3F' | 'UNCONFIGURED';
+  powerReadingMode?: 'DIRECT' | 'IMPORT_EXPORT' | 'VOLTAGE_CURRENT_PF' | 'UNCONFIGURED';
+  readingReference?: 'PRIMARY' | 'SECONDARY';
+  ctPrimaryA?: number;
+  ctSecondaryA?: number;
+  vtPrimaryV?: number;
+  vtSecondaryV?: number;
+  missingDirectionMeansZero?: boolean;
+  netPowerObis?: string;
+  importPowerObis?: string;
+  exportPowerObis?: string;
+  importEnergyObis?: string;
+  exportEnergyObis?: string;
 }
 
 export interface EdgeConfigurationView {
@@ -219,6 +234,7 @@ export interface EdgeRawMeasurementView {
     [key: string]: unknown;
   };
   rawObis: Record<string, unknown> | unknown[];
+  telemetry?: unknown;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -245,6 +261,9 @@ export class MeterService {
   deleteSite(clientId: string, siteId: string): Observable<void> { return this.http.delete<void>(`${this.sitesUrl}/${encodeURIComponent(clientId)}/${encodeURIComponent(siteId)}`, { headers: this.authHeaders() }); }
   listAll(): Observable<MeterConfigurationView[]> { return this.http.get<MeterConfigurationView[]>(`${this.metersUrl}/admin`, { headers: this.authHeaders() }); }
   create(input: MeterConfigurationInput): Observable<MeterConfigurationView> { return this.http.post<MeterConfigurationView>(this.metersUrl, input, { headers: this.authHeaders() }); }
+  updateAlarmThresholds(id: number, input: Pick<MeterConfigurationInput, 'instantaneousAlarmOnKw' | 'instantaneousAlarmOffKw' | 'quarterHourAlarmOnKw' | 'quarterHourAlarmOffKw'>): Observable<MeterConfigurationView> {
+    return this.http.put<MeterConfigurationView>(`${this.metersUrl}/${id}/alarm-thresholds`, input, { headers: this.authHeaders() });
+  }
   update(id: number, input: MeterConfigurationInput): Observable<MeterConfigurationView> { return this.http.put<MeterConfigurationView>(`${this.metersUrl}/${id}`, input, { headers: this.authHeaders() }); }
   moveUp(id: number): Observable<void> { return this.http.put<void>(`${this.metersUrl}/${id}/move-up`, null, { headers: this.authHeaders() }); }
   moveDown(id: number): Observable<void> { return this.http.put<void>(`${this.metersUrl}/${id}/move-down`, null, { headers: this.authHeaders() }); }
@@ -252,6 +271,11 @@ export class MeterService {
   latestMeasurement(meterId: number): Observable<MeasurementSnapshotView | null> { return this.http.get<MeasurementSnapshotView>(`${this.measurementsUrl}/latest/${meterId}`, { headers: this.authHeaders() }); }
   dayMeasurements(meterId: number, date: string): Observable<MeasurementView[]> { return this.http.get<MeasurementView[]>(`${this.measurementsUrl}/day/${meterId}`, { params: { date }, headers: this.authHeaders() }); }
   rangeMeasurements(meterId: number, from: string, to: string): Observable<MeasurementView[]> { return this.http.get<MeasurementView[]>(`${this.measurementsUrl}/range/${meterId}`, { params: { from, to }, headers: this.authHeaders() }); }
+  deleteMeasurementHistory(meterId: number, from: string, to: string): Observable<{deleted: number}> {
+    return this.http.delete<{deleted: number}>(`${this.measurementsUrl}/history/${meterId}`, {
+      params: { from, to, confirm: 'DELETE' }, headers: this.authHeaders()
+    });
+  }
   dayAlarms(meterId: number, date: string): Observable<AlarmView[]> { return this.http.get<AlarmView[]>(`${this.alarmsUrl}/day/${meterId}`, { params: { date }, headers: this.authHeaders() }); }
   rangeAlarms(meterId: number, from: string, to: string): Observable<AlarmView[]> { return this.http.get<AlarmView[]>(`${this.alarmsUrl}/range/${meterId}`, { params: { from, to }, headers: this.authHeaders() }); }
   activeAlarms(meterId: number): Observable<AlarmView[]> { return this.http.get<AlarmView[]>(`${this.alarmsUrl}/active/${meterId}`, { headers: this.authHeaders() }); }
