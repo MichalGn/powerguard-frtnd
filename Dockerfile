@@ -20,7 +20,7 @@
 #Spr. na raspberry
 #docker image inspect powerguard-frtnd_image_arm64 --format "{{.Architecture}}"
 
-#sudo docker save -o powerguard-frtnd-261030b_arm64.tar powerguard-frtnd_image_arm64
+#sudo docker save -o powerguard-frtnd-261031_arm64.tar powerguard-frtnd_image_arm64
 #=================================================================================
 
 #NA SERWERZE

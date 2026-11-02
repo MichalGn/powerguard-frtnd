@@ -2526,6 +2526,10 @@ h1 {
 .network-dot--l1 { background: #00a97a; }
 .network-dot--l2 { background: #1681c4; }
 .network-dot--l3 { background: #a968d8; }
+/* Match phase labels (including current readings) to plotted line colors. */
+.network-phase-label--l1 { color: #00a97a; }
+.network-phase-label--l2 { color: #1681c4; }
+.network-phase-label--l3 { color: #a968d8; }
 
 @media (max-width: 850px) {
   .meter-card__header { align-items: center; }
@@ -9670,3 +9674,10 @@ body:has(.measurement-data-panel) {
     min-height: 132px !important;
   }
 }
+
+/* Phase values act as the legend; individual series use their line color. */
+.network-chart-card .network-live-values .network-single-value--power { color: #00a97a; }
+.network-chart-card .network-live-values .network-single-value--frequency { color: #dc8a00; }
+.network-chart-card .network-live-values .network-phase-label--l1 { color: #00a97a; }
+.network-chart-card .network-live-values .network-phase-label--l2 { color: #1681c4; }
+.network-chart-card .network-live-values .network-phase-label--l3 { color: #a968d8; }
